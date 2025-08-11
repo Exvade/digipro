@@ -1,0 +1,622 @@
+/* ===================================
+   OEE SYSTEM - ADMINLTE COMPATIBLE
+   =================================== */
+
+/* ===================================
+   GLOBAL VARIABLES
+   =================================== */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --white-color: #ffffff;
+    --border-radius: 0.25rem;
+    --box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --transition: all 0.3s ease;
+}
+
+/* ===================================
+   GLOBAL STYLES
+   =================================== */
+body {
+    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f4f6f9;
+}
+
+.content-wrapper {
+    background-color: #f4f6f9;
+}
+
+/* ===================================
+   CONTENT HEADER STYLES
+   =================================== */
+.content-header {
+    padding: 15px 0.5rem;
+    background-color: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.content-header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin: 0;
+}
+
+.breadcrumb {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: ">";
+    color: var(--secondary-color);
+}
+
+.breadcrumb-item a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.breadcrumb-item.active {
+    color: var(--secondary-color);
+}
+
+/* ===================================
+   CARD STYLES
+   =================================== */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+    background-color: var(--white-color);
+    margin-bottom: 1rem;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background-color: var(--white-color);
+    border-bottom: 1px solid #dee2e6;
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+    padding: 1rem 1.25rem;
+}
+
+.card-title {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0;
+    font-size: 1.1rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+.card-footer {
+    background-color: var(--white-color);
+    border-top: 1px solid #dee2e6;
+    padding: 1rem 1.25rem;
+}
+
+/* ===================================
+   SMALL BOX STYLES
+   =================================== */
+.small-box {
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.small-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.small-box .inner {
+    padding: 1rem;
+}
+
+.small-box .inner h3 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    white-space: nowrap;
+    padding: 0;
+}
+
+.small-box .inner p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.small-box .icon {
+    color: rgba(0, 0, 0, 0.15);
+    z-index: 0;
+    font-size: 3rem;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+
+/* ===================================
+   INFO BOX STYLES
+   =================================== */
+.info-box {
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.info-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.info-box-icon {
+    width: 4rem;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--white-color);
+}
+
+.info-box-content {
+    padding: 1rem;
+}
+
+.info-box-text {
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.info-box-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark-color);
+}
+
+/* ===================================
+   BUTTON STYLES
+   =================================== */
+.btn {
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    transition: var(--transition);
+    border: none;
+    padding: 0.5rem 1rem;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-success {
+    color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.btn-outline-success:hover {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.btn-outline-warning {
+    color: var(--warning-color);
+    border-color: var(--warning-color);
+}
+
+.btn-outline-warning:hover {
+    background-color: var(--warning-color);
+    border-color: var(--warning-color);
+    color: var(--dark-color);
+}
+
+.btn-outline-info {
+    color: var(--info-color);
+    border-color: var(--info-color);
+}
+
+.btn-outline-info:hover {
+    background-color: var(--info-color);
+    border-color: var(--info-color);
+}
+
+/* ===================================
+   BADGE STYLES
+   =================================== */
+.badge {
+    border-radius: 1rem;
+    font-weight: 500;
+    padding: 0.375rem 0.75rem;
+}
+
+.badge-pill {
+    border-radius: 10rem;
+}
+
+/* ===================================
+   MACHINE CARD STYLES
+   =================================== */
+.machine-card {
+    transition: var(--transition);
+    border: none;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    height: 100%;
+}
+
+.machine-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.machine-card .card-header {
+    background: linear-gradient(135deg, var(--primary-color), #0056b3);
+    color: var(--white-color);
+    border-bottom: none;
+    padding: 1.25rem;
+}
+
+.machine-card .card-title {
+    color: var(--white-color);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.info-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f8f9fa;
+    display: flex;
+    align-items: center;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-item i {
+    width: 1.5rem;
+    text-align: center;
+    margin-right: 0.75rem;
+}
+
+/* ===================================
+   OEE METRICS STYLES
+   =================================== */
+.oee-section {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin-top: 1rem;
+    border: 1px solid #e4e6ea;
+}
+
+.oee-circle {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    color: var(--white-color);
+    font-weight: 700;
+    font-size: 0.875rem;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+    transition: var(--transition);
+}
+
+.oee-circle:hover {
+    transform: scale(1.1);
+}
+
+.oee-value {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.total-oee {
+    border-radius: 2rem;
+    font-weight: 700;
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+    transition: var(--transition);
+}
+
+.total-oee:hover {
+    transform: scale(1.05);
+}
+
+/* ===================================
+   MODAL STYLES
+   =================================== */
+.modal-content {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--primary-color), #0056b3);
+    color: var(--white-color);
+    border-radius: 0.75rem 0.75rem 0 0;
+    border-bottom: none;
+    padding: 1.5rem;
+}
+
+.modal-title {
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid #e4e6ea;
+    padding: 1rem 1.5rem;
+}
+
+/* ===================================
+   FORM STYLES
+   =================================== */
+.form-control {
+    border-radius: var(--border-radius);
+    border: 1px solid #dce7f1;
+    padding: 0.75rem;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+/* ===================================
+   TABLE STYLES
+   =================================== */
+.table {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.table th {
+    border-top: none;
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: var(--dark-color);
+    padding: 1rem;
+}
+
+.table td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* ===================================
+   STATUS COLORS
+   =================================== */
+.bg-aktif { 
+    background-color: var(--success-color) !important; 
+}
+
+.bg-maintenance { 
+    background-color: var(--warning-color) !important; 
+    color: var(--dark-color) !important; 
+}
+
+.bg-tidak-aktif { 
+    background-color: var(--danger-color) !important; 
+}
+
+.bg-success { 
+    background-color: var(--success-color) !important; 
+}
+
+.bg-warning { 
+    background-color: var(--warning-color) !important; 
+}
+
+.bg-danger { 
+    background-color: var(--danger-color) !important; 
+}
+
+.bg-info { 
+    background-color: var(--info-color) !important; 
+}
+
+.bg-primary { 
+    background-color: var(--primary-color) !important; 
+}
+
+.bg-secondary { 
+    background-color: var(--secondary-color) !important; 
+}
+
+/* ===================================
+   UTILITY CLASSES
+   =================================== */
+.text-decoration-none {
+    text-decoration: none !important;
+}
+
+.shadow-sm {
+    box-shadow: var(--box-shadow) !important;
+}
+
+.shadow {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.shadow-lg {
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.rounded-lg {
+    border-radius: 0.75rem !important;
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+@media (max-width: 768px) {
+    .oee-circle {
+        width: 3rem;
+        height: 3rem;
+        font-size: 0.75rem;
+    }
+    
+    .btn-group .btn {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .machine-card .card-header {
+        padding: 1rem;
+    }
+    
+    .oee-section {
+        padding: 1rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .small-box .inner h3 {
+        font-size: 1.8rem;
+    }
+    
+    .content-header h1 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .oee-circle {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 0.7rem;
+    }
+    
+    .info-box-icon {
+        width: 3rem;
+        height: 3rem;
+        font-size: 1.25rem;
+    }
+}
+
+/* ===================================
+   ANIMATIONS
+   =================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* ===================================
+   LOADING STATES
+   =================================== */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2rem;
+    height: 2rem;
+    margin: -1rem 0 0 -1rem;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+} 

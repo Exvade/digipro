@@ -1,0 +1,323 @@
+/* Checksheet Create Page Styles */
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-control {
+    border-radius: 0.25rem;
+    border: 1px solid #ced4da;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-control-file {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control-file:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-text {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.img-thumbnail {
+    padding: 0.25rem;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    max-width: 100%;
+    height: auto;
+}
+
+.btn {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    border: 1px solid transparent;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    color: #fff;
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+.btn-secondary {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    color: #fff;
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0.75rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.modal-footer .btn {
+    margin-left: 0.25rem;
+}
+
+/* Section visibility */
+#mesin_section, #meja_section {
+    transition: all 0.3s ease;
+}
+
+/* Camera container styling */
+.camera-container {
+    position: relative;
+    width: 100%;
+    min-height: 200px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px dashed #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.camera-container:hover {
+    border-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+}
+
+/* Camera preview styling */
+.camera-preview {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.camera-canvas {
+    display: none;
+}
+
+/* Camera preview container */
+.camera-preview-container {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.camera-preview-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+/* Camera controls */
+.camera-controls {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px;
+    border-radius: 6px;
+    backdrop-filter: blur(5px);
+}
+
+.camera-controls .btn {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.camera-controls .btn i {
+    font-size: 0.7rem;
+}
+
+/* Camera button states */
+.camera-btn {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.camera-btn:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.capture-btn {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.capture-btn:hover {
+    background-color: #1e7e34;
+    border-color: #1e7e34;
+}
+
+.retake-btn {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.retake-btn:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+    color: #212529;
+}
+
+/* Card styling for camera sections */
+.card.border-0.shadow-sm {
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef !important;
+}
+
+.card.border-0.shadow-sm:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-2px);
+}
+
+/* Label styling */
+.small.font-weight-bold {
+    color: #495057;
+    font-size: 0.875rem;
+}
+
+.small.font-weight-bold i {
+    color: #007bff;
+}
+
+/* Responsive camera controls */
+@media (max-width: 768px) {
+    .camera-controls {
+        flex-direction: column;
+        gap: 3px;
+    }
+    
+    .camera-controls .btn {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
+    
+    .camera-preview,
+    .camera-preview-container {
+        height: 150px;
+    }
+    
+    .camera-container {
+        min-height: 150px;
+    }
+}
+
+/* Loading state for camera */
+.camera-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.camera-loading i {
+    margin-right: 0.5rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Success animation for photo capture */
+@keyframes photoCapture {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+.photo-capturing {
+    animation: photoCapture 0.3s ease;
+}
+
+/* Form validation styles */
+.form-control.is-invalid {
+    border-color: #dc3545;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='m5.8 4.6 2.4 2.4m0-2.4L5.8 7'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #dc3545;
+} 

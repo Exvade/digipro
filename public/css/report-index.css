@@ -1,0 +1,279 @@
+/* Report Index Page Additional Styles */
+
+.report-container {
+    padding: 20px 0;
+}
+
+/* Department restriction notice */
+.alert-info {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+    border-radius: 8px;
+}
+
+.alert-info i {
+    color: #17a2b8;
+}
+
+/* Filter card styling */
+.filter-card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+
+.filter-card .card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px 10px 0 0;
+    border-bottom: none;
+    padding: 1rem 1.5rem;
+}
+
+.filter-card .card-title {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.filter-card .card-body {
+    padding: 1.5rem;
+}
+
+/* Form controls in filter */
+.filter-card .form-control {
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.filter-card .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.filter-card .form-control:disabled {
+    background-color: #e9ecef;
+    opacity: 0.6;
+}
+
+.filter-card .form-text {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+/* Filter buttons */
+.filter-card .btn {
+    border-radius: 6px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.filter-card .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.filter-card .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.filter-card .btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+}
+
+.filter-card .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    transform: translateY(-1px);
+}
+
+/* Info boxes styling */
+.info-box {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease-in-out;
+    margin-bottom: 20px;
+}
+
+.info-box:hover {
+    transform: translateY(-2px);
+}
+
+.info-box-icon {
+    border-radius: 10px 0 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.info-box-content {
+    padding: 1rem;
+}
+
+.info-box-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.info-box-number {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Modal styling */
+.modal-content {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px 10px 0 0;
+    border-bottom: none;
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+.modal-header .close {
+    color: white;
+    opacity: 0.8;
+}
+
+.modal-header .close:hover {
+    opacity: 1;
+}
+
+/* PDF container in modal */
+.pdf-container {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.pdf-container iframe {
+    border: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .report-container {
+        padding: 10px 0;
+    }
+    
+    .filter-card .card-body {
+        padding: 1rem;
+    }
+    
+    .filter-card .row > div {
+        margin-bottom: 15px;
+    }
+    
+    .info-box {
+        margin-bottom: 15px;
+    }
+    
+    .info-box-number {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .filter-card .d-flex {
+        flex-direction: column;
+    }
+    
+    .filter-card .btn {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    
+    .info-box-icon {
+        font-size: 1.2rem;
+    }
+    
+    .info-box-number {
+        font-size: 1.3rem;
+    }
+}
+
+/* Animation for page elements */
+.report-container > * {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stagger animation for info boxes */
+.info-box:nth-child(1) { animation-delay: 0.1s; }
+.info-box:nth-child(2) { animation-delay: 0.2s; }
+.info-box:nth-child(3) { animation-delay: 0.3s; }
+.info-box:nth-child(4) { animation-delay: 0.4s; }
+
+/* DataTables customization */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 15px;
+}
+
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+    margin-top: 15px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    border-radius: 4px;
+    margin: 0 2px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+} 

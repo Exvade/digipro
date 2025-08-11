@@ -1,0 +1,130 @@
+/* Checksheet Index Page Styles */
+
+.nav-tabs .nav-link {
+    color: #495057;
+    border: 1px solid transparent;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: #e9ecef #e9ecef #dee2e6;
+}
+
+.nav-tabs .nav-link.active {
+    color: #495057;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+}
+
+.nav-tabs .nav-link .badge {
+    font-size: 0.75em;
+}
+
+.info-box {
+    display: block;
+    min-height: 80px;
+    background: #fff;
+    width: 100%;
+    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+.info-box.bg-primary {
+    background-color: #007bff !important;
+    color: #fff;
+}
+
+.info-box.bg-info {
+    background-color: #17a2b8 !important;
+    color: #fff;
+}
+
+.info-box-icon {
+    border-radius: 0.25rem;
+    display: block;
+    float: left;
+    height: 80px;
+    width: 80px;
+    text-align: center;
+    font-size: 1.875rem;
+    line-height: 80px;
+    background: rgba(0,0,0,.2);
+}
+
+.info-box-content {
+    padding: 5px 10px;
+    margin-left: 80px;
+}
+
+.info-box-text {
+    display: block;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+}
+
+.info-box-number {
+    display: block;
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.progress {
+    height: 3px;
+    margin: 5px 0;
+}
+
+.progress-description {
+    display: block;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* AMTPM Modal Styles */
+#amptmExampleModal .modal-dialog {
+    max-width: 90%;
+}
+
+#amptmExampleModal .pdf-container {
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+}
+
+#amptmExampleModal .pdf-container iframe {
+    border: none;
+    background: white;
+}
+
+#amptmExampleModal .alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+#amptmExampleModal .modal-footer .btn {
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+#amptmExampleModal .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-bottom: none;
+}
+
+#amptmExampleModal .modal-header .close {
+    color: white;
+    opacity: 0.8;
+}
+
+#amptmExampleModal .modal-header .close:hover {
+    opacity: 1;
+} 

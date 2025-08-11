@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Checksheet Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Test Checksheet Form</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="testForm">
+                            <div class="form-group">
+                                <label for="mesin_id">Mesin ID</label>
+                                <input type="number" class="form-control" id="mesin_id" name="mesin_id" value="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="user_id">User ID</label>
+                                <input type="number" class="form-control" id="user_id" name="user_id" value="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="part_id">Part ID</label>
+                                <input type="number" class="form-control" id="part_id" name="part_id" value="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="shift">Shift</label>
+                                <select class="form-control" id="shift" name="shift" required>
+                                    <option value="pagi">Pagi</option>
+                                    <option value="siang">Siang</option>
+                                    <option value="malam">Malam</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Test Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Test SweetAlert
+            Swal.fire({
+                icon: 'info',
+                title: 'Test Page Loaded',
+                text: 'SweetAlert is working!',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            $('#testForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                
+                // Log form data
+                console.log('Form data:');
+                for (let [key, value] of formData.entries()) {
+                    console.log(key + ': ' + value);
+                }
+                
+                // Show loading
+                Swal.fire({
+                    title: 'Mengirim data...',
+                    text: 'Mohon tunggu sebentar',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Simulate AJAX call
+                setTimeout(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Test Berhasil!',
+                        text: 'Form submission simulation completed',
+                        confirmButtonText: 'OK'
+                    });
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html> 

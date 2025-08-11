@@ -1,0 +1,558 @@
+/* User Management Styles - Responsive Design */
+
+/* Base Table Styles */
+#userTable {
+    font-size: 14px;
+    width: 100% !important;
+}
+
+#userTable th {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+#userTable td {
+    vertical-align: middle;
+    border-color: #dee2e6;
+    word-wrap: break-word;
+}
+
+/* Badge Styles */
+.badge {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Role Badge Colors */
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.badge-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.badge-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.badge-light {
+    background-color: #f8f9fa;
+    color: #212529;
+    border: 1px solid #dee2e6;
+}
+
+.badge-dark {
+    background-color: #343a40;
+    color: white;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+/* Modal Styles */
+.modal-lg {
+    max-width: 800px;
+}
+
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 1rem;
+}
+
+.modal-title {
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border-radius: 0.375rem;
+    border: 1px solid #ced4da;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+}
+
+.invalid-feedback {
+    display: block;
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 0.25rem;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 0.375rem;
+    font-weight: 500;
+    padding: 0.375rem 0.75rem;
+    font-size: 14px;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 12px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+    border-color: #117a8b;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #545b62;
+    border-color: #4e555b;
+}
+
+/* Action Buttons */
+.d-flex.gap-1 {
+    gap: 0.25rem !important;
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: 0.375rem;
+    border: none;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+/* Loading Spinner */
+.spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
+
+/* Card Styles */
+.card {
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    margin-bottom: 1rem;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    padding: 0.75rem 1rem;
+}
+
+.card-title {
+    margin-bottom: 0;
+    font-weight: 600;
+    color: #495057;
+}
+
+.card-tools {
+    display: flex;
+    align-items: center;
+}
+
+/* Table Responsive */
+.table-responsive {
+    border-radius: 0.375rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* SweetAlert2 Customization */
+.swal2-popup {
+    border-radius: 0.5rem;
+}
+
+.swal2-title {
+    color: #495057;
+    font-weight: 600;
+}
+
+.swal2-content {
+    color: #6c757d;
+}
+
+/* Grup Field Styles */
+.form-text {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.form-text i {
+    color: #17a2b8;
+}
+
+/* Grup Column in Table */
+#userTable td .badge {
+    margin-bottom: 0.25rem;
+}
+
+#userTable td small {
+    font-size: 11px;
+    line-height: 1.2;
+}
+
+#userTable td small i {
+    width: 12px;
+    text-align: center;
+}
+
+/* Grup Select Enhancement */
+#grup_id option {
+    padding: 8px;
+}
+
+#grup_id option:disabled {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Grup Statistics */
+.card.bg-light {
+    border: 1px solid #e9ecef;
+    border-radius: 0.375rem;
+}
+
+.card.bg-light .card-body {
+    padding: 0.75rem 1rem;
+}
+
+.card.bg-light h6 {
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.card.bg-light small {
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* Tooltip Enhancement */
+.tooltip-inner {
+    max-width: 300px;
+    text-align: left;
+    white-space: pre-line;
+    font-size: 12px;
+}
+
+/* DataTables Customization */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 1rem;
+}
+
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+    margin-top: 1rem;
+}
+
+.dt-buttons .btn {
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Responsive Design - Mobile First */
+@media (max-width: 575.98px) {
+    /* Extra Small devices (phones, less than 576px) */
+    .container-fluid {
+        padding: 0.5rem;
+    }
+    
+    .card-header {
+        padding: 0.5rem;
+    }
+    
+    .card-body {
+        padding: 0.75rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    #userTable {
+        font-size: 12px;
+    }
+    
+    #userTable th,
+    #userTable td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .btn-sm {
+        padding: 0.375rem 0.5rem;
+        font-size: 12px;
+    }
+    
+    .badge {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+    
+    .card.bg-light h6 {
+        font-size: 1rem;
+    }
+    
+    .card.bg-light small {
+        font-size: 10px;
+    }
+    
+    /* Hide DataTables buttons on mobile */
+    .dt-buttons {
+        display: none !important;
+    }
+    
+    /* Adjust modal size for mobile */
+    .modal-lg {
+        max-width: 95%;
+        margin: 0.5rem auto;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+    /* Small devices (landscape phones, 576px and up) */
+    .container-fluid {
+        padding: 1rem;
+    }
+    
+    #userTable {
+        font-size: 13px;
+    }
+    
+    .btn-sm {
+        padding: 0.375rem 0.75rem;
+        font-size: 13px;
+    }
+    
+    .badge {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+    
+    /* Show limited DataTables buttons */
+    .dt-buttons .btn:not(.buttons-colvis) {
+        display: none !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    /* Medium devices (tablets, 768px and up) */
+    .modal-lg {
+        max-width: 90%;
+    }
+    
+    #userTable {
+        font-size: 14px;
+    }
+    
+    /* Show more DataTables buttons */
+    .dt-buttons .btn:not(.buttons-print):not(.buttons-pdf) {
+        display: inline-block !important;
+    }
+}
+
+@media (min-width: 992px) {
+    /* Large devices (desktops, 992px and up) */
+    .modal-lg {
+        max-width: 800px;
+    }
+    
+    #userTable {
+        font-size: 14px;
+    }
+    
+    /* Show all DataTables buttons */
+    .dt-buttons .btn {
+        display: inline-block !important;
+    }
+}
+
+/* DataTables Responsive Enhancements */
+.dtr-title {
+    font-weight: 600;
+    color: #495057;
+}
+
+.dtr-data {
+    color: #6c757d;
+}
+
+/* Table cell content wrapping */
+#userTable td {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#userTable td:hover {
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Action buttons container */
+#userTable td:last-child {
+    min-width: 100px;
+    text-align: center;
+}
+
+/* Username column with email on mobile */
+#userTable td .d-flex.flex-column {
+    min-width: 120px;
+}
+
+/* Statistics cards responsive */
+@media (max-width: 767.98px) {
+    .card.bg-light .row > div {
+        margin-bottom: 1rem;
+    }
+    
+    .card.bg-light .row > div:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Modal scrollable content */
+.modal-dialog-scrollable .modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* Form responsive adjustments */
+@media (max-width: 575.98px) {
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+    
+    .form-label {
+        font-size: 14px;
+        margin-bottom: 0.25rem;
+    }
+    
+    .form-control {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+}
+
+/* Button group responsive */
+@media (max-width: 575.98px) {
+    .d-flex.gap-1 {
+        gap: 0.125rem !important;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.375rem;
+    }
+}
+
+/* Table header sticky on mobile */
+@media (max-width: 767.98px) {
+    .table-responsive {
+        position: relative;
+    }
+    
+    #userTable thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: #f8f9fa;
+    }
+} 

@@ -1,0 +1,345 @@
+/* QR Code Generator Styles */
+
+/* QR Code Container Styles */
+.qr-code-container {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: white;
+    transition: box-shadow 0.2s ease;
+}
+
+.qr-code-container:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.qr-code-container canvas {
+    display: block;
+    margin: 0 auto;
+    border-radius: 4px;
+}
+
+.qr-info {
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+.qr-info small {
+    color: #6c757d;
+    font-size: 0.8rem;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.download-btn {
+    margin: 0.25rem;
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+}
+
+/* Preview Section Styles */
+#previewSection {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+#previewSection h4 {
+    color: #495057;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+/* QR Preview Container */
+#qrPreview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 1rem;
+}
+
+#qrText {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    background: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    max-height: 100px;
+    overflow-y: auto;
+    word-break: break-all;
+}
+
+/* Form Styles */
+.form-group label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.form-control:focus {
+    border-color: #2e59d9;
+    box-shadow: 0 0 0 0.2rem rgba(46, 89, 217, 0.25);
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: 8px;
+    border: none;
+    padding: 1rem 1.25rem;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 4px solid #17a2b8;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 4px solid #ffc107;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+/* Card Styles */
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 1.25rem;
+    border-radius: 8px 8px 0 0;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: #2e59d9;
+    border-color: #2e59d9;
+}
+
+.btn-primary:hover {
+    background-color: #224abe;
+    border-color: #224abe;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #218838;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+    border-color: #138496;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #5a6268;
+}
+
+/* Grid Layout */
+.qr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .qr-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .qr-code-container {
+        padding: 0.75rem;
+    }
+    
+    #qrPreview {
+        min-height: 150px;
+    }
+    
+    .btn {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .alert {
+        padding: 0.75rem 1rem;
+    }
+    
+    .qr-code-container canvas {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+/* Loading States */
+.loading-qr {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+}
+
+.loading-qr::after {
+    content: "Generating QR Code...";
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Error States */
+.qr-error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    background: #f8d7da;
+    border-radius: 8px;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    text-align: center;
+    padding: 1rem;
+}
+
+/* Success States */
+.qr-success {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    background: #d4edda;
+    border-radius: 8px;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    text-align: center;
+    padding: 1rem;
+}
+
+/* Animation for QR Code Generation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.qr-code-container {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Status Indicators */
+.status-loading {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+.status-success {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.status-error {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+/* CDN Status Indicators */
+.status-warning {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.status-danger {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.badge-info {
+    background-color: #17a2b8;
+    color: white;
+    font-size: 0.75em;
+    padding: 0.25em 0.5em;
+    border-radius: 0.25rem;
+    margin-left: 0.5em;
+}
+
+/* Debug Info Styles */
+.debug-info {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+}
+
+.debug-info strong {
+    color: #495057;
+}
+
+.debug-info span {
+    color: #6c757d;
+}
