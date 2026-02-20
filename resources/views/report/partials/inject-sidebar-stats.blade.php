@@ -9,12 +9,18 @@
     <div class="card-body">
         <!-- Shift Statistics -->
         <h6 class="font-weight-bold">Statistik per Shift</h6>
-        @foreach($shiftStats as $stat)
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="text-capitalize">{{ $stat->shift }}</span>
-            <span class="badge badge-primary">{{ $stat->total }}</span>
-        </div>
-        @endforeach
+        @if(isset($shiftStats) && count($shiftStats) > 0)
+            @foreach($shiftStats as $stat)
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-capitalize">{{ is_array($stat) ? ($stat['shift'] ?? '-') : ($stat->shift ?? '-') }}</span>
+                <span class="badge badge-primary">{{ is_array($stat) ? ($stat['total'] ?? 0) : ($stat->total ?? 0) }}</span>
+            </div>
+            @endforeach
+        @else
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted">Tidak ada data</span>
+            </div>
+        @endif
         
         <hr>
         

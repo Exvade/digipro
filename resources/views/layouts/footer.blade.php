@@ -1,8 +1,9 @@
-<footer class="main-footer">
+@php
+$hideSidebar = !Auth::check() || request()->routeIs('*.dashboard.inject') || request()->routeIs('*.dashboard.assy') || request()->routeIs('dashboard.inject.public');
+@endphp
+<footer class="main-footer {{ $hideSidebar ? 'ml-0' : '' }}">
     <!-- To the right -->
-    <div class="float-right d-none d-sm-inline">
-        Version 1.0.0
+    <div class="container text-center">
+        <span class="text-muted">© {{ date('Y') }} All rights reserved | IT Department PT Mada Wikri Tunggal</span>
     </div>
-    <!-- Default to the left -->
-    <strong>Copyright &copy; {{ date('Y') }} <a href="#">DIGIPRO</a>.</strong> All rights reserved.
-</footer> 
+</footer>

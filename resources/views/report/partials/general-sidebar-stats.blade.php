@@ -10,12 +10,18 @@
         <!-- Shift Statistics -->
         <div class="stat-section">
             <h6>Statistik per Shift</h6>
-            @foreach($shiftStats as $stat)
-            <div class="stat-item-sidebar">
-                <span class="text-capitalize">{{ $stat->shift }}</span>
-                <span class="badge badge-primary">{{ $stat->total }}</span>
-            </div>
-            @endforeach
+            @if(isset($shiftStats) && count($shiftStats) > 0)
+                @foreach($shiftStats as $stat)
+                <div class="stat-item-sidebar">
+                    <span class="text-capitalize">{{ is_array($stat) ? ($stat['shift'] ?? '-') : ($stat->shift ?? '-') }}</span>
+                    <span class="badge badge-primary">{{ is_array($stat) ? ($stat['total'] ?? 0) : ($stat->total ?? 0) }}</span>
+                </div>
+                @endforeach
+            @else
+                <div class="stat-item-sidebar">
+                    <span class="text-muted">Tidak ada data</span>
+                </div>
+            @endif
         </div>
         
         <hr>

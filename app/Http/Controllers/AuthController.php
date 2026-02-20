@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
+use Illuminate\Support\Facades\Hash;    
+use App\Models\User;    
+use App\Http\Requests\Auth\LoginRequest;
 
 class AuthController extends Controller
 {
@@ -13,21 +15,18 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $credentials = $request->validate([
-            'username' => 'required',
-            'password' => 'required',
-        ]);
+        $request->authenticate();
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->route('menu');
-        }
+        $request->session()->regenerate();
 
-        return back()->withErrors([
-            'username' => 'The provided credentials do not match our records.',
-        ]);
+        if (Auth::check()) {
+            $user = Auth::user();
+        }           
+        
+
+        return redirect()->intended(route('menu'));
     }
 
     public function logout(Request $request)
@@ -37,4 +36,4 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
         return redirect('/login');
     }
-} 
+}

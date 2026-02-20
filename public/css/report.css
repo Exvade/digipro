@@ -5,6 +5,11 @@
     padding: 20px 0;
 }
 
+body.dark-mode .report-container {
+    background-color: #454d55;
+    color: #fff;
+}
+
 /* Report Type Selector - Simplified */
 .report-type-selector {
     background: #ffffff;
@@ -522,33 +527,33 @@
     .report-container {
         padding: 10px 0;
     }
-    
+
     .stats-grid {
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 0.75rem;
         padding: 1rem;
     }
-    
+
     .stat-number {
         font-size: 1.25rem;
     }
-    
+
     .info-box-number {
         font-size: 1.5rem;
     }
-    
+
     .modal-body {
         padding: 1rem;
     }
-    
+
     .modal-footer {
         padding: 0.75rem 1rem;
     }
-    
+
     .table-responsive {
         font-size: 0.875rem;
     }
-    
+
     .table th,
     .table td {
         padding: 0.75rem;
@@ -559,15 +564,15 @@
     .stats-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .info-box-content {
         padding: 1rem;
     }
-    
+
     .info-box-text {
         font-size: 0.8rem;
     }
-    
+
     .info-box-number {
         font-size: 1.25rem;
     }
@@ -578,14 +583,16 @@
     display: inline-block;
     width: 20px;
     height: 20px;
-    border: 2px solid rgba(255,255,255,.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
     border-top-color: #fff;
     animation: spin 1s ease-in-out infinite;
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Custom Scrollbar */
@@ -614,12 +621,12 @@
     .modal-footer {
         display: none !important;
     }
-    
+
     .card {
         box-shadow: none !important;
         border: 1px solid #ddd !important;
     }
-    
+
     .info-box {
         break-inside: avoid;
     }
@@ -717,25 +724,25 @@
     .filter-card .card-body {
         padding: 1rem;
     }
-    
+
     .filter-card .row > div {
         margin-bottom: 1rem;
     }
-    
+
     .filter-card .row > div:last-child {
         margin-bottom: 0;
     }
-    
+
     .filter-card .d-flex {
         flex-direction: column;
     }
-    
+
     .filter-card .btn {
         width: 100%;
         margin-bottom: 0.5rem;
     }
-    
+
     .filter-card .btn:last-child {
         margin-bottom: 0;
     }
-} 
+}

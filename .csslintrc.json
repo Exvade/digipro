@@ -1,0 +1,6 @@
+{
+  "rules": {
+    "css-ruleorselectorexpected": "off",
+    "css-propertyvalueexpected": "off"
+  }
+}

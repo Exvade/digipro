@@ -4,142 +4,235 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/dashboard-inject.css') }}">
+<link rel="stylesheet" href="{{ asset('css/dashboard-inject-oee.css') }}">
+<link rel="stylesheet" href="{{ asset('css/dashboard-inject-tooltip.css') }}">
 @endpush
 
 @section('content')
+@auth
 @if((auth()->user()->role === 'leader' || auth()->user()->role === 'foreman') && session('kabag_approved'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle mr-2"></i>
-        {{ session('kabag_approved') }}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle mr-2"></i>
+    {{ session('kabag_approved') }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
 @endif
+@endauth
 
-<!-- Filter Section -->
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="form-group">
-            <!-- HAPUS DROPDOWN GRUP DARI SINI -->
+<!-- Info boxes Grid System -->
+<div class="row info-boxes-row mb-3 mt-3">
+    <!-- Total Mesin -->
+    <div class="col-6 col-md-4 col-lg-custom-5 mb-2">
+        <div class="info-box-modern status-total h-100">
+            <div class="info-box-icon-modern">
+                <i class="fas fa-cogs"></i>
+            </div>
+            <div class="info-box-content-modern">
+                <div class="info-box-number-modern text-truncate">{{ $totalMesins }}</div>
+                <div class="info-box-text-modern">TOTAL</div>
+                <div class="info-box-subtitle-modern">Mesin</div>
+            </div>
         </div>
     </div>
-    <div class="col-md-8 d-flex align-items-end">
-        <!-- Hapus peringatan pilih grup -->
+
+    <!-- Running -->
+    <div class="col-6 col-md-4 col-lg-custom-5 mb-2">
+        <div class="info-box-modern status-running h-100">
+            <div class="info-box-icon-modern">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="info-box-content-modern">
+                <div class="info-box-number-modern text-truncate">{{ $countAktif }}</div>
+                <div class="info-box-text-modern">RUNNING</div>
+                <div class="info-box-subtitle-modern">Normal</div>
+                <div class="mt-2 aggregate-hours-container" style="border-top: 1px solid rgba(128,128,128,0.1); padding-top: 5px;">
+                    <i class="far fa-clock mr-1 text-primary"></i> <span id="agg-running-jam" class="aggregate-hours-value">{{ $aggregates['running'] }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stop -->
+    <div class="col-6 col-md-4 col-lg-custom-5 mb-2">
+        <div class="info-box-modern status-stop h-100">
+            <div class="info-box-icon-modern">
+                <i class="fas fa-stop-circle"></i>
+            </div>
+            <div class="info-box-content-modern">
+                <div class="info-box-number-modern text-truncate">{{ $countStop }}</div>
+                <div class="info-box-text-modern">STAND BY</div>
+                <div class="info-box-subtitle-modern">Planned Stop</div>
+                <div class="mt-2 aggregate-hours-container" style="border-top: 1px solid rgba(128,128,128,0.1); padding-top: 5px;">
+                    <i class="far fa-clock mr-1 text-warning"></i> <span id="agg-standby-jam" class="aggregate-hours-value">{{ $aggregates['standby'] }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maintenance -->
+    <div class="col-6 col-md-4 col-lg-custom-5 mb-2">
+        <div class="info-box-modern status-maintenance h-100">
+            <div class="info-box-icon-modern">
+                <i class="fas fa-tools"></i>
+            </div>
+            <div class="info-box-content-modern">
+                <div class="info-box-number-modern text-truncate">{{ $countMaintenance }}</div>
+                <div class="info-box-text-modern">DOWNTIME</div>
+                <div class="info-box-subtitle-modern">Breakdown</div>
+                <div class="mt-2 aggregate-hours-container" style="border-top: 1px solid rgba(128,128,128,0.1); padding-top: 5px;">
+                    <i class="far fa-clock mr-1 text-danger"></i> <span id="agg-downtime-jam" class="aggregate-hours-value">{{ $aggregates['downtime'] }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offline -->
+    <div class="col-6 col-md-4 col-lg-custom-5 mb-2">
+        <div class="info-box-modern status-offline h-100">
+            <div class="info-box-icon-modern">
+                <i class="fas fa-power-off"></i>
+            </div>
+            <div class="info-box-content-modern">
+                <div class="info-box-number-modern text-truncate">{{ $countTidakAktif }}</div>
+                <div class="info-box-text-modern">OFF</div>
+                <div class="info-box-subtitle-modern">No Plan</div>
+                <div class="mt-2 aggregate-hours-container" style="border-top: 1px solid rgba(128,128,128,0.1); padding-top: 5px;">
+                    <i class="far fa-clock mr-1 text-muted"></i> <span id="agg-offline-jam" class="aggregate-hours-value">{{ $aggregates['offline'] }}</span>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Info boxes -->
-<div class="info-boxes-horizontal mb-4">
-    <div class="info-box-modern">
-        <div class="info-box-icon-modern bg-info">
-            <i class="fas fa-cogs"></i>
-        </div>
-        <div class="info-box-content-modern">
-            <div class="info-box-number-modern">{{ $totalMesins }}</div>
-            <div class="info-box-text-modern">Total Mesin</div>
-            <div class="info-box-subtitle-modern">PT Mada Wikri Tunggal Plant 3</div>
-        </div>
-    </div>
-    <div class="info-box-modern">
-        <div class="info-box-icon-modern bg-success">
-            <i class="fas fa-check-circle"></i>
-        </div>
-        <div class="info-box-content-modern">
-            <div class="info-box-number-modern">{{ $countAktif }}</div>
-            <div class="info-box-text-modern">Mesin Aktif</div>
-            <div class="info-box-subtitle-modern">Beroperasi Normal</div>
-        </div>
-    </div>
-    <div class="info-box-modern">
-        <div class="info-box-icon-modern bg-warning">
-            <i class="fas fa-tools"></i>
-        </div>
-        <div class="info-box-content-modern">
-            <div class="info-box-number-modern">{{ $countMaintenance }}</div>
-            <div class="info-box-text-modern">Maintenance</div>
-            <div class="info-box-subtitle-modern">Dalam Perbaikan</div>
-        </div>
-    </div>
-    <div class="info-box-modern">
-        <div class="info-box-icon-modern bg-danger">
-            <i class="fas fa-power-off"></i>
-        </div>
-        <div class="info-box-content-modern">
-            <div class="info-box-number-modern">{{ $countTidakAktif }}</div>
-            <div class="info-box-text-modern">Tidak Aktif</div>
-            <div class="info-box-subtitle-modern">Offline</div>
-        </div>
-    </div>
-</div>
+<style>
+    .col-lg-custom-5 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    @media (min-width: 768px) {
+        .col-lg-custom-5 {
+            flex: 0 0 33.333333%;
+            max-width: 33.333333%;
+        }
+    }
+
+    @media (min-width: 992px) {
+        .col-lg-custom-5 {
+            flex: 0 0 20% !important;
+            max-width: 20% !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .info-boxes-row {
+            margin-left: -5px;
+            margin-right: -5px;
+        }
+
+        .info-boxes-row [class*="col-"] {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+    }
+
+    .aggregate-hours-value {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #2c3e50;
+        letter-spacing: 0.5px;
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+    body.dark-mode .aggregate-hours-value {
+        color: #ffffff;
+    }
+
+    @media (max-width: 576px) {
+        .aggregate-hours-value {
+            font-size: 0.9rem;
+        }
+
+        .aggregate-hours-container {
+            padding-top: 2px !important;
+            margin-top: 4px !important;
+        }
+    }
+</style>
 
 <div class="row">
-    <div class="col-lg-8 col-md-12 mb-4">
+    <!-- Kolom daftar mesin -->
+    <div class="col-12 mb-1">
         <!-- Daftar Mesin -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-cogs mr-2"></i>
-                    <span class="d-none d-sm-inline">Daftar Mesin Produksi</span>
-                    <span class="d-sm-none">Mesin Produksi</span>
+        <div class="card mb-0 shadow-sm border-0">
+            <div class="card-header dashboard-card-header d-flex flex-column flex-md-row justify-content-between align-items-center py-2 bg-transparent border-bottom">
+                <h3 class="card-title m-0 text-center font-weight-bold" style="font-size: 1.1rem; letter-spacing: 0.5px;">
+                    DAFTAR MESIN PRODUKSI
                 </h3>
-                <div class="card-tools">
-                    <span class="badge badge-primary d-none d-sm-inline">Total: {{ $totalMesins }} Mesin</span>
-                    <span class="badge badge-primary d-sm-none">{{ $totalMesins }}</span>
+                <div class="d-flex align-items-center mt-2 mt-md-0">
+                    <div class="machine-filter-container d-flex align-items-center bg-dark-soft p-1 rounded-pill">
+                        <span class="small text-muted mx-2 d-none d-lg-inline">Tampilkan:</span>
+                        <button class="filter-btn" data-limit="8">8</button>
+                        <button class="filter-btn" data-limit="16">16</button>
+                        <button class="filter-btn active" data-limit="all">Semua</button>
+                    </div>
+                    <button id="shareWhatsappBtn" class="btn btn-sm btn-success rounded-pill ml-2 px-3 shadow-sm" title="Bagikan ke WhatsApp">
+                        <i class="fab fa-whatsapp mr-1"></i> <span class="d-none d-md-inline">WhatsApp</span>
+                    </button>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="row" id="mesinGrid">
-                    @foreach($machines as $mesin)
-                    @php
-                        $statusClass = 'bg-success';
-                        $statusIcon = 'check-circle';
-                        $statusText = 'Aktif';
-                        if ($mesin->status === 'maintenance') {
-                            $statusClass = 'bg-warning';
-                            $statusIcon = 'tools';
-                            $statusText = 'Maintenance';
-                        } elseif ($mesin->status === 'tidak aktif') {
-                            $statusClass = 'bg-danger';
-                            $statusIcon = 'power-off';
-                            $statusText = 'Offline';
-                        }
-                    @endphp
-                    <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3 mesin-item" data-mesin-id="{{ $mesin->id }}" data-mesin-nama="{{ $mesin->nama_mesin }}" data-mesin-brand="{{ $mesin->brand_mesin }}" data-mesin-tonase="{{ $mesin->tonase_mesin }}" data-mesin-status="{{ $mesin->status }}">
-                        <div class="card machine-card machine-card-3d h-100">
-                            <div class="card-header p-2 border-0 bg-white">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge {{ $statusClass }} text-white">{{ $statusText }}</span>
-                                    <span class="badge badge-secondary">#{{ $loop->iteration }}</span>
-                                </div>
-                            </div>
-                            <div class="card-body p-3">
-                                <div class="text-center mb-3">
-                                    <i class="fas fa-cogs fa-2x text-primary mb-2"></i>
-                                    <h5 class="card-title text-truncate mb-0">{{ $mesin->nama_mesin }}</h5>
-                                </div>
-                                <div class="machine-details">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <i class="fas fa-tag mr-2 text-info"></i>
-                                        <small>Brand: <strong>{{ $mesin->brand_mesin }}</strong></small>
-                                    </div>
-                                    <div class="d-flex align-items-center">
-                                        <i class="fas fa-weight-hanging mr-2 text-success"></i>
-                                        <small>Tonase: <strong>{{ $mesin->tonase_mesin }} Ton</strong></small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <div class="card-body p-2">
+                <div class="machine-grid-wrapper">
+                    <div class="row machine-grid" id="mesinGrid">
+                        @foreach($machines as $mesin)
+                        @include('dashboardinject.partials.machine-card-simple', ['mesin' => $mesin, 'machineProductionData' => $machineProductionData])
+                        @endforeach
                     </div>
-                    @endforeach
+                </div>
+
+                {{-- Pagination Controls --}}
+                <div id="paginationControls" class="d-none justify-content-center align-items-center mt-3 mb-2">
+                    <button id="prevPage" class="btn btn-sm btn-outline-primary rounded-circle mx-2">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div id="pageIndicator" class="small font-weight-bold mx-2">
+                        Halaman <span id="currentPageNum">1</span> dari <span id="totalPageNum">1</span>
+                    </div>
+                    <button id="nextPage" class="btn btn-sm btn-outline-primary rounded-circle mx-2">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-    
-    <div class="col-lg-4 col-md-12">
-        @include('dashboardinject.partials.statistik-chart')
-        @include('dashboardinject.partials.quick-stats')
+</div>
+
+
+
+<!-- Edit Mesin Modal -->
+<div class="modal fade" id="editMesinModal" tabindex="-1" aria-labelledby="editMesinModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editMesinModalLabel">
+                    <i class="fas fa-edit mr-2"></i>Edit Mesin
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="editMesinModalBody">
+                <!-- Form will be loaded here -->
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Memuat data mesin...</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -147,17 +240,38 @@
 @endsection
 
 @push('scripts')
-@if((auth()->user()->role === 'leader' || auth()->user()->role === 'foreman') && session('kabag_approved'))
-<script>
-window.kabagApproved = @json(session('kabag_approved'));
-</script>
-@endif
+<div id="dashboard-data" style="display: none;"
+    data-is-authenticated="{{ Auth::check() ? 'true' : 'false' }}"
+    data-login-route="{{ route('login') }}"
+    data-docs-url="{{ route('dashboard.inject.machine.documents', ['id' => '__ID__']) }}"
+    data-machines="{{ json_encode($machines) }}"
+    data-production-data="{{ json_encode($machineProductionData) }}"
+    @auth
+    @if((auth()->user()->role === 'leader' || auth()->user()->role === 'foreman') && session('kabag_approved'))
+    data-kabag-approved="{{ json_encode(session('kabag_approved')) }}"
+    @endif
+    @endauth
+    ></div>
+
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- Bootstrap JS (if not already included) -->
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Dashboard Inject JS -->
-<script src="{{ asset('js/dashboard-inject.js') }}"></script>
+<script src="{{ asset('js/dashboard-inject.js') }}?v={{ time() }}"></script>
+<!-- Dashboard Inject Realtime Update -->
+<script src="{{ asset('js/dashboard-inject-realtime.js') }}?v={{ time() }}"></script>
+<!-- Dashboard Inject Main Logic -->
+<script src="{{ asset('js/dashboard-inject-main.js') }}?v={{ time() }}"></script>
+
+
+
+
+<!-- Dashboard Inject Pagination & Tooltips -->
+<script src="{{ asset('js/dashboard-inject-pagination.js') }}?v={{ time() }}"></script>
+
+<!-- Dashboard Inject Edit Modal Handler -->
+<script src="{{ asset('js/dashboard-inject-edit-modal.js') }}?v={{ time() }}"></script>
 @endpush

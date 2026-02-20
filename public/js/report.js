@@ -450,7 +450,7 @@ function createReportModalContent(data, reportType) {
             <td>${item.part?.nama_part || '-'}</td>
             <td>${item.user?.nama || '-'}</td>
             <td>${item.user?.grup?.nama_grup || '-'}</td>
-            <td><span class="badge badge-info">${item.shift}</span></td>
+            <td><span class="badge badge-info">${item.shift ? item.shift.replace('_', ' ').toUpperCase() : '-'}</span></td>
             <td>${statusBadge(item)}</td>
         </tr>
     `).join('');
@@ -507,7 +507,7 @@ function createReportModalContent(data, reportType) {
                             </div>
                         </div>
                         
-                        <div class="table-responsive">
+                        <div class="table-responsive" style="max-height: 60vh; overflow-y: auto;">
                             <table class="table table-bordered table-striped">
                                 <thead>
                                     <tr>

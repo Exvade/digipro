@@ -20,42 +20,54 @@ class ChecksheetController extends Controller
     public function index(Request $request)
     {
         // Get filter parameters
-        $selectedGrup = $request->get('grup_id');
-        $selectedBagian = $request->get('bagian');
-        
-        // Get all checksheets with relationships
+        $selectedGrup     = $request->get('grup_id');
+        $selectedBagian   = $request->get('bagian');
+        $selectedTanggal  = $request->get('tanggal'); // ✅ Filter tanggal
+
+        // Base query dengan relasi
         $query = Checksheet::with(['mesin', 'part', 'user.grup', 'meja', 'approver', 'grup'])
             ->orderBy('created_at', 'desc');
-        
-        // Apply filters
-        if ($selectedGrup) {
-            $query->whereHas('user', function($q) use ($selectedGrup) {
+
+        // ✅ Filter grup
+        if (!empty($selectedGrup)) {
+            $query->whereHas('user', function ($q) use ($selectedGrup) {
                 $q->where('grup_id', $selectedGrup);
             });
         }
-        
-        if ($selectedBagian) {
-            $query->whereHas('user', function($q) use ($selectedBagian) {
+
+        // ✅ Filter bagian
+        if (!empty($selectedBagian)) {
+            $query->whereHas('user', function ($q) use ($selectedBagian) {
                 $q->where('bagian', $selectedBagian);
             });
         }
-        
+
+        // ✅ Filter tanggal tunggal (format YYYY-MM-DD)
+        if (!empty($selectedTanggal)) {
+            try {
+                $tanggal = \Carbon\Carbon::parse($selectedTanggal)->format('Y-m-d');
+                $query->whereDate('created_at', $tanggal);
+            } catch (\Exception $e) {
+                // kalau parsing gagal, abaikan filter tanggal
+            }
+        }
+
+        // Eksekusi query
         $allChecksheets = $query->get();
-        
+
         // Separate checksheets by section
-        $assyChecksheets = collect();
+        $assyChecksheets   = collect();
         $injectChecksheets = collect();
-        
+
         foreach ($allChecksheets as $checksheet) {
-            // Determine section based on the presence of mesin_id vs meja_id
             if ($checksheet->meja_id && !$checksheet->mesin_id) {
-                // If has meja_id but no mesin_id, it's assy section
+                // Kalau ada meja_id tapi tidak ada mesin_id → assy
                 $assyChecksheets->push($checksheet);
-            } elseif ($checksheet->mesin_id) {
-                // If has mesin_id (regardless of meja_id), it's inject section
+            } elseif ($checksheet->mesin_id && !$checksheet->meja_id) {
+                // Kalau ada mesin_id tapi tidak ada meja_id → inject
                 $injectChecksheets->push($checksheet);
             } else {
-                // Fallback: if neither mesin_id nor meja_id, check user's bagian
+                // Fallback: cek bagian user
                 if ($checksheet->user && $checksheet->user->bagian === 'assy') {
                     $assyChecksheets->push($checksheet);
                 } else {
@@ -63,12 +75,21 @@ class ChecksheetController extends Controller
                 }
             }
         }
-        
-        // Get groups for filter dropdown
+
+        // Ambil grup untuk dropdown filter
         $grups = Grup::orderBy('nama_grup')->get();
-        
-        return view('checksheet.index', compact('assyChecksheets', 'injectChecksheets', 'grups', 'selectedGrup', 'selectedBagian'));
+
+        return view('checksheet.index', compact(
+            'assyChecksheets',
+            'injectChecksheets',
+            'grups',
+            'selectedGrup',
+            'selectedBagian',
+            'selectedTanggal'
+        ));
     }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -80,7 +101,7 @@ class ChecksheetController extends Controller
         $users = User::where('role', '!=', 'super_admin')->get();
         $mejas = Meja::where('status', 'aktif')->get();
         $grups = Grup::orderBy('nama_grup')->get();
-        
+
         return view('checksheet.create', compact('mesins', 'parts', 'users', 'mejas', 'grups'));
     }
 
@@ -91,10 +112,10 @@ class ChecksheetController extends Controller
     {
         // Get user details to determine validation rules
         $user = User::find($request->user_id);
-        
+
         $validationRules = [
             'user_id' => 'required|exists:users,id',
-            'shift' => 'required|in:shift_1,shift_2,shift_3',
+            // Shift validation removed - will be retrieved from jadwal kerja automatically
             'grup_id' => 'nullable|exists:grups,id',
             'foto_apd' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'foto_instruksi_kerja' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -130,10 +151,10 @@ class ChecksheetController extends Controller
         try {
             DB::beginTransaction();
 
+            // Note: shift is no longer stored, it will be retrieved from jadwal kerja via accessor
             $checksheetData = [
                 'user_id' => $request->user_id,
                 'grup_id' => $request->grup_id,
-                'shift' => $request->shift,
                 'amptm_standar' => $request->amptm_standar,
                 'approval_status' => 'pending',
             ];
@@ -153,18 +174,18 @@ class ChecksheetController extends Controller
 
             // Handle photo uploads
             $photoTypes = ['foto_apd', 'foto_instruksi_kerja', 'foto_qpoint', 'foto_limit_sampel', 'foto_amptm'];
-            
+
             foreach ($photoTypes as $type) {
                 if ($request->hasFile($type)) {
                     $file = $request->file($type);
                     $path = $file->store('checksheet-photos', 'public');
-                    
+
                     // Map the type correctly
                     $photoType = str_replace('foto_', '', $type);
                     if ($photoType === 'qpoint') {
                         $photoType = 'quality';
                     }
-                    
+
                     $checksheet->photos()->create([
                         'file_path' => $path,
                         'type' => $photoType,
@@ -185,17 +206,16 @@ class ChecksheetController extends Controller
 
             return redirect()->route('checksheet.index')
                 ->with('success', 'Checksheet berhasil dibuat');
-
         } catch (\Exception $e) {
             DB::rollback();
-            
+
             if ($request->ajax()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Terjadi kesalahan: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat membuat checksheet')
                 ->withInput();
@@ -221,7 +241,7 @@ class ChecksheetController extends Controller
         $users = User::where('role', '!=', 'super_admin')->get();
         $mejas = Meja::where('status', 'aktif')->get();
         $grups = Grup::orderBy('nama_grup')->get();
-        
+
         // Return ke update.blade.php saja
         return view('checksheet.update', compact('checksheet', 'mesins', 'parts', 'users', 'mejas', 'grups'));
     }
@@ -237,7 +257,7 @@ class ChecksheetController extends Controller
             'user_id' => 'required|exists:users,id',
             'grup_id' => 'nullable|exists:grups,id',
             'meja_id' => 'nullable|exists:meja,id_meja',
-            'shift' => 'required|in:shift_1,shift_2,shift_3',
+            // Shift validation removed - will be retrieved from jadwal kerja automatically
             'foto_apd' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'foto_instruksi_kerja' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'foto_qpoint' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -248,19 +268,19 @@ class ChecksheetController extends Controller
         try {
             DB::beginTransaction();
 
+            // Note: shift is no longer stored, it will be retrieved from jadwal kerja via accessor
             $checksheet->update([
                 'mesin_id' => $request->mesin_id,
                 'part_id' => $request->part_id,
                 'user_id' => $request->user_id,
                 'grup_id' => $request->grup_id,
                 'meja_id' => $request->meja_id,
-                'shift' => $request->shift,
                 'amptm_standar' => $request->amptm_standar,
             ]);
 
             // Handle photo uploads
             $photoTypes = ['foto_apd', 'foto_instruksi_kerja', 'foto_qpoint', 'foto_limit_sampel', 'foto_amptm'];
-            
+
             foreach ($photoTypes as $type) {
                 if ($request->hasFile($type)) {
                     // Map the type correctly for deletion
@@ -268,18 +288,18 @@ class ChecksheetController extends Controller
                     if ($photoType === 'qpoint') {
                         $photoType = 'quality';
                     }
-                    
+
                     // Delete old photo if exists
                     $oldPhoto = $checksheet->photos()->where('type', $photoType)->first();
                     if ($oldPhoto) {
                         Storage::disk('public')->delete($oldPhoto->file_path);
                         $oldPhoto->delete();
                     }
-                    
+
                     // Upload new photo
                     $file = $request->file($type);
                     $path = $file->store('checksheet-photos', 'public');
-                    
+
                     $checksheet->photos()->create([
                         'file_path' => $path,
                         'type' => $photoType,
@@ -300,17 +320,16 @@ class ChecksheetController extends Controller
 
             return redirect()->route('checksheet.index')
                 ->with('success', 'Checksheet berhasil diperbarui');
-
         } catch (\Exception $e) {
             DB::rollback();
-            
+
             if ($request->ajax()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Terjadi kesalahan: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat memperbarui checksheet')
                 ->withInput();
@@ -345,19 +364,18 @@ class ChecksheetController extends Controller
 
             return redirect()->route('checksheet.index')
                 ->with('success', 'Checksheet berhasil dihapus');
-
         } catch (\Exception $e) {
             DB::rollback();
-            
+
             if (request()->ajax()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Terjadi kesalahan: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat menghapus checksheet');
         }
     }
-} 
+}

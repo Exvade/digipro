@@ -20,11 +20,11 @@ class DashboardAssyController extends Controller
 
         // Authorization Check
         $isAuthorized = false;
-        if (in_array($user->role, ['super_admin', 'kabag', 'manager_plant'])) {
+        if (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'staff'])) {
             $isAuthorized = true;
         } elseif ($user->role === 'leader' && isset($user->bagian) && strtolower($user->bagian) === 'assy') {
             $isAuthorized = true;
-        } elseif ($user->role === 'foreman') { // Ubah: tidak perlu cek bagian
+        } elseif ($user->role === 'foreman') {
             $isAuthorized = true;
         }
 
@@ -32,19 +32,79 @@ class DashboardAssyController extends Controller
             return redirect()->route('menu')->with('error', 'You do not have permission to access this page.');
         }
 
-        // Jika foreman, hanya tampilkan user di grup-nya, meja tetap semua
+        // Filter data user sesuai role
         if ($user->role === 'foreman') {
-            $mejas = Meja::all();
+            // Foreman -> semua user di grup yang sama
             $users = User::where('grup_id', $user->grup_id)->get();
+        } elseif ($user->role === 'leader') {
+            // Leader -> hanya operator dari grup & bagian yang sama
+            $users = User::where('role', 'operator')
+                ->where('bagian', $user->bagian)
+                ->where('grup_id', $user->grup_id)
+                ->get();
         } else {
-            $mejas = Meja::all();
-            $users = User::where('role', '!=', 'super_admin')->get();
+            // super_admin, kabag, manager_plant -> semua user
+            $users = User::all();
         }
+
+        // Data meja
+        $mejas = Meja::all();
+
+        // Hitung total meja
         $totalMejas = $mejas->count();
         $countAktif = $mejas->where('status', 'aktif')->count();
         $countMaintenance = $mejas->where('status', 'maintenance')->count();
         $countTidakAktif = $mejas->where('status', 'tidak_aktif')->count();
+
+        // Ambil semua part
         $parts = Part::all();
+
+        // Get all grups for the form (filter by bagian assy via users)
+        $grups = \App\Models\Grup::whereHas('users', function ($query) {
+            $query->where('bagian', 'assy');
+        })
+            ->orderBy('nama_grup')
+            ->get();
+
+        // Progress untuk tiap meja
+        $mejaProgress = [];
+        foreach ($mejas as $meja) {
+            $mejaProgress[$meja->id] = 0; // default
+        }
+
+        // Status detail tiap meja
+        $checksheetDetails = [];
+        foreach ($mejas as $meja) {
+            $checksheetDetails[$meja->id] = [
+                'maintenance' => $meja->maintenance_count > 0,
+                'offline' => $meja->offline_count > 0,
+            ];
+        }
+
+        // Initialize production data
+        $mejaProductionData = [];
+        $today = \Carbon\Carbon::today();
+
+        foreach ($mejas as $meja) {
+            // Get active planning for this meja
+            $planning = \App\Models\PlanningProduksi::with(['moldshop'])
+                ->where('meja_id', $meja->id_meja)
+                ->whereDate('tanggal', $today)
+                ->where('status_approval', 'approved')
+                ->first();
+
+            $customer = '-';
+            if ($planning && $planning->moldshop) {
+                $customer = $planning->moldshop->customer ?? '-';
+            }
+
+            $mejaProductionData[$meja->id_meja] = [
+                'customer' => $customer,
+                'has_planning' => $planning ? true : false,
+                'part_name' => $planning && $planning->part ? $planning->part->nama_part : null,
+            ];
+        }
+
         return view('dashboardasyy.index', compact(
             'mejas',
             'totalMejas',
@@ -52,9 +112,15 @@ class DashboardAssyController extends Controller
             'countMaintenance',
             'countTidakAktif',
             'users',
-            'parts'
+            'parts',
+            'grups',
+            'mejaProgress',
+            'mejaProgress',
+            'checksheetDetails',
+            'mejaProductionData'
         ));
     }
+
 
     /**
      * Store checksheet data from dashboard
@@ -70,13 +136,22 @@ class DashboardAssyController extends Controller
             'content_type' => $request->header('Content-Type')
         ]);
 
+        // Authorization check for staff
+        if (Auth::user()->role === 'staff') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Staff Produksi tidak memiliki hak akses untuk mengisi checksheet.'
+            ], 403);
+        }
+
         // Validate the request
         $request->validate([
             'meja_id' => 'required|exists:meja,id_meja',
             'user_id' => 'required|exists:users,id',
             'part_id' => 'required|exists:parts,id',
-            'grup' => 'required|in:A,B,C',
-            'shift' => 'required|in:shift_1,shift_2,shift_3',
+            'grup_id' => 'required|exists:grups,id',
+            'grup' => 'nullable|in:A,B,C', // For backward compatibility
+            // Shift validation removed - will be retrieved from jadwal kerja automatically
             'apd_topi' => 'required|in:ya,tidak',
             'apd_sepatu' => 'required|in:ya,tidak',
             'quality_qpoint' => 'required|in:ya,tidak',
@@ -97,8 +172,7 @@ class DashboardAssyController extends Controller
             'part_id.exists' => 'Part yang dipilih tidak ditemukan',
             'grup.required' => 'Grup harus dipilih',
             'grup.in' => 'Grup harus salah satu dari: A, B, C',
-            'shift.required' => 'Shift harus dipilih',
-            'shift.in' => 'Shift harus salah satu dari: Shift 1, Shift 2, Shift 3',
+            // Shift validation messages removed
             'apd_topi.required' => 'Jawaban untuk topi harus dipilih',
             'apd_topi.in' => 'Jawaban untuk topi harus Ya atau Tidak',
             'apd_sepatu.required' => 'Jawaban untuk sepatu safety harus dipilih',
@@ -149,14 +223,27 @@ class DashboardAssyController extends Controller
                 throw new \Exception('Part tidak ditemukan');
             }
 
+            // Get grup_id from request (now using actual grup_id from database)
+            $grupId = $request->grup_id ?? null;
+
+            // For backward compatibility: if grup is A/B/C, try to find by nama_grup
+            if (!$grupId && in_array($request->grup, ['A', 'B', 'C'])) {
+                $grup = \App\Models\Grup::where('nama_grup', 'LIKE', '%' . $request->grup . '%')
+                    ->whereHas('users', function ($query) {
+                        $query->where('bagian', 'assy');
+                    })
+                    ->first();
+                $grupId = $grup ? $grup->id : null;
+            }
+
             // Create checksheet record
+            // Note: shift is no longer stored, it will be retrieved from jadwal kerja via accessor
             $checksheetData = [
                 'meja_id' => $request->meja_id,
                 'user_id' => $request->user_id,
-                'grup_id' => Auth::user()->grup_id,
+                'grup_id' => $grupId,
                 'part_id' => $request->part_id,
-                'shift' => $request->shift,
-                'grup' => $request->grup,
+                'grup' => $request->grup ?? null,
                 'apd_topi' => $request->apd_topi,
                 'apd_sepatu' => $request->apd_sepatu,
                 'quality_qpoint' => $request->quality_qpoint,
@@ -176,7 +263,7 @@ class DashboardAssyController extends Controller
             // Handle photo uploads (from camera or file)
             $photoTypes = ['foto_apd', 'foto_instruksi_kerja', 'foto_quality', 'foto_limit_sampel', 'foto_amptm'];
             $uploadedPhotos = [];
-            
+
             foreach ($photoTypes as $type) {
                 Log::info("Processing photo type: {$type}", [
                     'has_file' => $request->hasFile($type),
@@ -187,10 +274,10 @@ class DashboardAssyController extends Controller
                     'file_error' => $request->hasFile($type) ? $request->file($type)->getError() : null,
                     'file_error_message' => $request->hasFile($type) ? $request->file($type)->getErrorMessage() : null
                 ]);
-                
+
                 if ($request->hasFile($type)) {
                     $file = $request->file($type);
-                    
+
                     // Check if file is valid
                     if (!$file->isValid()) {
                         Log::warning("Invalid file for type: {$type}", [
@@ -199,7 +286,7 @@ class DashboardAssyController extends Controller
                         ]);
                         continue;
                     }
-                    
+
                     // Check file size
                     if ($file->getSize() > 2 * 1024 * 1024) {
                         Log::warning("File too large for type: {$type}", [
@@ -208,7 +295,7 @@ class DashboardAssyController extends Controller
                         ]);
                         continue;
                     }
-                    
+
                     // Check file type
                     $allowedMimes = ['image/jpeg', 'image/jpg', 'image/png'];
                     if (!in_array($file->getMimeType(), $allowedMimes)) {
@@ -218,34 +305,34 @@ class DashboardAssyController extends Controller
                         ]);
                         continue;
                     }
-                    
+
                     try {
                         // Generate unique filename
                         $timestamp = time();
                         $extension = $file->getClientOriginalExtension() ?: 'jpg';
                         $filename = "{$timestamp}_{$type}_{$checksheet->id}.{$extension}";
-                        
+
                         // Ensure the directory exists
                         $directory = 'checksheet-photos';
                         if (!Storage::disk('public')->exists($directory)) {
                             Storage::disk('public')->makeDirectory($directory);
                             Log::info("Created directory: {$directory}");
                         }
-                        
+
                         // Store the file
                         $path = $file->storeAs($directory, $filename, 'public');
-                        
+
                         if (!$path) {
                             throw new \Exception("Failed to store file: {$filename}");
                         }
-                        
+
                         Log::info("File stored successfully", [
                             'original_name' => $file->getClientOriginalName(),
                             'stored_path' => $path,
                             'file_size' => $file->getSize(),
                             'mime_type' => $file->getMimeType()
                         ]);
-                        
+
                         // Create photo record in database
                         $photoData = [
                             'checksheet_id' => $checksheet->id,
@@ -253,24 +340,23 @@ class DashboardAssyController extends Controller
                             'type' => str_replace('foto_', '', $type),
                             'description' => ucfirst(str_replace('foto_', '', $type)) . ' Photo - Captured via Camera'
                         ];
-                        
+
                         Log::info("Creating photo record", $photoData);
-                        
+
                         $photo = $checksheet->photos()->create($photoData);
-                        
+
                         if (!$photo) {
                             throw new \Exception("Failed to create photo record for type: {$type}");
                         }
-                        
+
                         $uploadedPhotos[] = $photo;
                         Log::info('Photo uploaded and saved to database successfully', [
-                            'photo_id' => $photo->id, 
+                            'photo_id' => $photo->id,
                             'type' => $type,
                             'filename' => $filename,
                             'path' => $path,
                             'database_id' => $photo->id
                         ]);
-                        
                     } catch (\Exception $e) {
                         // Log the error but don't fail the entire transaction
                         Log::error('Failed to upload photo: ' . $e->getMessage(), [
@@ -304,29 +390,313 @@ class DashboardAssyController extends Controller
                     'total_photos_in_db' => $checksheet->photos()->count()
                 ]
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollback();
-            
+
             Log::error('Validation error in assembly checksheet creation', ['errors' => $e->errors()]);
-            
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Validasi gagal',
                 'errors' => $e->errors()
             ], 422);
-            
         } catch (\Exception $e) {
             DB::rollback();
-            
+
             Log::error('Assembly checksheet creation error: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
         }
     }
-} 
+
+    public function getMejaDocuments($id)
+    {
+        $meja = \App\Models\Meja::with(['documents' => function ($q) {
+            $q->where('enabled', true)->orderByDesc('id');
+        }])->findOrFail($id);
+
+        // Defaults: url dan filename null
+        $defaults = [
+            'apd' => [
+                'url' => asset('images/barang/StandarAPDAssy.pdf'),
+                'filename' => null,
+            ],
+            'qpoint' => [
+                'url' => asset('images/barang/3Qpointrev.pdf'),
+                'filename' => null,
+            ],
+            'instruksi_kerja' => [
+                'url' => asset('images/barang/intruksikerja.pdf'),
+                'filename' => null,
+            ],
+            'limit_sampel' => [
+                'url' => asset('images/barang/LimitSampel.pdf'),
+                'filename' => null,
+            ],
+            'amptm' => [
+                'url' => asset('images/barang/1AMTPM.pdf'),
+                'filename' => null,
+            ],
+        ];
+
+        $docs = $defaults;
+
+        foreach ($meja->documents as $doc) {
+            if (isset($docs[$doc->type])) {
+                $docs[$doc->type] = [
+                    'url' => $doc->url ? asset($doc->url) : null,
+                    'filename' => $doc->filename ?? null,
+                ];
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $docs,
+        ]);
+    }
+
+    /**
+     * Get operators by grup_id for dashboard assy
+     */
+    public function getOperatorsByGrup(Request $request)
+    {
+        $grupId = $request->query('grup_id');
+
+        if (!$grupId) {
+            return response()->json(['data' => []]);
+        }
+
+        // Get operators from the grup
+        $operators = User::where('role', 'operator')
+            ->where('bagian', 'assy')
+            ->where('grup_id', $grupId)
+            ->get(['id', 'nama', 'username', 'nik']);
+
+        return response()->json([
+            'data' => $operators,
+            'message' => $operators->count() > 0
+                ? "Ditemukan {$operators->count()} operator di grup ini"
+                : "Tidak ada operator di grup ini"
+        ]);
+    }
+
+    /**
+     * Get ploting data for a specific meja on a specific date
+     * This will auto-populate operator, grup, and part from existing ploting
+     */
+    public function getPlotingByMeja(Request $request)
+    {
+        $mejaId = $request->query('meja_id');
+        $tanggal = $request->query('tanggal', date('Y-m-d'));
+
+        if (!$mejaId) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Meja ID harus disediakan',
+                'data' => []
+            ]);
+        }
+
+        // Get planning produksi for this meja on this date
+        $plannings = \App\Models\PlanningProduksi::with([
+            'plotings' => function ($query) {
+                $query->whereNotNull('user_id')
+                    ->with(['operator', 'grup']);
+            },
+            'part'
+        ])
+            ->where('meja_id', $mejaId)
+            ->whereDate('tanggal', $tanggal)
+            ->where('status_approval', 'approved')
+            ->get();
+
+        $plotingData = [];
+        foreach ($plannings as $planning) {
+            foreach ($planning->plotings as $ploting) {
+                if ($ploting->user_id) {
+                    // Get jadwal kerja untuk user pada tanggal tersebut untuk mendapatkan shift
+                    $jadwal = \App\Models\JadwalKerja::where('user_id', $ploting->user_id)
+                        ->whereDate('tanggal', $tanggal)
+                        ->where('status', 'aktif')
+                        ->first();
+
+                    $isCurrentShift = false;
+                    $now = \Carbon\Carbon::now();
+                    $currentTime = $now->format('H:i:s');
+
+                    if ($jadwal && $jadwal->jam_masuk && $jadwal->jam_keluar) {
+                        $masuk = $jadwal->jam_masuk;
+                        $keluar = $jadwal->jam_keluar;
+
+                        if ($keluar < $masuk) {
+                            // Crosses midnight (Shift 3)
+                            if ($currentTime >= $masuk || $currentTime <= $keluar) {
+                                $isCurrentShift = true;
+                            }
+                        } else {
+                            // Normal day shift
+                            if ($currentTime >= $masuk && $currentTime <= $keluar) {
+                                $isCurrentShift = true;
+                            }
+                        }
+                    }
+
+                    $shift = null;
+                    $shiftDisplay = null;
+                    if ($jadwal) {
+                        $shiftMap = [
+                            'pagi' => 'shift_1',
+                            'siang' => 'shift_2',
+                            'malam' => 'shift_3',
+                            'off' => null
+                        ];
+                        $shift = $shiftMap[$jadwal->shift] ?? null;
+                        $shiftDisplay = $jadwal->shift === 'off' ? 'Libur' : 'Shift ' . ucfirst($jadwal->shift);
+                    }
+
+                    // Check if checksheet already exists for this meja, user, and shift on this date
+                    $existingChecksheet = null;
+                    $hasChecksheet = false;
+                    if ($shift) {
+                        // Get checksheets for this meja and user on this date
+                        $checksheets = Checksheet::where('meja_id', $mejaId)
+                            ->where('user_id', $ploting->user_id)
+                            ->whereDate('created_at', $tanggal)
+                            ->get();
+
+                        // Check each checksheet's shift (using accessor)
+                        foreach ($checksheets as $cs) {
+                            if ($cs->shift === $shift) {
+                                $hasChecksheet = true;
+                                $existingChecksheet = [
+                                    'id' => $cs->id,
+                                    'shift' => $cs->shift,
+                                    'shift_display' => $cs->shift_display ?? $shiftDisplay,
+                                    'created_at' => $cs->created_at->format('Y-m-d H:i:s')
+                                ];
+                                break;
+                            }
+                        }
+                    }
+
+                    $plotingData[] = [
+                        'ploting_id' => $ploting->id,
+                        'planning_id' => $planning->id,
+                        'user_id' => $ploting->user_id,
+                        'user_nama' => $ploting->operator->nama ?? '-',
+                        'grup_id' => $ploting->grup_id,
+                        'grup_nama' => $ploting->grup->nama_grup ?? '-',
+                        'part_id' => $planning->part_id,
+                        'part_nama' => $planning->part->nama_part ?? '-',
+                        'part_no' => $planning->part->no_parts ?? '-',
+                        'status' => $ploting->status,
+                        'is_active' => $ploting->status === 'on_progress',
+                        'shift' => $shift,
+                        'shift_display' => $shiftDisplay,
+                        'has_checksheet' => $hasChecksheet,
+                        'existing_checksheet' => $existingChecksheet,
+                        'is_current_shift' => $isCurrentShift,
+                        'updated_at' => $ploting->updated_at
+                    ];
+                }
+            }
+        }
+
+        // Sort plotingData to prioritize current shift, then most recently updated
+        usort($plotingData, function ($a, $b) {
+            // Priority 1: Current Shift
+            if ($a['is_current_shift'] && !$b['is_current_shift']) return -1;
+            if (!$a['is_current_shift'] && $b['is_current_shift']) return 1;
+
+            // Priority 2: Most recently updated
+            if ($a['updated_at'] != $b['updated_at']) {
+                return $a['updated_at'] > $b['updated_at'] ? -1 : 1;
+            }
+
+            return 0;
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => count($plotingData) > 0
+                ? "Ditemukan " . count($plotingData) . " operator yang sudah di-ploting untuk meja ini"
+                : "Belum ada operator yang di-ploting untuk meja ini pada tanggal tersebut",
+            'data' => $plotingData,
+            'has_ploting' => count($plotingData) > 0
+        ]);
+    }
+
+    /**
+     * Check if checksheet already exists for meja, user, and shift
+     */
+    public function checkChecksheetExists(Request $request)
+    {
+        $request->validate([
+            'meja_id' => 'required|exists:meja,id_meja',
+            'user_id' => 'required|exists:users,id',
+            'tanggal' => 'nullable|date'
+        ]);
+
+        $mejaId = $request->meja_id;
+        $userId = $request->user_id;
+        $tanggal = $request->tanggal ?: date('Y-m-d');
+
+        // Get jadwal kerja untuk user pada tanggal tersebut untuk mendapatkan shift
+        $jadwal = \App\Models\JadwalKerja::where('user_id', $userId)
+            ->whereDate('tanggal', $tanggal)
+            ->where('status', 'aktif')
+            ->first();
+
+        $shift = null;
+        $shiftDisplay = null;
+        if ($jadwal) {
+            $shiftMap = [
+                'pagi' => 'shift_1',
+                'siang' => 'shift_2',
+                'malam' => 'shift_3',
+                'off' => null
+            ];
+            $shift = $shiftMap[$jadwal->shift] ?? null;
+            $shiftDisplay = $jadwal->shift === 'off' ? 'Libur' : 'Shift ' . ucfirst($jadwal->shift);
+        }
+
+        // Check if checksheet already exists for this meja, user, and shift on this date
+        $existingChecksheet = null;
+        $hasChecksheet = false;
+        if ($shift) {
+            // Get checksheets for this meja and user on this date
+            $checksheets = Checksheet::where('meja_id', $mejaId)
+                ->where('user_id', $userId)
+                ->whereDate('created_at', $tanggal)
+                ->get();
+
+            // Check each checksheet's shift (using accessor)
+            foreach ($checksheets as $cs) {
+                if ($cs->shift === $shift) {
+                    $hasChecksheet = true;
+                    $existingChecksheet = [
+                        'id' => $cs->id,
+                        'shift' => $cs->shift,
+                        'shift_display' => $cs->shift_display ?? $shiftDisplay,
+                        'created_at' => $cs->created_at->format('Y-m-d H:i:s')
+                    ];
+                    break;
+                }
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'has_checksheet' => $hasChecksheet,
+            'shift' => $shift,
+            'shift_display' => $shiftDisplay,
+            'existing_checksheet' => $existingChecksheet
+        ]);
+    }
+}

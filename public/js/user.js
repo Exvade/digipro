@@ -1,3 +1,7 @@
+/**
+ * User JavaScript
+ */
+
 $(document).ready(function() {
     // Check if jQuery and Bootstrap are available
     console.log('jQuery version:', $.fn.jquery);
@@ -18,6 +22,7 @@ $(document).ready(function() {
     const dataTableConfig = {
         responsive: {
             details: {
+                type: 'none', // Menghapus button expand/collapse
                 display: $.fn.dataTable.Responsive.display.modal({
                     header: function(row) {
                         var data = row.data();
@@ -66,65 +71,14 @@ $(document).ready(function() {
         initComplete: function() {
             // Initialize tooltips after table is loaded
             $('[data-toggle="tooltip"]').tooltip();
-            
-            // Adjust DataTables buttons visibility based on screen size
-            adjustDataTableButtons();
         }
     };
     
-    // Add buttons configuration for larger screens
+    // Configure DOM based on screen size
     if (!isMobile) {
-        dataTableConfig.dom = '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>' +
+        dataTableConfig.dom = '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
                              '<"row"<"col-sm-12"tr>>' +
                              '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>';
-        
-        dataTableConfig.buttons = [
-            {
-                extend: 'copy',
-                text: '<i class="fas fa-copy me-1"></i>Copy',
-                className: 'btn btn-secondary btn-sm',
-                exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5, 6]
-                }
-            },
-            {
-                extend: 'csv',
-                text: '<i class="fas fa-file-csv me-1"></i>CSV',
-                className: 'btn btn-secondary btn-sm',
-                exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5, 6]
-                }
-            },
-            {
-                extend: 'excel',
-                text: '<i class="fas fa-file-excel me-1"></i>Excel',
-                className: 'btn btn-secondary btn-sm',
-                exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5, 6]
-                }
-            },
-            {
-                extend: 'pdf',
-                text: '<i class="fas fa-file-pdf me-1"></i>PDF',
-                className: 'btn btn-secondary btn-sm',
-                exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5, 6]
-                }
-            },
-            {
-                extend: 'print',
-                text: '<i class="fas fa-print me-1"></i>Print',
-                className: 'btn btn-secondary btn-sm',
-                exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5, 6]
-                }
-            },
-            {
-                extend: 'colvis',
-                text: '<i class="fas fa-columns me-1"></i>Columns',
-                className: 'btn btn-secondary btn-sm'
-            }
-        ];
     } else {
         // Simplified DOM for mobile
         dataTableConfig.dom = '<"row"<"col-12"f>>' +
@@ -135,39 +89,50 @@ $(document).ready(function() {
     // Initialize DataTable
     const userTable = $('#userTable').DataTable(dataTableConfig);
     
-    // Function to adjust DataTable buttons visibility
-    function adjustDataTableButtons() {
-        const width = window.innerWidth;
-        
-        if (width < 576) {
-            // Extra small devices - hide all buttons
-            $('.dt-buttons').hide();
-        } else if (width < 768) {
-            // Small devices - show only column visibility
-            $('.dt-buttons .btn').hide();
-            $('.buttons-colvis').show();
-        } else if (width < 992) {
-            // Medium devices - show limited buttons
-            $('.dt-buttons .btn').hide();
-            $('.buttons-copy, .buttons-csv, .buttons-colvis').show();
-        } else {
-            // Large devices - show all buttons
-            $('.dt-buttons .btn').show();
-        }
-    }
-    
     // Handle window resize
     let resizeTimer;
     $(window).on('resize', function() {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(function() {
-            adjustDataTableButtons();
             userTable.columns.adjust().responsive.recalc();
         }, 250);
     });
 });
 
+// =========================================
+// Function to open detail modal (Index Page)
+// =========================================
+window.openDetailModal = function(userId) {
+    // Show modal first
+    $('#detailModal').modal('show');
+    
+    // Load detail content via AJAX
+    $.ajax({
+        url: '/user/' + userId + '/show-modal',
+        method: 'GET',
+        beforeSend: function() {
+            $('#detailModalBody').html('');
+        },
+        success: function(response) {
+            $('#detailModalBody').html(response);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading detail:', error);
+            $('#detailModalBody').html(`
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Terjadi kesalahan saat memuat data user.<br>
+                    Error: ${error}<br>
+                    Status: ${xhr.status}
+                </div>
+            `);
+        }
+    });
+};
+
+// =========================================
 // Function to open create modal
+// =========================================
 function openCreateModal() {
     console.log('Opening create modal...');
     
@@ -193,18 +158,7 @@ function openCreateModal() {
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
-        beforeSend: function() {
-            console.log('Sending AJAX request to:', window.createModalUrl);
-            // Show loading in modal body
-            $('#addModalBody').html(`
-                <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2 text-muted">Memuat form...</p>
-                </div>
-            `);
-        },
+
         success: function(response) {
             console.log('Form loaded successfully');
             $('#addModalBody').html(response);
@@ -246,7 +200,9 @@ function openCreateModal() {
     });
 }
 
+// =========================================
 // Function to open edit modal
+// =========================================
 function openEditModal(userId) {
     // Show modal first
     $('#editModal').modal('show');
@@ -256,15 +212,7 @@ function openEditModal(userId) {
         url: '/user/' + userId + '/edit-modal',
         method: 'GET',
         beforeSend: function() {
-            // Show loading in modal body
-            $('#editModalBody').html(`
-                <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2 text-muted">Memuat data...</p>
-                </div>
-            `);
+            $('#editModalBody').html('');
         },
         success: function(response) {
             $('#editModalBody').html(response);
@@ -291,7 +239,9 @@ function openEditModal(userId) {
     });
 }
 
+// =========================================
 // Function to initialize form elements
+// =========================================
 function initializeFormElements() {
     // Initialize select2 if available
     if ($.fn.select2) {
@@ -322,10 +272,7 @@ function initializeFormElements() {
         const originalText = submitBtn.html();
         
         // Show loading state
-        submitBtn.prop('disabled', true).html(`
-            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            Menyimpan...
-        `);
+        submitBtn.prop('disabled', true).text('Menyimpan...');
         
         // Re-enable button after 5 seconds as fallback
         setTimeout(function() {
@@ -334,7 +281,9 @@ function initializeFormElements() {
     });
 }
 
+// =========================================
 // Function to delete user
+// =========================================
 function deleteUser(userId, userName) {
     Swal.fire({
         title: 'Konfirmasi Hapus',
@@ -389,7 +338,9 @@ function deleteUser(userId, userName) {
     });
 }
 
+// =========================================
 // Handle modal events for better mobile experience
+// =========================================
 $(document).on('shown.bs.modal', '.modal', function() {
     // Focus on first input in modal
     $(this).find('input:first').focus();
@@ -400,16 +351,23 @@ $(document).on('shown.bs.modal', '.modal', function() {
     }
 });
 
+// =========================================
 // Handle touch events for better mobile interaction
+// =========================================
 $(document).on('touchstart', '.btn', function() {
     $(this).addClass('btn-touch');
 });
 
+// =========================================
+// Handle touch events for better mobile interaction
+// =========================================
 $(document).on('touchend touchcancel', '.btn', function() {
     $(this).removeClass('btn-touch');
 });
 
+// =========================================
 // Add responsive table enhancements
+// =========================================
 $(document).on('click', '#userTable td', function() {
     if (window.innerWidth < 768) {
         const cell = $(this);
@@ -425,4 +383,51 @@ $(document).on('click', '#userTable td', function() {
             });
         }
     }
-}); 
+});
+
+
+// =========================================
+// Dark Mode Toggle Functionality
+// =========================================
+$(document).ready(function() {
+    const $darkModeSwitch = $('#darkModeSwitch');
+    const $darkModeIcon = $('#darkModeIcon');
+    const $body = $('body');
+
+    // Check if elements exist
+    if ($darkModeSwitch.length === 0) {
+        // console.warn('Dark mode elements not found');
+        return;
+    }
+
+    // Check for saved dark mode preference
+    const isDarkMode = localStorage.getItem('darkMode') === 'enabled';
+
+    // Apply saved preference on page load
+    if (isDarkMode) {
+        enableDarkMode();
+    }
+
+    // Toggle dark mode on switch change
+    $darkModeSwitch.on('change', function() {
+        if ($(this).is(':checked')) {
+            enableDarkMode();
+        } else {
+            disableDarkMode();
+        }
+    });
+
+    function enableDarkMode() {
+        $body.addClass('dark-mode');
+        $darkModeSwitch.prop('checked', true);
+        $darkModeIcon.removeClass('fa-moon').addClass('fa-sun');
+        localStorage.setItem('darkMode', 'enabled');
+    }
+
+    function disableDarkMode() {
+        $body.removeClass('dark-mode');
+        $darkModeSwitch.prop('checked', false);
+        $darkModeIcon.removeClass('fa-sun').addClass('fa-moon');
+        localStorage.setItem('darkMode', 'disabled');
+    }
+});

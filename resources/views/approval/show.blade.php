@@ -1,65 +1,113 @@
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label class="font-weight-bold">Mesin</label>
-            <p class="form-control-plaintext">{{ $checksheet->mesin->nama_mesin ?? '-' }}</p>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="form-group">
-            <label class="font-weight-bold">Part</label>
-            <p class="form-control-plaintext">{{ $checksheet->part->nama_part ?? '-' }}</p>
-        </div>
-    </div>
-</div>
+{{-- Tentukan tipe operator berdasarkan mesin_id atau meja_id --}}
+@php
+    $isInject = !empty($checksheet->mesin_id);
+    $isAssy = !empty($checksheet->meja_id);
+@endphp
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label class="font-weight-bold">User</label>
-            <p class="form-control-plaintext">{{ $checksheet->user->nama ?? '-' }}</p>
-        </div>
+<div class="card card-outline card-primary mb-3">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-info-circle mr-2"></i>Informasi Checksheet
+        </h5>
     </div>
-    <div class="col-md-6">
-        <div class="form-group">
-            <label class="font-weight-bold">Grup</label>
-            <p class="form-control-plaintext">
-                {{ $checksheet->user->grup->nama_grup ?? '-' }}
-            </p>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="font-weight-bold text-primary">
+                        <i class="fas fa-user mr-1"></i>Operator
+                    </label>
+                    <p class="form-control-plaintext">{{ $checksheet->user->nama ?? '-' }}</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="font-weight-bold text-primary">
+                        <i class="fas fa-users mr-1"></i>Grup
+                    </label>
+                    <p class="form-control-plaintext">
+                        <span class="badge badge-secondary">{{ $checksheet->user->grup->nama_grup ?? '-' }}</span>
+                    </p>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label class="font-weight-bold">Meja</label>
-            <p class="form-control-plaintext">{{ $checksheet->meja->nama_meja ?? '-' }}</p>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="font-weight-bold text-primary">
+                        <i class="fas fa-box mr-1"></i>Part
+                    </label>
+                    <p class="form-control-plaintext">{{ $checksheet->part->nama_part ?? '-' }}</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="font-weight-bold text-primary">
+                        <i class="fas fa-clock mr-1"></i>Shift
+                    </label>
+                    <p class="form-control-plaintext">
+                        <span class="badge badge-info">{{ ucfirst($checksheet->shift) }}</span>
+                    </p>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="col-md-6">
-        <div class="form-group">
-            <label class="font-weight-bold">Shift</label>
-            <p class="form-control-plaintext">
-                <span class="badge badge-info">{{ ucfirst($checksheet->shift) }}</span>
-            </p>
-        </div>
-    </div>
-</div>
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label class="font-weight-bold">Status</label>
-            <p class="form-control-plaintext">
-                <span class="badge badge-warning">Pending</span>
-            </p>
+        {{-- Tampilkan Mesin untuk Operator Inject --}}
+        @if($isInject)
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="font-weight-bold text-primary">
+                        <i class="fas fa-cog mr-1"></i>Mesin
+                    </label>
+                    <p class="form-control-plaintext">
+                        <span class="badge badge-success">{{ $checksheet->mesin->nama_mesin ?? '-' }}</span>
+                    </p>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="col-md-6">
-        <div class="form-group">
-            <label class="font-weight-bold">Tanggal Dibuat</label>
-            <p class="form-control-plaintext">{{ $checksheet->created_at->format('d/m/Y H:i') }}</p>
+        @endif
+
+        {{-- Tampilkan Meja untuk Operator Assy --}}
+        @if($isAssy)
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="font-weight-bold text-primary">
+                        <i class="fas fa-table mr-1"></i>Meja
+                    </label>
+                    <p class="form-control-plaintext">
+                        <span class="badge badge-success">{{ $checksheet->meja->nama_meja ?? '-' }}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <hr class="my-3">
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="font-weight-bold text-primary">
+                        <i class="fas fa-info-circle mr-1"></i>Status
+                    </label>
+                    <p class="form-control-plaintext">
+                        <span class="badge badge-warning">
+                            <i class="fas fa-clock mr-1"></i>Pending
+                        </span>
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="font-weight-bold text-primary">
+                        <i class="fas fa-calendar mr-1"></i>Tanggal Dibuat
+                    </label>
+                    <p class="form-control-plaintext">{{ $checksheet->created_at->format('d/m/Y H:i') }}</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -81,7 +129,7 @@
             <div class="photo-item">
                 <div class="card photo-card h-100 shadow-sm border-0">
                     <div class="photo-container position-relative">
-                        <img src="{{ asset('storage/' . $photo->file_path) }}" 
+                        <img src="{{ url('storage/' . ltrim(str_replace(['public/','storage/'], '', $photo->file_path), '/')) }}" 
                              class="card-img-top photo-img" 
                              alt="{{ $photo->type_display_name }}"
                              data-toggle="modal" 
@@ -117,7 +165,7 @@
             <div class="photo-item">
                 <div class="card photo-card h-100 shadow-sm border-0">
                     <div class="photo-container position-relative">
-                        <img src="{{ asset('storage/' . $photo->file_path) }}" 
+                        <img src="{{ url('storage/' . ltrim(str_replace(['public/','storage/'], '', $photo->file_path), '/')) }}" 
                              class="card-img-top photo-img" 
                              alt="{{ $photo->type_display_name }}"
                              data-toggle="modal" 
@@ -163,7 +211,7 @@
                 </button>
             </div>
             <div class="modal-body p-0">
-                <img src="{{ asset('storage/' . $photo->file_path) }}" 
+                <img src="{{ url('storage/' . ltrim(str_replace(['public/','storage/'], '', $photo->file_path), '/')) }}" 
                      class="img-fluid w-100" 
                      alt="{{ $photo->type_display_name }}">
             </div>
@@ -190,10 +238,10 @@
 <div class="row mt-3">
     <div class="col-12">
         <div class="btn-group" role="group">
-            <button type="button" class="btn btn-success" onclick="approveChecksheet({{ $checksheet->id }})">
+            <button type="button" class="btn btn-success mx-1"  onclick="approveChecksheet({{ $checksheet->id }})">
                 <i class="fas fa-check mr-1"></i>Setujui
             </button>
-            <button type="button" class="btn btn-danger" onclick="rejectChecksheet({{ $checksheet->id }})">
+            <button type="button" class="btn btn-danger mx-1"  onclick="rejectChecksheet({{ $checksheet->id }})">
                 <i class="fas fa-times mr-1"></i>Tolak
             </button>
         </div>

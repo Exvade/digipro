@@ -26,39 +26,12 @@ class ReportController extends Controller
     public function index()
     {
         $user = auth()->user();
-        
-        // Build base query for all statistics
-        $baseQuery = Checksheet::query();
-        
-        // Apply group filter from page filter form
-        if (request('filter_grup_id')) {
-            Log::info('Applying group filter', [
-                'filter_grup_id' => request('filter_grup_id'),
-                'filter_grup_id_type' => gettype(request('filter_grup_id'))
-            ]);
-            
-            $baseQuery->whereHas('user', function($q) {
-                $q->where('grup_id', request('filter_grup_id'));
-            });
-        }
-        
-        // Get summary statistics with filters
-        $totalChecksheets = (clone $baseQuery)->count();
-        $pendingChecksheets = (clone $baseQuery)->where('approval_status', 'pending')->count();
-        $approvedChecksheets = (clone $baseQuery)->where('approval_status', 'approved')->count();
-        $rejectedChecksheets = (clone $baseQuery)->where('approval_status', 'rejected')->count();
-        
-        // Get recent checksheets based on user department
-        $recentChecksheetsQuery = (clone $baseQuery)->with(['mesin', 'part', 'user.grup', 'meja', 'approver']);
-        
-        // Log all request parameters
-        Log::info('All request parameters', request()->all());
-        
-        // Determine report type based on user role and department
+
+        // Determine report type based on user role and department FIRST
         $reportType = 'general'; // default
         $departmentSpecificData = null;
         $userDepartment = null;
-        
+
         if ($user->role === 'leader') {
             // For leaders, determine their department from their profile
             if (isset($user->bagian) && strtolower($user->bagian) === 'assy') {
@@ -76,39 +49,111 @@ class ReportController extends Controller
                 $reportType = $requestedReportType;
             }
         }
-        
-        // Filter checksheets based on report type
-        if ($reportType === 'assy') {
-            // For assy department, only show checksheets with meja_id
-            $recentChecksheetsQuery->whereNotNull('meja_id');
-        } elseif ($reportType === 'inject') {
-            // For inject department, only show checksheets with mesin_id
-            $recentChecksheetsQuery->whereNotNull('mesin_id');
+
+        // Build base query for all statistics
+        $baseQuery = Checksheet::query();
+
+        // Apply group filter from page filter form
+        if (request('filter_grup_id')) {
+            Log::info('Applying group filter', [
+                'filter_grup_id' => request('filter_grup_id'),
+                'filter_grup_id_type' => gettype(request('filter_grup_id'))
+            ]);
+
+            $baseQuery->whereHas('user', function ($q) {
+                $q->where('grup_id', request('filter_grup_id'));
+            });
         }
-        
+
+        // Leader filter by group if they have one
+        if ($user->role === 'leader' && isset($user->grup_id)) {
+            $baseQuery->whereHas('user', function ($q) use ($user) {
+                $q->where('grup_id', $user->grup_id);
+            });
+        }
+
+        // Apply report type filter to base query for statistics
+        if ($reportType === 'assy') {
+            $baseQuery->whereNotNull('meja_id')
+                ->whereNull('mesin_id');
+        } elseif ($reportType === 'inject') {
+            $baseQuery->whereNotNull('mesin_id')
+                ->whereNull('meja_id');
+        }
+
+        // Get summary statistics with filters
+        $totalChecksheets = (clone $baseQuery)->count();
+        $pendingChecksheets = (clone $baseQuery)->where('approval_status', 'pending')->count();
+        $approvedChecksheets = (clone $baseQuery)->where('approval_status', 'approved')->count();
+        $rejectedChecksheets = (clone $baseQuery)->where('approval_status', 'rejected')->count();
+
+        // Get recent checksheets based on user department
+        $recentChecksheetsQuery = (clone $baseQuery)->with(['mesin', 'part', 'user.grup', 'user.jadwalKerjas', 'meja', 'approver']);
+
+        // Log all request parameters
+        Log::info('All request parameters', request()->all());
+
+        // Note: Filter already applied to baseQuery, so recentChecksheetsQuery already has the filter
         $recentChecksheets = $recentChecksheetsQuery->orderBy('created_at', 'desc')->limit(10)->get();
-        
+
         // Get statistics by shift (apply same filters)
+        // Note: shift column was removed from checksheets table, so we need to get it from jadwal_kerja
+        // Note: Filter already applied to baseQuery
         $shiftStatsQuery = (clone $baseQuery);
-        
-        // Apply report type filter
-        if ($reportType === 'assy') {
-            $shiftStatsQuery->whereNotNull('meja_id');
-        } elseif ($reportType === 'inject') {
-            $shiftStatsQuery->whereNotNull('mesin_id');
+
+        // Get checksheets with their shift from jadwal_kerja
+        $checksheetsForShift = $shiftStatsQuery->with(['user.jadwalKerjas' => function ($query) {
+            $query->where('status', 'aktif');
+        }])->get();
+
+        // Group by shift using accessor
+        $shiftStats = collect([
+            'pagi' => 0,
+            'siang' => 0,
+            'malam' => 0
+        ]);
+
+        foreach ($checksheetsForShift as $checksheet) {
+            $shift = $checksheet->shift; // Use accessor
+            if ($shift) {
+                // Map shift_1, shift_2, shift_3 to pagi, siang, malam
+                $shiftMap = [
+                    'shift_1' => 'pagi',
+                    'shift_2' => 'siang',
+                    'shift_3' => 'malam',
+                    'pagi' => 'pagi',
+                    'siang' => 'siang',
+                    'malam' => 'malam'
+                ];
+                $shiftKey = $shiftMap[$shift] ?? null;
+                if ($shiftKey) {
+                    $shiftStats[$shiftKey] = ($shiftStats[$shiftKey] ?? 0) + 1;
+                }
+            }
         }
-        
-        $shiftStats = $shiftStatsQuery->select('shift', DB::raw('count(*) as total'))
-            ->groupBy('shift')
-            ->get();
-        
+
+        // Convert to format expected by view
+        $shiftStats = $shiftStats->map(function ($count, $shift) {
+            return ['shift' => $shift, 'total' => $count];
+        })->values();
+
         // Get data for filters
         $mesins = Mesin::all();
         $parts = Part::all();
-        $users = User::with('grup')->get();
-        $grups = Grup::all();
+
+        // Filter users and groups for leaders
+        $usersQuery = User::with('grup');
+        $grupsQuery = Grup::query();
+
+        if ($user->role === 'leader' && isset($user->grup_id)) {
+            $usersQuery->where('grup_id', $user->grup_id);
+            $grupsQuery->where('id', $user->grup_id);
+        }
+
+        $users = $usersQuery->get();
+        $grups = $grupsQuery->get();
         $mejas = Meja::all();
-        
+
         // Debug: Log data being passed to view
         Log::info('Data being passed to view', [
             'mesins_count' => $mesins->count(),
@@ -125,7 +170,7 @@ class ReportController extends Controller
                 'group_name' => $recentChecksheets->first()->user->grup->nama_grup ?? 'N/A'
             ] : 'No checksheets'
         ]);
-        
+
         // Set department specific data based on report type
         if ($reportType === 'assy') {
             // Get meja statistics for assy department
@@ -151,47 +196,52 @@ class ReportController extends Controller
                 ]
             ];
         }
-        
+
         // Get machine/meja statistics based on report type (apply same filters)
         if ($reportType === 'assy') {
             $machineStatsQuery = (clone $baseQuery)->with('meja')->whereNotNull('meja_id');
         } else {
             $machineStatsQuery = (clone $baseQuery)->with('mesin')->whereNotNull('mesin_id');
         }
-        
+
         $machineStats = $machineStatsQuery->select(
-            $reportType === 'assy' ? 'meja_id' : 'mesin_id', 
+            $reportType === 'assy' ? 'meja_id' : 'mesin_id',
             DB::raw('count(*) as total')
         )
-        ->groupBy($reportType === 'assy' ? 'meja_id' : 'mesin_id')
-        ->orderBy('total', 'desc')
-        ->limit(5)
-        ->get();
-        
+            ->groupBy($reportType === 'assy' ? 'meja_id' : 'mesin_id')
+            ->orderBy('total', 'desc')
+            ->limit(5)
+            ->get();
+
         // Get group statistics (apply same filters)
         $groupStatsQuery = DB::table('checksheets')
             ->join('users', 'checksheets.user_id', '=', 'users.id')
             ->join('grups', 'users.grup_id', '=', 'grups.id')
             ->whereNotNull('users.grup_id');
-        
+
         // Apply group filter
         if (request('filter_grup_id')) {
             $groupStatsQuery->where('users.grup_id', request('filter_grup_id'));
         }
-        
+
+        // Leader filter by group
+        if ($user->role === 'leader' && isset($user->grup_id)) {
+            $groupStatsQuery->where('users.grup_id', $user->grup_id);
+        }
+
         // Apply report type filter
         if ($reportType === 'assy') {
             $groupStatsQuery->whereNotNull('checksheets.meja_id');
         } elseif ($reportType === 'inject') {
             $groupStatsQuery->whereNotNull('checksheets.mesin_id');
         }
-        
+
         $groupStats = $groupStatsQuery->select('grups.id', 'grups.nama_grup', DB::raw('count(*) as total'))
             ->groupBy('grups.id', 'grups.nama_grup')
             ->orderBy('total', 'desc')
             ->limit(5)
             ->get();
-        
+
         return view('report.index', compact(
             'totalChecksheets',
             'pendingChecksheets',
@@ -222,7 +272,7 @@ class ReportController extends Controller
         $users = User::with('grup')->get();
         $mejas = Meja::all();
         $grups = Grup::all();
-        
+
         return view('report.create', compact('mesins', 'parts', 'users', 'mejas', 'grups'));
     }
 
@@ -233,7 +283,7 @@ class ReportController extends Controller
     {
         $user = auth()->user();
         $reportType = 'general';
-        
+
         // Determine report type based on user role and department
         if ($user->role === 'leader') {
             // For leaders, report type is fixed to their department
@@ -249,12 +299,12 @@ class ReportController extends Controller
                 $reportType = $request->report_type;
             }
         }
-        
+
         // Check for department_type parameter (from modal forms) - only for non-leaders
         if ($user->role !== 'leader' && $request->filled('department_type') && in_array($request->department_type, ['assy', 'inject'])) {
             $reportType = $request->department_type;
         }
-        
+
         $validationRules = [
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -265,7 +315,7 @@ class ReportController extends Controller
             'photo_data' => 'nullable|string',
             'photo_description' => 'nullable|string|max:500',
         ];
-        
+
         // Add conditional validation based on report type
         if ($reportType === 'assy') {
             $validationRules['meja_id'] = 'nullable|exists:meja,id_meja';
@@ -284,7 +334,7 @@ class ReportController extends Controller
         $request->validate($validationRules);
 
         try {
-            $query = Checksheet::with(['mesin', 'part', 'user.grup', 'meja', 'approver']);
+            $query = Checksheet::with(['mesin', 'part', 'user.grup', 'user.jadwalKerjas', 'meja', 'approver']);
 
             // Debug: Log request data
             Log::info('Report request data', $request->all());
@@ -297,6 +347,13 @@ class ReportController extends Controller
                 } elseif ($reportType === 'inject') {
                     // For inject department, only show checksheets with mesin_id
                     $query->whereNotNull('mesin_id');
+                }
+
+                // Leader filter by group
+                if (isset($user->grup_id)) {
+                    $query->whereHas('user', function ($q) use ($user) {
+                        $q->where('grup_id', $user->grup_id);
+                    });
                 }
             } else {
                 // For super_admin, kabag, and manager_plant, apply filters based on report_type
@@ -319,27 +376,43 @@ class ReportController extends Controller
                     $query->where('mesin_id', $request->mesin_id);
                 }
             }
-            
+
             if ($request->filled('part_id')) {
                 $query->where('part_id', $request->part_id);
             }
-            
+
             if ($request->filled('user_id')) {
                 $query->where('user_id', $request->user_id);
             }
-            
+
             // Apply group filter
             if ($request->filled('grup_id')) {
                 Log::info('Applying group filter for grup_id', ['grup_id' => $request->grup_id]);
-                $query->whereHas('user', function($q) use ($request) {
+                $query->whereHas('user', function ($q) use ($request) {
                     $q->where('grup_id', $request->grup_id);
                 });
             }
-            
+
+            // Note: shift column was removed from checksheets table
+            // Filter by shift using jadwal_kerja relationship
             if ($request->filled('shift')) {
-                $query->where('shift', $request->shift);
+                $shiftMap = [
+                    'pagi' => 'pagi',
+                    'siang' => 'siang',
+                    'malam' => 'malam',
+                    'shift_1' => 'pagi',
+                    'shift_2' => 'siang',
+                    'shift_3' => 'malam'
+                ];
+                $shiftValue = $shiftMap[$request->shift] ?? $request->shift;
+
+                $query->whereHas('user.jadwalKerjas', function ($q) use ($shiftValue) {
+                    $q->where('shift', $shiftValue)
+                        ->where('status', 'aktif')
+                        ->whereColumn('tanggal', DB::raw('DATE(checksheets.created_at)'));
+                });
             }
-            
+
             if ($request->filled('approval_status')) {
                 $query->where('approval_status', $request->approval_status);
             }
@@ -351,7 +424,7 @@ class ReportController extends Controller
             ]);
 
             $checksheets = $query->orderBy('created_at', 'desc')->get();
-            
+
             // Debug: Log query results
             Log::info('Query results count', ['count' => $checksheets->count()]);
             Log::info('Report type', ['type' => $reportType]);
@@ -360,19 +433,19 @@ class ReportController extends Controller
             $photoPath = null;
             if ($request->filled('photo_data')) {
                 $photoData = $request->photo_data;
-                
+
                 // Remove data:image/jpeg;base64, prefix if present
                 if (strpos($photoData, 'data:image/jpeg;base64,') === 0) {
                     $photoData = substr($photoData, 23);
                 } elseif (strpos($photoData, 'data:image/png;base64,') === 0) {
                     $photoData = substr($photoData, 22);
                 }
-                
+
                 // Decode base64 and save to file
                 $imageData = base64_decode($photoData);
                 $fileName = 'report_photo_' . time() . '.jpg';
                 $path = 'report-photos/' . $fileName;
-                
+
                 Storage::disk('public')->put($path, $imageData);
                 $photoPath = $path;
             }
@@ -399,7 +472,6 @@ class ReportController extends Controller
             }
 
             return view('report.show', compact('reportData'));
-
         } catch (\Exception $e) {
             if ($request->ajax()) {
                 return response()->json([
@@ -407,7 +479,7 @@ class ReportController extends Controller
                     'message' => 'Terjadi kesalahan: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat membuat laporan')
                 ->withInput();
@@ -465,9 +537,18 @@ class ReportController extends Controller
                 'rejected' => $checksheets->where('approval_status', 'rejected')->count(),
             ],
             'by_shift' => [
-                'pagi' => $checksheets->where('shift', 'pagi')->count(),
-                'siang' => $checksheets->where('shift', 'siang')->count(),
-                'malam' => $checksheets->where('shift', 'malam')->count(),
+                'pagi' => $checksheets->filter(function ($c) {
+                    $shift = $c->shift;
+                    return in_array($shift, ['shift_1', 'pagi']);
+                })->count(),
+                'siang' => $checksheets->filter(function ($c) {
+                    $shift = $c->shift;
+                    return in_array($shift, ['shift_2', 'siang']);
+                })->count(),
+                'malam' => $checksheets->filter(function ($c) {
+                    $shift = $c->shift;
+                    return in_array($shift, ['shift_3', 'malam']);
+                })->count(),
             ],
             'by_machine' => $checksheets->groupBy('mesin_id')->map->count(),
             'by_part' => $checksheets->groupBy('part_id')->map->count(),
@@ -484,7 +565,7 @@ class ReportController extends Controller
     {
         $user = auth()->user();
         $reportType = 'general';
-        
+
         // Determine report type based on user role and department
         if ($user->role === 'leader') {
             // For leaders, report type is fixed to their department
@@ -500,7 +581,7 @@ class ReportController extends Controller
                 $reportType = $request->report_type;
             }
         }
-        
+
         $validationRules = [
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -509,12 +590,12 @@ class ReportController extends Controller
             'shift' => 'nullable|in:pagi,siang,malam',
             'approval_status' => 'nullable|in:pending,approved,rejected',
         ];
-        
+
         // Only add report_type validation for non-leaders
         if ($user->role !== 'leader') {
             $validationRules['report_type'] = 'nullable|in:assy,inject,general';
         }
-        
+
         // Add conditional validation based on report type
         if ($reportType === 'assy') {
             $validationRules['meja_id'] = 'nullable|exists:meja,id_meja';
@@ -527,7 +608,7 @@ class ReportController extends Controller
         $request->validate($validationRules);
 
         try {
-            $query = Checksheet::with(['mesin', 'part', 'user.grup', 'meja', 'approver']);
+            $query = Checksheet::with(['mesin', 'part', 'user.grup', 'user.jadwalKerjas', 'meja', 'approver']);
 
             // Apply department-specific filters for leaders
             if ($user->role === 'leader') {
@@ -537,6 +618,13 @@ class ReportController extends Controller
                 } elseif ($reportType === 'inject') {
                     // For inject department, only show checksheets with mesin_id
                     $query->whereNotNull('mesin_id');
+                }
+
+                // Leader filter by group
+                if (isset($user->grup_id)) {
+                    $query->whereHas('user', function ($q) use ($user) {
+                        $q->where('grup_id', $user->grup_id);
+                    });
                 }
             } else {
                 // For super_admin, kabag, and manager_plant, apply filters based on report_type
@@ -559,26 +647,42 @@ class ReportController extends Controller
                     $query->where('mesin_id', $request->mesin_id);
                 }
             }
-            
+
             if ($request->filled('part_id')) {
                 $query->where('part_id', $request->part_id);
             }
-            
+
             if ($request->filled('user_id')) {
                 $query->where('user_id', $request->user_id);
             }
-            
+
             // Apply group filter
             if ($request->filled('grup_id')) {
-                $query->whereHas('user', function($q) use ($request) {
+                $query->whereHas('user', function ($q) use ($request) {
                     $q->where('grup_id', $request->grup_id);
                 });
             }
-            
+
+            // Note: shift column was removed from checksheets table
+            // Filter by shift using jadwal_kerja relationship
             if ($request->filled('shift')) {
-                $query->where('shift', $request->shift);
+                $shiftMap = [
+                    'pagi' => 'pagi',
+                    'siang' => 'siang',
+                    'malam' => 'malam',
+                    'shift_1' => 'pagi',
+                    'shift_2' => 'siang',
+                    'shift_3' => 'malam'
+                ];
+                $shiftValue = $shiftMap[$request->shift] ?? $request->shift;
+
+                $query->whereHas('user.jadwalKerjas', function ($q) use ($shiftValue) {
+                    $q->where('shift', $shiftValue)
+                        ->where('status', 'aktif')
+                        ->whereColumn('tanggal', DB::raw('DATE(checksheets.created_at)'));
+                });
             }
-            
+
             if ($request->filled('approval_status')) {
                 $query->where('approval_status', $request->approval_status);
             }
@@ -597,7 +701,6 @@ class ReportController extends Controller
             $fileName = 'laporan_checksheet_' . $reportType . '_' . date('Y-m-d_H-i-s') . '.xlsx';
 
             return Excel::download(new ChecksheetExport($checksheets, $request->all(), $reportType, $summary), $fileName);
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
@@ -613,7 +716,7 @@ class ReportController extends Controller
     {
         $user = auth()->user();
         $reportType = 'general';
-        
+
         // Determine report type based on user role and department
         if ($user->role === 'leader') {
             // For leaders, report type is fixed to their department
@@ -629,7 +732,7 @@ class ReportController extends Controller
                 $reportType = $request->report_type;
             }
         }
-        
+
         $validationRules = [
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -638,12 +741,12 @@ class ReportController extends Controller
             'shift' => 'nullable|in:pagi,siang,malam',
             'approval_status' => 'nullable|in:pending,approved,rejected',
         ];
-        
+
         // Only add report_type validation for non-leaders
         if ($user->role !== 'leader') {
             $validationRules['report_type'] = 'nullable|in:assy,inject,general';
         }
-        
+
         // Add conditional validation based on report type
         if ($reportType === 'assy') {
             $validationRules['meja_id'] = 'nullable|exists:meja,id_meja';
@@ -656,7 +759,7 @@ class ReportController extends Controller
         $request->validate($validationRules);
 
         try {
-            $query = Checksheet::with(['mesin', 'part', 'user.grup', 'meja', 'approver']);
+            $query = Checksheet::with(['mesin', 'part', 'user.grup', 'user.jadwalKerjas', 'meja', 'approver']);
 
             // Apply department-specific filters for leaders
             if ($user->role === 'leader') {
@@ -666,6 +769,13 @@ class ReportController extends Controller
                 } elseif ($reportType === 'inject') {
                     // For inject department, only show checksheets with mesin_id
                     $query->whereNotNull('mesin_id');
+                }
+
+                // Leader filter by group
+                if (isset($user->grup_id)) {
+                    $query->whereHas('user', function ($q) use ($user) {
+                        $q->where('grup_id', $user->grup_id);
+                    });
                 }
             } else {
                 // For super_admin, kabag, and manager_plant, apply filters based on report_type
@@ -688,26 +798,42 @@ class ReportController extends Controller
                     $query->where('mesin_id', $request->mesin_id);
                 }
             }
-            
+
             if ($request->filled('part_id')) {
                 $query->where('part_id', $request->part_id);
             }
-            
+
             if ($request->filled('user_id')) {
                 $query->where('user_id', $request->user_id);
             }
-            
+
             // Apply group filter
             if ($request->filled('grup_id')) {
-                $query->whereHas('user', function($q) use ($request) {
+                $query->whereHas('user', function ($q) use ($request) {
                     $q->where('grup_id', $request->grup_id);
                 });
             }
-            
+
+            // Note: shift column was removed from checksheets table
+            // Filter by shift using jadwal_kerja relationship
             if ($request->filled('shift')) {
-                $query->where('shift', $request->shift);
+                $shiftMap = [
+                    'pagi' => 'pagi',
+                    'siang' => 'siang',
+                    'malam' => 'malam',
+                    'shift_1' => 'pagi',
+                    'shift_2' => 'siang',
+                    'shift_3' => 'malam'
+                ];
+                $shiftValue = $shiftMap[$request->shift] ?? $request->shift;
+
+                $query->whereHas('user.jadwalKerjas', function ($q) use ($shiftValue) {
+                    $q->where('shift', $shiftValue)
+                        ->where('status', 'aktif')
+                        ->whereColumn('tanggal', DB::raw('DATE(checksheets.created_at)'));
+                });
             }
-            
+
             if ($request->filled('approval_status')) {
                 $query->where('approval_status', $request->approval_status);
             }
@@ -720,39 +846,52 @@ class ReportController extends Controller
 
             $checksheets = $query->orderBy('created_at', 'desc')->get();
 
-            // Generate report data
+            // Generate summary for the report
+            $summary = $this->generateSummary($checksheets);
+
+            // Generate PDF
+            $pdf = new Dompdf();
+            $options = new Options();
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('isRemoteEnabled', true);
+            $pdf->setOptions($options);
+
+            // Prepare report data for view
             $reportData = [
                 'filters' => $request->all(),
                 'total_records' => $checksheets->count(),
                 'data' => $checksheets,
-                'summary' => $this->generateSummary($checksheets),
-                'photo_path' => null,
+                'summary' => $summary,
+                'photo_path' => null, // PDF export doesn't handle photo upload in this flow
                 'photo_description' => null,
                 'generated_at' => now(),
                 'generated_by' => auth()->user()->nama ?? 'System',
                 'report_type' => $reportType
             ];
 
-            $fileName = 'laporan_checksheet_' . date('Y-m-d_H-i-s') . '.pdf';
+            // Read CSS files to pass to view (avoids Blade linting errors)
+            $cssPath = public_path('css/report-pdf.css');
+            $templateCssPath = public_path('css/report-pdf-template.css');
 
-            // Generate PDF using DomPDF
-            $html = view('report.pdf', compact('reportData'))->render();
-            
-            $options = new Options();
-            $options->set('isHtml5ParserEnabled', true);
-            $options->set('isPhpEnabled', true);
-            $options->set('isRemoteEnabled', true);
-            
-            $dompdf = new Dompdf($options);
-            $dompdf->loadHtml($html);
-            $dompdf->setPaper('A4', 'portrait');
-            $dompdf->render();
+            $cssContent = '';
+            if (file_exists($cssPath)) {
+                $cssContent .= '<style>' . file_get_contents($cssPath) . '</style>';
+            }
+            if (file_exists($templateCssPath)) {
+                $cssContent .= '<style>' . file_get_contents($templateCssPath) . '</style>';
+            }
 
-            return response()->make($dompdf->output(), 200, [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
-            ]);
+            $html = view('report.pdf', compact('reportData', 'cssContent'))->render();
+            $pdf->loadHtml($html);
+            $pdf->setPaper('A4', 'landscape');
+            $pdf->render();
 
+            $fileName = 'laporan_checksheet_' . $reportType . '_' . date('Y-m-d_H-i-s') . '.pdf';
+
+            // Use explicit response to ensure inline display (preview) instead of forced download
+            return response($pdf->output())
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'inline; filename="' . $fileName . '"');
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
@@ -760,30 +899,4 @@ class ReportController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * Export report to Excel/PDF (legacy method for backward compatibility)
-     */
-    public function export(Request $request)
-    {
-        $request->validate([
-            'format' => 'required|in:excel,pdf',
-            'report_data' => 'required|array'
-        ]);
-
-        $reportData = $request->report_data;
-        
-        try {
-            if ($request->format === 'excel') {
-                return $this->exportExcel(new Request($reportData));
-            } else {
-                return $this->exportPdf(new Request($reportData));
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Terjadi kesalahan saat mengekspor: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-} 
+}

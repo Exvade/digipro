@@ -568,4 +568,364 @@
 
 .notification-error .notification-content i {
     color: #dc3545;
-} 
+} /* produksi.css - QR Scanner Styles */
+
+/* Scan Area Styles */
+.scan-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 30px;
+    margin-bottom: 20px;
+}
+
+.scan-area {
+    background: white;
+    border: 3px dashed #007bff;
+    border-radius: 15px;
+    padding: 40px 20px;
+    transition: all 0.3s ease;
+}
+
+.scan-area:hover {
+    border-color: #0056b3;
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.1);
+}
+
+.scan-icon i {
+    color: #007bff;
+    transition: all 0.3s ease;
+}
+
+.scan-area:hover .scan-icon i {
+    transform: scale(1.1);
+}
+
+.scan-title {
+    color: #495057;
+    font-weight: 600;
+}
+
+.scan-text {
+    font-size: 16px;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.scan-subtext {
+    font-size: 14px;
+}
+
+/* Loading Animation */
+.loading {
+    display: none;
+    text-align: center;
+    padding: 40px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading p {
+    color: #6c757d;
+    margin: 0;
+    font-weight: 500;
+}
+
+/* Product Info Styles */
+.product-info {
+    display: none;
+    margin: 20px 0;
+}
+
+.product-info .card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+.product-info .table td {
+    padding: 8px 12px;
+    vertical-align: middle;
+}
+
+.product-info .table td:first-child {
+    font-weight: 500;
+    color: #495057;
+    width: 40%;
+}
+
+/* Quality Check Styles */
+.quality-check {
+    display: none;
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 30px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.quality-title {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 25px;
+}
+
+.quality-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.quality-btn {
+    background: white;
+    border: 3px solid transparent;
+    border-radius: 15px;
+    padding: 20px 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    font-size: 16px;
+    min-width: 120px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.quality-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.quality-btn.good {
+    color: #28a745;
+    border-color: #28a745;
+}
+
+.quality-btn.good:hover,
+.quality-btn.good.selected {
+    background: #28a745;
+    color: white;
+}
+
+.quality-btn.ng {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.quality-btn.ng:hover,
+.quality-btn.ng.selected {
+    background: #dc3545;
+    color: white;
+}
+
+.quality-btn.retry {
+    color: #ffc107;
+    border-color: #ffc107;
+}
+
+.quality-btn.retry:hover,
+.quality-btn.retry.selected {
+    background: #ffc107;
+    color: #212529;
+}
+
+.quality-btn i {
+    font-size: 20px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+/* Scanner Modal Styles */
+#scannerModal .modal-content {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+#scannerModal .modal-header {
+    border-bottom: none;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+#scannerModal .modal-body {
+    padding: 30px;
+}
+
+#interactive {
+    width: 100% !important;
+    max-width: 500px;
+    margin: 0 auto;
+    border: 3px solid #007bff !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+}
+
+/* QR Scanner specific styles */
+#interactive video {
+    border-radius: 7px;
+}
+
+#interactive canvas {
+    border-radius: 7px;
+}
+
+/* Scan History Styles */
+.scan-history-section .card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+.scan-history-section .card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.scan-history-item {
+    padding: 15px 0;
+    transition: background-color 0.2s ease;
+}
+
+.scan-history-item:hover {
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    margin: 0 -10px;
+    padding: 15px 10px;
+}
+
+.scan-history-item:last-child {
+    border-bottom: none !important;
+}
+
+/* Alert Styles */
+.alert {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    color: #0c5460;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    color: #856404;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+}
+
+/* Badge Styles */
+.badge {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+/* Code Styles */
+code {
+    background: #f8f9fa;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #e83e8c;
+}
+
+/* Button Animations */
+.btn {
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .scan-area {
+        padding: 30px 15px;
+    }
+    
+    .quality-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .quality-btn {
+        min-width: 200px;
+    }
+    
+    #interactive {
+        max-width: 100%;
+    }
+    
+    .quality-check {
+        padding: 20px;
+    }
+    
+    .scan-section {
+        padding: 20px 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .product-info .row > div {
+        margin-bottom: 20px;
+    }
+    
+    .scan-history-item {
+        padding: 10px 0;
+    }
+    
+    .scan-history-item .d-flex {
+        flex-direction: column;
+        text-align: left;
+    }
+    
+    .scan-history-item .text-right {
+        text-align: left !important;
+        margin-top: 5px;
+    }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+    .scan-area {
+        background: #2d3748;
+        border-color: #4299e1;
+    }
+    
+    .quality-check {
+        background: #2d3748;
+    }
+    
+    .quality-btn {
+        background: #4a5568;
+        color: white;
+    }
+}

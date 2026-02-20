@@ -47,6 +47,42 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Tab Filter Section --}}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-body p-2">
+                <ul class="nav nav-pills nav-fill bagian-tabs" id="bagianTabsApprovalHistory" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="all-tab-approval-history" href="#" data-bagian="all">
+                            <i class="fas fa-list"></i> All
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="inject-tab-approval-history" href="#" data-bagian="inject">
+                            <i class="fas fa-cog"></i> Inject
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="assy-tab-approval-history" href="#" data-bagian="assy">
+                            <i class="fas fa-tools"></i> Assy
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
 
                 @if($checksheets->count() > 0)
                     <div class="table-responsive">
@@ -55,7 +91,12 @@
                                 <tr>
                                     <th>No</th>
                                     <th>Tanggal</th>
-                                    <th>Mesin/Meja</th>
+                                    @if ($filter === 'all' || $filter === 'inject')
+                                        <th>Mesin</th>
+                                    @endif
+                                    @if ($filter === 'all' || $filter === 'assy')
+                                        <th>Meja</th>
+                                    @endif
                                     <th>Part</th>
                                     <th>User</th>
                                     <th>Grup</th>
@@ -71,15 +112,12 @@
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $checksheet->created_at->format('d/m/Y H:i') }}</td>
-                                    <td>
-                                        @if($checksheet->mesin)
-                                            <span class="badge badge-info">{{ $checksheet->mesin->nama_mesin }}</span>
-                                        @elseif($checksheet->meja)
-                                            <span class="badge badge-warning">{{ $checksheet->meja->nama_meja }}</span>
-                                        @else
-                                            <span class="text-muted">-</span>
-                                        @endif
-                                    </td>
+                                    @if ($filter === 'all' || $filter === 'inject')
+                                        <td>{{ $checksheet->mesin->nama_mesin ?? '-' }}</td>
+                                    @endif
+                                    @if ($filter === 'all' || $filter === 'assy')
+                                        <td>{{ $checksheet->meja->nama_meja ?? '-' }}</td>
+                                    @endif
                                     <td>{{ $checksheet->part->nama_part ?? '-' }}</td>
                                     <td>{{ $checksheet->user->nama ?? '-' }}</td>
                                     <td>{{ $checksheet->user->grup->nama_grup ?? '-' }}</td>
@@ -182,6 +220,8 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap4.min.css">
+<!-- Planning CSS for Tab Filter -->
+<link rel="stylesheet" href="{{ asset('css/planning.css') }}">
 @endpush
 
 @push('scripts')
@@ -191,12 +231,38 @@
 <script>
 $(document).ready(function() {
     // Initialize DataTable
-    $('#historyTable').DataTable({
+    var historyTable = $('#historyTable').DataTable({
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json"
         },
         "pageLength": 25,
         "order": [[1, "desc"]]
+    });
+
+    // =========================================
+    // Tab Filter Bagian (All, Inject, Assy) - Approval History Page
+    // =========================================
+    $('#bagianTabsApprovalHistory .nav-link').on('click', function(e) {
+        e.preventDefault();
+        const bagian = $(this).data('bagian');
+        
+        // Update URL with filter parameter
+        const currentUrl = new URL(window.location);
+        
+        if (bagian === 'all') {
+            currentUrl.searchParams.delete('filter');
+        } else {
+            currentUrl.searchParams.set('filter', bagian);
+        }
+        
+        // Preserve grup filter if exists
+        const grupFilter = currentUrl.searchParams.get('grup_filter');
+        if (grupFilter) {
+            currentUrl.searchParams.set('grup_filter', grupFilter);
+        }
+        
+        // Redirect to new URL
+        window.location.href = currentUrl.toString();
     });
 });
 
@@ -229,5 +295,19 @@ function clearFilter() {
     
     window.location.href = currentUrl.toString();
 }
+
+// Set active tab based on current filter
+$(document).ready(function() {
+    const currentFilter = '{{ request("filter", "all") }}';
+    $('#bagianTabsApprovalHistory .nav-link').removeClass('active');
+    
+    if (currentFilter === 'inject') {
+        $('#inject-tab-approval-history').addClass('active');
+    } else if (currentFilter === 'assy') {
+        $('#assy-tab-approval-history').addClass('active');
+    } else {
+        $('#all-tab-approval-history').addClass('active');
+    }
+});
 </script>
 @endpush 

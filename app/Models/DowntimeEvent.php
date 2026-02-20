@@ -20,12 +20,14 @@ class DowntimeEvent extends Model
         'start_time',
         'end_time',
         'duration_minutes',
+
         'downtime_category_id',
         'downtime_code_id',
         'downtime_type',
         'responsibility',
         'title',
         'description',
+        'keterangan',
         'root_cause',
         'corrective_action',
         'status',
@@ -35,8 +37,8 @@ class DowntimeEvent extends Model
 
     protected $casts = [
         'tanggal' => 'date',
-        'start_time' => 'datetime:H:i:s',
-        'end_time' => 'datetime:H:i:s',
+        // 'start_time' => 'datetime:H:i:s', // Removed to prevent casting issues
+        // 'end_time' => 'datetime:H:i:s',   // Removed to prevent casting issues
         'duration_minutes' => 'integer',
         'resolved_at' => 'datetime',
         'created_at' => 'datetime',
@@ -54,10 +56,12 @@ class DowntimeEvent extends Model
         return $this->belongsTo(User::class);
     }
 
+    /*
     public function oeeData()
     {
         return $this->belongsTo(OeeData::class);
     }
+    */
 
     public function category()
     {
@@ -134,4 +138,4 @@ class DowntimeEvent extends Model
     {
         return $this->downtime_type === 'planned' ? 'warning' : 'danger';
     }
-} 
+}

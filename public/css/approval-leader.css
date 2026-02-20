@@ -1,0 +1,465 @@
+/* Badge Status */
+.badge-status {
+    font-size: 0.85em;
+    padding: 0.35em 0.65em;
+}
+
+/* Efficiency Colors */
+.efficiency-high {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.efficiency-medium {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.efficiency-low {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Table Styling */
+.approval-table {
+    font-size: 0.9rem;
+}
+
+.approval-table th {
+    background-color: #007bff;
+    color: #fff;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+    padding: 12px 8px;
+    white-space: nowrap;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.approval-table td {
+    padding: 10px 8px;
+    vertical-align: middle;
+}
+
+.approval-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Button Spacing */
+.btn-action-group {
+    display: flex;
+    gap: 5px;
+    flex-wrap: nowrap;
+}
+
+.btn-action {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.875rem;
+    min-width: 35px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-action i {
+    font-size: 0.9rem;
+}
+
+/* Badge Styling */
+.approval-badge {
+    font-size: 0.85em;
+    padding: 0.4em 0.6em;
+    font-weight: 500;
+}
+
+/* Detail Modal */
+.detail-item {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.detail-value {
+    color: #212529;
+    font-size: 1rem;
+}
+
+.detail-section {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.detail-section-title {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Tab Navigation */
+.nav-tabs .nav-link {
+    color: #495057;
+}
+
+.nav-tabs .nav-link.active {
+    color: #495057;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+}
+
+/* Badge in Tabs */
+.nav-tabs .badge {
+    margin-left: 5px;
+}
+
+.tab-filter-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tab-filter-wrapper .nav {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+}
+
+.tab-filter-wrapper .nav-item {
+    flex: 1 0 auto;
+}
+
+.tab-filter-wrapper .nav-link {
+    white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+    .tab-filter-wrapper .nav {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .tab-filter-wrapper .nav-item {
+        width: 100%;
+    }
+
+    .tab-filter-wrapper .nav-link {
+        width: 100%;
+    }
+}
+
+.tabs-scrollable {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tabs-scrollable .nav-item {
+    white-space: nowrap;
+}
+
+.tabs-scrollable .nav-link {
+    white-space: nowrap;
+}
+
+/* Modal Styling */
+.modal-content {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    border-radius: 8px 8px 0 0;
+    padding: 1.25rem 1.5rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid #dee2e6;
+    padding: 1rem 1.5rem;
+}
+
+.modal-dialog-centered {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 1rem);
+}
+
+.modal-dialog-scrollable .modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+/* Form Styling in Modal */
+.modal-body .form-group {
+    margin-bottom: 1.25rem;
+}
+
+.modal-body .form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.modal-body textarea.form-control {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    transition:
+        border-color 0.15s ease-in-out,
+        box-shadow 0.15s ease-in-out;
+}
+
+.modal-body textarea.form-control:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Alert in Modal */
+.modal-body .alert {
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+/* Button Styling */
+.modal-footer .btn {
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    border-radius: 4px;
+    transition: all 0.2s ease-in-out;
+}
+
+.modal-footer .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Loading Spinner in Modal */
+.modal-body .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3em;
+}
+
+/* DataTables Styling */
+.dataTables_wrapper {
+    padding-top: 1rem;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 1rem;
+}
+
+.dataTables_wrapper .dataTables_length label,
+.dataTables_wrapper .dataTables_filter label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    padding: 0.375rem 1.75rem 0.375rem 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    margin: 0 0.5rem;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    padding: 0.375rem 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    margin-left: 0.5rem;
+}
+
+.dataTables_wrapper .dataTables_info {
+    padding-top: 0.85rem;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    padding-top: 0.85rem;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0.375rem 0.75rem;
+    margin-left: 0.25rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    color: #007bff !important;
+    background-color: #fff !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background-color: #e9ecef !important;
+    border-color: #dee2e6;
+    color: #0056b3 !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+    color: #fff !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive DataTables */
+@media screen and (max-width: 767px) {
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        text-align: left;
+        margin-bottom: 0.5rem;
+    }
+
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+        width: 100%;
+        margin: 0.25rem 0;
+    }
+}
+
+/* ====== DARK MODE STYLES ====== */
+body.dark-mode {
+    background-color: #121220;
+    color: #e0e0e0;
+}
+
+/* Table Dark Mode */
+body.dark-mode .approval-table th {
+    background-color: #0f0f1e;
+    color: #ffffff;
+    border-bottom-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .approval-table tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+}
+
+body.dark-mode .approval-table td {
+    color: #e0e0e0;
+}
+
+/* Detail Section Dark Mode */
+body.dark-mode .detail-section {
+    background-color: #1a1a2e;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .detail-section-title {
+    color: #ffffff;
+    border-bottom-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .detail-label {
+    color: #b0b0b0;
+}
+
+body.dark-mode .detail-value {
+    color: #ffffff;
+}
+
+body.dark-mode .detail-item {
+    border-bottom-color: rgba(102, 126, 234, 0.1);
+}
+
+/* Modal Dark Mode */
+body.dark-mode .modal-content {
+    background-color: #1a1a2e;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .modal-header,
+body.dark-mode .modal-footer {
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .modal-header {
+    background-color: #0f0f1e;
+}
+
+body.dark-mode .modal-title {
+    color: #ffffff;
+}
+
+body.dark-mode .modal-body .form-label {
+    color: #b0b0b0;
+}
+
+body.dark-mode .modal-body textarea.form-control {
+    background-color: #0f0f1e;
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #e0e0e0;
+}
+
+body.dark-mode .modal-body textarea.form-control:focus {
+    background-color: #16213e;
+    border-color: #667eea;
+}
+
+/* Tabs Dark Mode */
+body.dark-mode .nav-tabs .nav-link {
+    color: #b0b0b0;
+}
+
+body.dark-mode .nav-tabs .nav-link.active {
+    background-color: #1a1a2e;
+    border-color: rgba(102, 126, 234, 0.2) rgba(102, 126, 234, 0.2) #1a1a2e;
+    color: #ffffff;
+}
+
+body.dark-mode .nav-tabs {
+    border-bottom-color: rgba(102, 126, 234, 0.2);
+}
+
+/* DataTables Dark Mode */
+body.dark-mode .dataTables_wrapper .dataTables_length label,
+body.dark-mode .dataTables_wrapper .dataTables_filter label {
+    color: #b0b0b0;
+}
+
+body.dark-mode .dataTables_wrapper .dataTables_length select,
+body.dark-mode .dataTables_wrapper .dataTables_filter input {
+    background-color: #0f0f1e;
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #e0e0e0;
+}
+
+body.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button {
+    background-color: #0f0f1e !important;
+    border-color: rgba(102, 126, 234, 0.2) !important;
+    color: #e0e0e0 !important;
+}
+
+body.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background-color: rgba(102, 126, 234, 0.2) !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode
+    .dataTables_wrapper
+    .dataTables_paginate
+    .paginate_button.current {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+    color: #ffffff !important;
+}

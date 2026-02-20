@@ -59,7 +59,8 @@ class QualityEvent extends Model
 
     public function oeeData()
     {
-        return $this->belongsTo(OeeData::class);
+        // return $this->belongsTo(OeeData::class);
+        return null;
     }
 
     public function assignedTo()
@@ -143,4 +144,4 @@ class QualityEvent extends Model
                 return 'secondary';
         }
     }
-} 
+}

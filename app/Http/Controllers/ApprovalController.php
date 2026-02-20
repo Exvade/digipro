@@ -21,9 +21,13 @@ class ApprovalController extends Controller
         $filter = $request->get('filter', 'all');
         
         if ($filter === 'inject') {
-            $query->whereNotNull('mesin_id');
+            // Inject: has mesin_id but no meja_id
+            $query->whereNotNull('mesin_id')
+                  ->whereNull('meja_id');
         } elseif ($filter === 'assy') {
-            $query->whereNotNull('meja_id');
+            // Assy: has meja_id but no mesin_id
+            $query->whereNotNull('meja_id')
+                  ->whereNull('mesin_id');
         }
         
         // Apply grup filter
@@ -236,6 +240,19 @@ class ApprovalController extends Controller
         $query = Checksheet::with(['mesin', 'part', 'user', 'meja', 'approver', 'grup'])
             ->whereIn('approval_status', ['approved', 'rejected']);
         
+        // Apply filter based on request parameter
+        $filter = $request->get('filter', 'all');
+        
+        if ($filter === 'inject') {
+            // Inject: has mesin_id but no meja_id
+            $query->whereNotNull('mesin_id')
+                  ->whereNull('meja_id');
+        } elseif ($filter === 'assy') {
+            // Assy: has meja_id but no mesin_id
+            $query->whereNotNull('meja_id')
+                  ->whereNull('mesin_id');
+        }
+        
         // Apply grup filter
         $selectedGrup = $request->get('grup_filter');
         if ($selectedGrup) {
@@ -247,7 +264,7 @@ class ApprovalController extends Controller
         // Get all grups for filter dropdown
         $grups = \App\Models\Grup::orderBy('nama_grup')->get();
         
-        return view('approval.history', compact('checksheets', 'grups', 'selectedGrup'));
+        return view('approval.history', compact('checksheets', 'filter', 'grups', 'selectedGrup'));
     }
 
     /**

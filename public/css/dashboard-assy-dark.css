@@ -1,0 +1,131 @@
+/* ====== DARK MODE STYLES FOR DASHBOARD ASSY ====== */
+
+body.dark-mode {
+    --primary-color: #5dade2;
+    --dark-color: #f7fafc;
+    --secondary-color: #a0aec0;
+    --light-color: #1a202c;
+    --bg-darker: #171923;
+}
+
+body.dark-mode .content-wrapper {
+    background-color: var(--bg-darker) !important;
+}
+
+/* Info Boxes Dark Mode */
+body.dark-mode .info-box-modern {
+    background: #1e2632;
+    border-color: #2d3748;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .info-box-modern:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 8px 30px rgba(52, 152, 219, 0.2);
+}
+
+body.dark-mode .info-box-number-modern {
+    color: #ffffff;
+}
+
+body.dark-mode .info-box-text-modern {
+    color: #cbd5e0;
+}
+
+body.dark-mode .info-box-subtitle-modern {
+    color: #718096;
+}
+
+/* Meja Cards Dark Mode */
+body.dark-mode .meja-card-simple {
+    background: #1e2632;
+    border-color: #2d3748;
+}
+
+body.dark-mode .meja-card-simple:hover {
+    border-color: var(--primary-color);
+}
+
+body.dark-mode .machine-name-simple {
+    color: #ffffff;
+}
+
+body.dark-mode .machine-status-display {
+    background: #2d3748;
+    color: #cbd5e0;
+    border-color: #4a5568;
+}
+
+/* Status colors in dark mode */
+body.dark-mode .meja-card-simple.aktif .machine-status-display {
+    background: rgba(40, 167, 69, 0.2);
+    color: #4cd964;
+}
+
+body.dark-mode .meja-card-simple.maintenance .machine-status-display {
+    background: rgba(241, 196, 15, 0.2);
+    color: #f1c40f;
+}
+
+body.dark-mode .meja-card-simple.tidak_aktif .machine-status-display,
+body.dark-mode .meja-card-simple.offline .machine-status-display {
+    background: rgba(220, 53, 69, 0.2);
+    color: #ff5f56;
+}
+
+/* Cards & Containers */
+body.dark-mode .card {
+    background: #1e2632;
+    border: 1px solid #2d3748;
+}
+
+body.dark-mode .card-header {
+    background: #171923;
+    border-bottom: 1px solid #2d3748;
+}
+
+body.dark-mode .card-title {
+    color: #ffffff;
+}
+
+/* Modal Dark Mode */
+body.dark-mode .modal-content {
+    background-color: #1a202c !important;
+    color: #e2e8f0 !important;
+    border: 1px solid #2d3748 !important;
+}
+
+body.dark-mode .modal-header {
+    background: linear-gradient(135deg, #2c5282, #1a365d);
+    border-bottom: none;
+}
+
+body.dark-mode .modal-footer {
+    background-color: #171923 !important;
+    border-top: 1px solid #2d3748 !important;
+}
+
+body.dark-mode .form-control {
+    background-color: #2d3748 !important;
+    border-color: #4a5568 !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .form-control:focus {
+    border-color: var(--primary-color);
+    background-color: #2d3748 !important;
+}
+
+body.dark-mode label {
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .camera-container {
+    background: #171923;
+    border-color: #4a5568;
+}
+
+/* Empty states */
+body.dark-mode .empty-state-mini {
+    color: #e2e8f0;
+}

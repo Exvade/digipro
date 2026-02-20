@@ -35,15 +35,15 @@
                                 <select class="form-control" id="filter_grup_id" name="filter_grup_id" @if(auth()->user()->role === 'foreman') disabled @endif>
                                     <option value="">Semua Grup</option>
                                     @foreach($grups as $grup)
-                                        @if(auth()->user()->role !== 'foreman' || auth()->user()->grup_id == $grup->id)
-                                            <option value="{{ $grup->id }}" {{ request('filter_grup_id', auth()->user()->role === 'foreman' ? auth()->user()->grup_id : null) == $grup->id ? 'selected' : '' }}>
-                                                {{ $grup->nama_grup }}
-                                            </option>
-                                        @endif
+                                    @if(auth()->user()->role !== 'foreman' || auth()->user()->grup_id == $grup->id)
+                                    <option value="{{ $grup->id }}" {{ request('filter_grup_id', auth()->user()->role === 'foreman' ? auth()->user()->grup_id : null) == $grup->id ? 'selected' : '' }}>
+                                        {{ $grup->nama_grup }}
+                                    </option>
+                                    @endif
                                     @endforeach
                                 </select>
                                 @if(auth()->user()->role === 'foreman')
-                                    <small class="form-text text-muted">Anda hanya dapat melihat laporan untuk grup Anda sendiri.</small>
+                                <small class="form-text text-muted">Anda hanya dapat melihat laporan untuk grup Anda sendiri.</small>
                                 @endif
                             </div>
                         </div>
@@ -68,6 +68,35 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- Tab Filter Section --}}
+    @if(in_array(auth()->user()->role, ['super_admin', 'kabag', 'manager_plant', 'foreman']))
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body p-2">
+                    <ul class="nav nav-pills nav-fill bagian-tabs" id="bagianTabsReport" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link {{ $reportType === 'general' ? 'active' : '' }}" id="all-tab-report" href="#" data-bagian="general">
+                                <i class="fas fa-list"></i> All
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ $reportType === 'inject' ? 'active' : '' }}" id="inject-tab-report" href="#" data-bagian="inject">
+                                <i class="fas fa-cog"></i> Inject
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ $reportType === 'assy' ? 'active' : '' }}" id="assy-tab-report" href="#" data-bagian="assy">
+                                <i class="fas fa-tools"></i> Assy
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -116,44 +145,44 @@
 
     <!-- Department Specific Statistics -->
     @if($reportType === 'assy' && $departmentSpecificData)
-        @include('report.partials.assy-stats')
+    @include('report.partials.assy-stats')
     @endif
 
     @if($reportType === 'inject' && $departmentSpecificData)
-        @include('report.partials.inject-stats')
+    @include('report.partials.inject-stats')
     @endif
 
     <div class="row">
         <div class="col-md-8">
             <!-- Recent Checksheets based on department -->
             @if($reportType === 'assy')
-                @include('report.partials.assy-checksheets')
+            @include('report.partials.assy-checksheets')
             @elseif($reportType === 'inject')
-                @include('report.partials.inject-checksheets')
+            @include('report.partials.inject-checksheets')
             @else
-                @include('report.partials.general-checksheets')
+            @include('report.partials.general-checksheets')
             @endif
         </div>
-        
+
         <div class="col-md-4">
             <!-- Statistics based on department -->
             @if($reportType === 'assy')
-                @include('report.partials.assy-sidebar-stats')
+            @include('report.partials.assy-sidebar-stats')
             @elseif($reportType === 'inject')
-                @include('report.partials.inject-sidebar-stats')
+            @include('report.partials.inject-sidebar-stats')
             @else
-                @include('report.partials.general-sidebar-stats')
+            @include('report.partials.general-sidebar-stats')
             @endif
         </div>
     </div>
 
     <!-- Department Specific Modal Forms -->
     @if($reportType === 'assy')
-        @include('report.partials.assy-modal-form')
+    @include('report.partials.assy-modal-form')
     @elseif($reportType === 'inject')
-        @include('report.partials.inject-modal-form')
+    @include('report.partials.inject-modal-form')
     @else
-        @include('report.partials.general-modal-form')
+    @include('report.partials.general-modal-form')
     @endif
 </div>
 
@@ -175,12 +204,13 @@
                     <strong>Petunjuk:</strong> Berikut adalah contoh dokumen Standar AMTPM yang dapat digunakan sebagai referensi.
                 </div>
                 <div class="pdf-container" style="height: 500px;">
-                    <iframe src="{{ asset('images/barang/1AMTPM.pdf') }}" 
-                            width="100%" 
-                            height="100%" 
-                            style="border: 1px solid #ddd; border-radius: 5px;">
-                        <p>Browser Anda tidak mendukung tampilan PDF. 
-                        <a href="{{ asset('images/barang/1AMTPM.pdf') }}" target="_blank">Klik di sini untuk mengunduh</a></p>
+                    <iframe src="{{ asset('images/barang/1AMTPM.pdf') }}"
+                        width="100%"
+                        height="100%"
+                        style="border: 1px solid #ddd; border-radius: 5px;">
+                        <p>Browser Anda tidak mendukung tampilan PDF.
+                            <a href="{{ asset('images/barang/1AMTPM.pdf') }}" target="_blank">Klik di sini untuk mengunduh</a>
+                        </p>
                     </iframe>
                 </div>
             </div>
@@ -200,6 +230,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="{{ asset('css/planning.css') }}">
 <link rel="stylesheet" href="{{ asset('css/report.css') }}">
 <link rel="stylesheet" href="{{ asset('css/report-index.css') }}">
 @endpush
@@ -208,16 +239,18 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap4.min.js"></script>
-<script>
-    window.reportType = @json($reportType ?? '');
-    window.reportStoreUrl = @json(route('report.store'));
-    window.exportExcelUrl = @json(route('report.export.excel'));
-    window.exportPdfUrl = @json(route('report.export.pdf'));
-    window.grups = @json($grups ?? []);
-    window.users = @json($users ?? []);
-    window.userDepartment = @json($userDepartment ?? '');
-    window.userRole = @json(auth()->user()->role ?? '');
-</script>
+<div id="report-config"
+    data-report-type="{{ $reportType ?? '' }}"
+    data-report-store-url="{{ route('report.store') }}"
+    data-export-excel-url="{{ route('report.export.excel') }}"
+    data-export-pdf-url="{{ route('report.export.pdf') }}"
+    data-grups="{{ json_encode($grups ?? []) }}"
+    data-users="{{ json_encode($users ?? []) }}"
+    data-user-department="{{ $userDepartment ?? '' }}"
+    data-user-role="{{ auth()->user()->role ?? '' }}"
+    style="display: none;">
+</div>
 <script src="{{ asset('js/report.js') }}"></script>
 <script src="{{ asset('js/report-page.js') }}"></script>
+<script src="{{ asset('js/report-index-init.js') }}"></script>
 @endpush

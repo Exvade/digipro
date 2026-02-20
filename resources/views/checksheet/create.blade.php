@@ -34,13 +34,13 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="shift">Shift <span class="text-danger">*</span></label>
-                    <select class="form-control" id="shift" name="shift" required>
-                        <option value="">Pilih Shift</option>
-                        <option value="shift_1">Pagi (07:00 - 15:00)</option>
-                        <option value="shift_2">Siang (15:00 - 23:00)</option>
-                        <option value="shift_3">Malam (23:00 - 07:00)</option>
-                    </select>
+                    <label for="shift_display">Shift</label>
+                    <input type="text" class="form-control" id="shift_display" 
+                        readonly placeholder="Otomatis dari Jadwal Kerja" 
+                        style="background-color: #e9ecef;">
+                    <small class="form-text text-muted">
+                        <i class="fas fa-info-circle mr-1"></i>Shift otomatis dari jadwal kerja user
+                    </small>
                 </div>
             </div>
         </div>
@@ -276,7 +276,7 @@
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
         <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save mr-1"></i>Simpan Checksheet
+            Simpan 
         </button>
     </div>
 </form>
@@ -323,22 +323,36 @@
 <link rel="stylesheet" href="{{ asset('css/checksheet-create.css') }}">
 <script src="{{ asset('js/checksheet-create.js') }}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const now = new Date();
-        const currentHour = now.getHours();
-        let selectedShift = '';
+    // Auto-fill shift when user is selected
+    $(document).ready(function() {
+        $('#user_id').on('change', function() {
+            const userId = $(this).val();
+            if (userId) {
+                loadUserShift(userId);
+            } else {
+                $('#shift_display').val('');
+            }
+        });
 
-        if (currentHour >= 7 && currentHour < 15) {
-            selectedShift = 'shift_1';
-        } else if (currentHour >= 15 && currentHour < 23) {
-            selectedShift = 'shift_2';
-        } else {
-            selectedShift = 'shift_3';
-        }
-
-        const shiftSelect = document.getElementById('shift');
-        if (shiftSelect) {
-            shiftSelect.value = selectedShift;
+        function loadUserShift(userId) {
+            $.ajax({
+                url: '/jadwal-kerja/get-user-shift',
+                method: 'GET',
+                data: {
+                    user_id: userId,
+                    tanggal: new Date().toISOString().split('T')[0]
+                },
+                success: function(response) {
+                    if (response.success && response.shift) {
+                        $('#shift_display').val(response.shift_display || '');
+                    } else {
+                        $('#shift_display').val(response.message || 'Tidak ada jadwal');
+                    }
+                },
+                error: function() {
+                    $('#shift_display').val('Error memuat shift');
+                }
+            });
         }
     });
 </script>

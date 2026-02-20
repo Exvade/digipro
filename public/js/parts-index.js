@@ -8,41 +8,52 @@ $(document).ready(function() {
     }
 
     // Initialize DataTable
+    if ($.fn.dataTable.isDataTable('#partsTable')) {
+        $('#partsTable').DataTable().destroy();
+    }
+    
     $('#partsTable').DataTable({
-        responsive: true,
-        dom: 'Bfrtip',
-        buttons: [
-            {
-                extend: 'copy',
-                text: '<i class="fas fa-copy"></i> Copy',
-                className: 'btn btn-secondary btn-sm'
-            },
-            {
-                extend: 'csv',
-                text: '<i class="fas fa-file-csv"></i> CSV',
-                className: 'btn btn-secondary btn-sm'
-            },
-            {
-                extend: 'excel',
-                text: '<i class="fas fa-file-excel"></i> Excel',
-                className: 'btn btn-secondary btn-sm'
-            },
-            {
-                extend: 'pdf',
-                text: '<i class="fas fa-file-pdf"></i> PDF',
-                className: 'btn btn-secondary btn-sm'
-            },
-            {
-                extend: 'print',
-                text: '<i class="fas fa-print"></i> Print',
-                className: 'btn btn-secondary btn-sm'
-            }
-        ],
+        responsive: false,
+        autoWidth: false,
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+        order: [[0, 'asc']],
+        dom: 'frtip',
         language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
+            url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json',
+            emptyTable: "Tidak ada data parts",
+            zeroRecords: "Tidak ada data yang sesuai dengan filter",
+            lengthMenu: "Tampilkan _MENU_ data per halaman",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+            infoFiltered: "(difilter dari _MAX_ total data)",
+            search: "Cari:",
+            paginate: {
+                first: "Pertama",
+                last: "Terakhir",
+                next: "Selanjutnya",
+                previous: "Sebelumnya"
+            }
         }
     });
 
+
+    // Event listeners for action buttons using event delegation
+    $(document).on('click', '.btn-view-part', function() {
+        const partId = $(this).data('part-id');
+        viewPart(partId);
+    });
+
+    $(document).on('click', '.btn-edit-part', function() {
+        const partId = $(this).data('part-id');
+        editPart(partId);
+    });
+
+    $(document).on('click', '.btn-delete-part', function() {
+        const partId = $(this).data('part-id');
+        const partName = $(this).data('part-name');
+        deletePart(partId, partName);
+    });
     // Search functionality
     $('#searchBtn').click(function() {
         performSearch();
@@ -76,7 +87,7 @@ $(document).ready(function() {
         if (parts.length === 0) {
             tbody = `
                 <tr>
-                    <td colspan="7" class="text-center text-muted empty-state">
+                    <td colspan="8" class="text-center text-muted empty-state">
                         <i class="fas fa-search fa-2x mb-2"></i>
                         <br>
                         Tidak ada data yang ditemukan
@@ -90,6 +101,9 @@ $(document).ready(function() {
                         <td>${index + 1}</td>
                         <td>
                             <span class="font-weight-bold text-primary">${part.no_parts}</span>
+                        </td>
+                        <td>
+                            <span class="text-muted">${part.no_barang || '-'}</span>
                         </td>
                         <td>
                             <div class="text-truncate-2" title="${part.nama_part}">
@@ -268,6 +282,7 @@ function viewPart(partId) {
         method: 'GET',
         success: function(response) {
             $('#view_no_parts').text(response.no_parts);
+            $('#view_no_barang').text(response.no_barang || '-');
             $('#view_type').text(response.type);
             $('#view_nama_part').text(response.nama_part);
             $('#view_quantity').text(number_format(response.quantity));
@@ -294,6 +309,7 @@ function editPart(partId) {
             // Populate form fields
             $('#edit_part_id').val(partId);
             $('#edit_no_parts').val(response.no_parts);
+            $('#edit_no_barang').val(response.no_barang);
             $('#edit_type').val(response.type);
             $('#edit_nama_part').val(response.nama_part);
             $('#edit_quantity').val(response.quantity);
@@ -395,4 +411,4 @@ function showNotification(message, type) {
         // Fallback to alert if SweetAlert is not available
         alert(message);
     }
-} 
+}

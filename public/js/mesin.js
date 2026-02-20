@@ -1,17 +1,32 @@
 $(document).ready(function() {
     // Initialize DataTable with basic configuration
     $('#mesinTable').DataTable({
-        responsive: true,
-        dom: 'Bfrtip',
-        buttons: [
-            'copy', 'csv', 'excel', 'pdf', 'print'
-        ],
+        responsive: false,
+        dom: 'frtip',
         language: {
             url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/id.json'
         },
         pageLength: 10,
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Semua"]],
         order: [[0, 'asc']]
+    });
+
+    // Event listener for create button
+    $(document).on('click', '.btn-create-mesin', function() {
+        openCreateModal();
+    });
+
+    // Event listener for edit button
+    $(document).on('click', '.btn-edit-mesin', function() {
+        const mesinId = $(this).data('mesin-id');
+        openEditModal(mesinId);
+    });
+
+    // Event listener for delete button
+    $(document).on('click', '.btn-delete-mesin', function() {
+        const mesinId = $(this).data('mesin-id');
+        const mesinName = $(this).data('mesin-name');
+        deleteMesin(mesinId, mesinName);
     });
 });
 
@@ -117,120 +132,117 @@ function openEditModal(mesinId) {
 
 // Function to delete mesin
 function deleteMesin(mesinId, mesinName) {
-    if (confirm(`Apakah Anda yakin ingin menghapus mesin "${mesinName}"?`)) {
-        $.ajax({
-            url: '/mesin/' + mesinId,
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            success: function(response) {
-                if (response.success) {
-                    alert('Data mesin berhasil dihapus.');
-                    location.reload();
-                } else {
-                    alert('Terjadi kesalahan: ' + (response.message || 'Unknown error'));
+    Swal.fire({
+        title: 'Yakin Hapus?',
+        html: `Data mesin <b>"${mesinName}"</b> akan dihapus secara permanen!`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: '<i class="fas fa-trash"></i> Ya, Hapus',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        focusCancel: true,
+        showClass: {
+            popup: 'animate__animated animate__zoomIn'
+        },
+        hideClass: {
+            popup: 'animate__animated animate__zoomOut'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '/mesin/' + mesinId,
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                beforeSend: function() {
+                    Swal.fire({
+                        title: 'Menghapus...',
+                        text: 'Mohon tunggu sebentar',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: 'Data mesin berhasil dihapus.',
+                            icon: 'success',
+                            timer: 200, 
+                            showConfirmButton: false,
+                            showClass: { popup: 'animate__animated animate__fadeInUp' },
+                            hideClass: { popup: 'animate__animated animate__fadeOutDown' }
+                        }).then(() => location.reload());
+                    } else {
+                        Swal.fire('Gagal', response.message || 'Terjadi kesalahan.', 'error');
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = 'Terjadi kesalahan saat menghapus data.';
+                    if (xhr.status === 404) {
+                        errorMessage = 'Data mesin tidak ditemukan.';
+                    } else if (xhr.status === 401) {
+                        errorMessage = 'Anda harus login terlebih dahulu.';
+                    } else if (xhr.status === 403) {
+                        errorMessage = 'Anda tidak memiliki akses untuk menghapus data ini.';
+                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+
+                    Swal.fire('Error', errorMessage, 'error');
                 }
-            },
-            error: function(xhr) {
-                let errorMessage = 'Terjadi kesalahan saat menghapus data.';
-                
-                if (xhr.status === 404) {
-                    errorMessage = 'Data mesin tidak ditemukan.';
-                } else if (xhr.status === 401) {
-                    errorMessage = 'Anda harus login terlebih dahulu.';
-                } else if (xhr.status === 403) {
-                    errorMessage = 'Anda tidak memiliki akses untuk menghapus data ini.';
-                } else if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMessage = xhr.responseJSON.message;
-                }
-                
-                alert(errorMessage);
-            }
-        });
-    }
+            });
+        }
+    });
 }
 
-// Handle form submissions
-$(document).on('submit', '#addForm', function(e) {
-    e.preventDefault();
-    
-    const form = $(this);
-    const submitBtn = form.find('button[type="submit"]');
-    
-    submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...');
-    submitBtn.prop('disabled', true);
-    
-    $.ajax({
-        url: form.attr('action'),
-        method: 'POST',
-        data: form.serialize(),
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        success: function(response) {
-            if (response.success) {
-                $('#addModal').modal('hide');
-                alert('Data mesin berhasil ditambahkan.');
-                location.reload();
-            } else {
-                alert('Terjadi kesalahan: ' + (response.message || 'Unknown error'));
-            }
-        },
-        error: function(xhr) {
-            let errorMessage = 'Terjadi kesalahan saat menyimpan data.';
-            
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-                errorMessage = xhr.responseJSON.message;
-            }
-            
-            alert(errorMessage);
-        },
-        complete: function() {
-            submitBtn.html('<i class="fas fa-save mr-1"></i>Simpan');
-            submitBtn.prop('disabled', false);
-        }
-    });
-});
+// =========================================
+// Dark Mode Toggle Functionality
+// =========================================
+$(document).ready(function() {
+    const $darkModeSwitch = $('#darkModeSwitch');
+    const $darkModeIcon = $('#darkModeIcon');
+    const $body = $('body');
 
-$(document).on('submit', '#editMesinForm', function(e) {
-    e.preventDefault();
-    
-    const form = $(this);
-    const submitBtn = form.find('button[type="submit"]');
-    
-    submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...');
-    submitBtn.prop('disabled', true);
-    
-    $.ajax({
-        url: form.attr('action'),
-        method: 'POST',
-        data: form.serialize(),
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        success: function(response) {
-            if (response.success) {
-                $('#editModal').modal('hide');
-                alert('Data mesin berhasil diperbarui.');
-                location.reload();
-            } else {
-                alert('Terjadi kesalahan: ' + (response.message || 'Unknown error'));
-            }
-        },
-        error: function(xhr) {
-            let errorMessage = 'Terjadi kesalahan saat menyimpan data.';
-            
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-                errorMessage = xhr.responseJSON.message;
-            }
-            
-            alert(errorMessage);
-        },
-        complete: function() {
-            submitBtn.html('Simpan Perubahan');
-            submitBtn.prop('disabled', false);
+    // Check if elements exist
+    if ($darkModeSwitch.length === 0) {
+        return;
+    }
+
+    // Check for saved dark mode preference
+    const isDarkMode = localStorage.getItem('darkMode') === 'enabled';
+
+    // Apply saved preference on page load
+    if (isDarkMode) {
+        enableDarkMode();
+    }
+
+    // Toggle dark mode on switch change
+    $darkModeSwitch.on('change', function() {
+        if ($(this).is(':checked')) {
+            enableDarkMode();
+        } else {
+            disableDarkMode();
         }
     });
-}); 
+
+    function enableDarkMode() {
+        $body.addClass('dark-mode');
+        $darkModeSwitch.prop('checked', true);
+        $darkModeIcon.removeClass('fa-moon').addClass('fa-sun');
+        localStorage.setItem('darkMode', 'enabled');
+    }
+
+    function disableDarkMode() {
+        $body.removeClass('dark-mode');
+        $darkModeSwitch.prop('checked', false);
+        $darkModeIcon.removeClass('fa-sun').addClass('fa-moon');
+        localStorage.setItem('darkMode', 'disabled');
+    }
+});

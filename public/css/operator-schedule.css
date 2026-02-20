@@ -1,0 +1,278 @@
+:root {
+    --primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+    --indigo-soft: #eef2ff;
+    --bg-color: #f8fafc;
+    --text-color: #1e293b;
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --border-color: rgba(255, 255, 255, 0.4);
+    --item-bg: #ffffff;
+    --item-border: #f1f5f9;
+}
+
+body.dark-mode {
+    --bg-color: #0f172a;
+    --text-color: #f1f5f9;
+    --card-bg: rgba(30, 41, 59, 0.8);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --indigo-soft: rgba(79, 70, 229, 0.1);
+    --item-bg: #1e293b;
+    --item-border: rgba(255, 255, 255, 0.05);
+    background-image:
+        radial-gradient(
+            at 0% 0%,
+            rgba(99, 102, 241, 0.15) 0px,
+            transparent 50%
+        ),
+        radial-gradient(
+            at 100% 0%,
+            rgba(16, 185, 129, 0.1) 0px,
+            transparent 50%
+        );
+}
+
+body {
+    font-family: "Outfit", sans-serif;
+    background-color: var(--bg-color);
+    background-image:
+        radial-gradient(
+            at 0% 0%,
+            rgba(99, 102, 241, 0.05) 0px,
+            transparent 50%
+        ),
+        radial-gradient(
+            at 100% 0%,
+            rgba(16, 185, 129, 0.05) 0px,
+            transparent 50%
+        );
+    min-height: 100vh;
+    color: var(--text-color);
+}
+
+/* Navbar Custom */
+.navbar-custom {
+    background: var(--card-bg);
+    padding: 1rem 0;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.04);
+}
+
+/* Page Header */
+.page-header {
+    background: var(--primary-gradient);
+    padding: 3rem 1rem 7rem;
+    color: white;
+    border-radius: 0 0 3rem 3rem;
+    margin-bottom: -5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-radius: 2rem;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    height: 100%;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 45px 0 rgba(31, 38, 135, 0.12);
+}
+
+/* Profile Section */
+.profile-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 2rem;
+    margin: 0 auto 1.5rem;
+    background: var(--indigo-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: #4f46e5;
+    font-weight: 700;
+    box-shadow: 0 10px 20px rgba(79, 70, 229, 0.1);
+}
+
+/* Tabs Styling */
+.nav-pills-custom {
+    background: var(--item-border);
+    padding: 0.5rem;
+    border-radius: 1.25rem;
+    display: inline-flex;
+    width: 100%;
+}
+
+.nav-pills-custom .nav-link {
+    border-radius: 1rem;
+    padding: 0.75rem 0;
+    color: #64748b;
+    font-weight: 600;
+    flex: 1;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.nav-pills-custom .nav-link.active {
+    background: var(--item-bg);
+    color: #4f46e5;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+/* Schedule Items (Week View) */
+.schedule-item {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: var(--item-bg);
+    border-radius: 1.5rem;
+    border: 1px solid var(--item-border);
+    transition: all 0.3s ease;
+}
+
+.schedule-item.today {
+    background: var(--bg-color);
+    border-color: #fee2e2;
+    position: relative;
+}
+
+.schedule-item.today::after {
+    content: "HARI INI";
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #ef4444;
+    background: #fee2e2;
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.5rem;
+}
+
+/* Stats Grid */
+.stats-card-mini {
+    padding: 1.25rem;
+    text-align: center;
+    border-radius: 1.5rem;
+    background: var(--item-bg);
+    border: 1px solid var(--item-border);
+}
+
+.stats-val {
+    font-size: 1.75rem;
+    font-weight: 800;
+    display: block;
+    margin-bottom: 0.25rem;
+    color: inherit;
+}
+
+body.dark-mode .stats-val.text-primary {
+    color: #818cf8 !important; /* Lighter indigo for dark mode */
+}
+
+body.dark-mode .stats-val.text-secondary {
+    color: #94a3b8 !important;
+}
+
+.stats-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+/* Table Styling (Month View) */
+.table-custom {
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+}
+
+.table-custom tr {
+    background: var(--item-bg);
+    border-radius: 1rem;
+}
+
+.table-custom td {
+    padding: 1.25rem 1rem;
+    border: none;
+}
+
+.table-custom td:first-child {
+    border-radius: 1rem 0 0 1rem;
+}
+.table-custom td:last-child {
+    border-radius: 0 1rem 1rem 0;
+}
+
+/* Progress Bar */
+.progress-custom {
+    height: 14px;
+    border-radius: 10px;
+    background: var(--bg-color);
+}
+
+/* Back Button */
+.btn-back {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.btn-back:hover {
+    background: white;
+    color: #4f46e5;
+}
+
+/* Animation */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-up {
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delay-1 {
+    animation-delay: 0.1s;
+}
+.delay-2 {
+    animation-delay: 0.2s;
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        padding: 4rem 1rem 6rem;
+    }
+    .btn-back {
+        top: 1rem;
+        left: 1rem;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+}

@@ -30,10 +30,6 @@
                 <div class="bg-success mr-2" style="width: 12px; height: 12px; border-radius: 50%;"></div>
                 <span class="text-mobile-sm">Aktif ({{ $countAktif }})</span>
             </div>
-            <div class="d-flex align-items-center mb-2">
-                <div class="bg-warning mr-2" style="width: 12px; height: 12px; border-radius: 50%;"></div>
-                <span class="text-mobile-sm">Proses ({{ $countMaintenance }})</span>
-            </div>
             <div class="d-flex align-items-center">
                 <div class="bg-danger mr-2" style="width: 12px; height: 12px; border-radius: 50%;"></div>
                 <span class="text-mobile-sm">Tidak Aktif ({{ $countTidakAktif }})</span>

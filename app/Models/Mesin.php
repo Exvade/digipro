@@ -16,14 +16,17 @@ class Mesin extends Model
         'brand_mesin',
         'tonase_mesin',
         'status',
-        'maintenance_count',
-        'offline_count',
+        'stop_reason',
+        'status_since',
+        'keterangan',
+
+        'bagian',
     ];
 
     protected $casts = [
         'tonase_mesin' => 'integer',
-        'maintenance_count' => 'integer',
-        'offline_count' => 'integer',
+
+        'status_since' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -34,11 +37,11 @@ class Mesin extends Model
         return $this->hasMany(Checksheet::class);
     }
 
-    // OEE Relationships
-    public function oeeData()
-    {
-        return $this->hasMany(OeeData::class);
-    }
+    // OEE Relationships - dihapus karena tabel oee_records tidak digunakan
+    // public function oeeData()
+    // {
+    //     return $this->hasMany(OeeRecord::class, 'mesin_id');
+    // }
 
     public function downtimeEvents()
     {
@@ -50,15 +53,36 @@ class Mesin extends Model
         return $this->hasMany(QualityEvent::class);
     }
 
-    public function oeeTargets()
+    // HAPUS DUPLICATE - hanya pakai satu documents() method
+    public function documents()
     {
-        return $this->hasMany(OeeTarget::class);
+        return $this->hasMany(MesinDocument::class);
+    }
+
+    public function activeDocuments()
+    {
+        return $this->hasMany(MesinDocument::class)->where('enabled', true);
+    }
+
+    // Helper untuk get dokumen by type
+    public function getDocument($type)
+    {
+        return $this->documents()
+            ->where('type', $type)
+            ->where('enabled', true)
+            ->orderByDesc('id')
+            ->first();
     }
 
     // Scopes
-    public function scopeActive($query)
+    public function scopeRunning($query)
     {
-        return $query->where('status', 'aktif');
+        return $query->where('status', 'running');
+    }
+
+    public function scopeStop($query)
+    {
+        return $query->where('status', 'stop');
     }
 
     public function scopeMaintenance($query)
@@ -66,101 +90,95 @@ class Mesin extends Model
         return $query->where('status', 'maintenance');
     }
 
-    public function scopeInactive($query)
+    public function scopeOffline($query)
     {
-        return $query->where('status', 'tidak aktif');
+        return $query->where('status', 'offline');
     }
 
     // Accessors
-    public function getMaintenanceCountAttribute($value)
-    {
-        return $value ?? 0;
-    }
 
-    public function getOfflineCountAttribute($value)
-    {
-        return $value ?? 0;
-    }
 
     public function getStatusColorAttribute()
     {
         switch ($this->status) {
-            case 'aktif':
+            case 'running':
                 return 'success';
             case 'maintenance':
                 return 'warning';
-            case 'tidak aktif':
+            case 'offline':
                 return 'danger';
+            case 'stop':
+                return 'info';
             default:
                 return 'secondary';
         }
     }
 
-    // Methods
-    public function getCurrentOeeData()
+    // Methods berikut dihapus karena tabel oee_records tidak digunakan
+    // Dashboard OEE menghitung data secara real-time dari planning_produksi dan input_produksi
+    // 
+    // public function getCurrentOeeData()
+    // public function getLatestOeeData($days = 30)
+    // public function getOeeDataForDate($date)
+    // public function getOeeDataForPeriod($startDate, $endDate)
+    // public function getAverageOee($days = 30)
+    // public function getAverageAvailability($days = 30)
+    // public function getAveragePerformance($days = 30)
+    // public function getAverageQuality($days = 30)
+
+    // Relationship to Planning Produksi
+    public function plannings()
     {
-        return $this->oeeData()
-                    ->where('tanggal', now()->format('Y-m-d'))
-                    ->first();
+        return $this->hasMany(PlanningProduksi::class, 'mesin_id');
     }
 
-    public function getCurrentTarget()
+    // Get upcoming plannings (today and future)
+    public function upcomingPlannings()
     {
-        return $this->oeeTargets()
-                    ->active()
-                    ->effective()
-                    ->first();
+        return $this->plannings()
+            ->where('tanggal', '>=', now()->format('Y-m-d'))
+            ->with('part')
+            ->orderBy('tanggal', 'asc')
+            ->orderBy('id', 'asc');
     }
 
-    public function getLatestOeeData($days = 30)
+    // Get plannings for today
+    public function todayPlannings()
     {
-        return $this->oeeData()
-                    ->where('tanggal', '>=', now()->subDays($days))
-                    ->orderBy('tanggal', 'desc')
-                    ->get();
+        return $this->plannings()
+            ->where('tanggal', now()->format('Y-m-d'))
+            ->with('part')
+            ->orderBy('id', 'asc');
     }
 
-    // Additional methods for OEE data access
-    public function getOeeDataForDate($date)
+    /**
+     * Cek dokumen apa saja yang belum diupload
+     */
+    public function getMissingDocuments()
     {
-        return $this->oeeData()
-                    ->where('tanggal', $date)
-                    ->first();
+        $requiredTypes = [
+            'apd' => 'APD',
+            'qpoint' => 'Q-Point',
+            'instruksi_kerja' => 'Instruksi Kerja',
+            'limit_sampel' => 'Limit Sampel',
+            'amptm' => 'AMTPM'
+        ];
+
+        $missing = [];
+        foreach ($requiredTypes as $type => $label) {
+            if (!$this->getDocument($type)) {
+                $missing[] = $label;
+            }
+        }
+
+        return $missing;
     }
 
-    public function getOeeDataForPeriod($startDate, $endDate)
+    /**
+     * Cek apakah semua dokumen wajib sudah diupload
+     */
+    public function hasCompleteDocuments()
     {
-        return $this->oeeData()
-                    ->whereBetween('tanggal', [$startDate, $endDate])
-                    ->orderBy('tanggal', 'desc')
-                    ->get();
+        return count($this->getMissingDocuments()) === 0;
     }
-
-    public function getAverageOee($days = 30)
-    {
-        return $this->oeeData()
-                    ->where('tanggal', '>=', now()->subDays($days))
-                    ->avg('oee') ?? 0;
-    }
-
-    public function getAverageAvailability($days = 30)
-    {
-        return $this->oeeData()
-                    ->where('tanggal', '>=', now()->subDays($days))
-                    ->avg('availability') ?? 0;
-    }
-
-    public function getAveragePerformance($days = 30)
-    {
-        return $this->oeeData()
-                    ->where('tanggal', '>=', now()->subDays($days))
-                    ->avg('performance') ?? 0;
-    }
-
-    public function getAverageQuality($days = 30)
-    {
-        return $this->oeeData()
-                    ->where('tanggal', '>=', now()->subDays($days))
-                    ->avg('quality') ?? 0;
-    }
-} 
+}

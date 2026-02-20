@@ -80,13 +80,13 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="shift">Shift <span class="text-danger">*</span></label>
-                    <select class="form-control" id="shift" name="shift" required>
-                        <option value="">Pilih Shift</option>
-                        <option value="pagi" {{ $checksheet->shift == 'pagi' ? 'selected' : '' }}>Pagi</option>
-                        <option value="siang" {{ $checksheet->shift == 'siang' ? 'selected' : '' }}>Siang</option>
-                        <option value="malam" {{ $checksheet->shift == 'malam' ? 'selected' : '' }}>Malam</option>
-                    </select>
+                    <label for="shift_display">Shift</label>
+                    <input type="text" class="form-control" id="shift_display" 
+                        value="{{ $checksheet->shift_display ?? '-' }}" readonly 
+                        style="background-color: #e9ecef;">
+                    <small class="form-text text-muted">
+                        <i class="fas fa-info-circle mr-1"></i>Shift otomatis dari jadwal kerja
+                    </small>
                 </div>
             </div>
         </div>

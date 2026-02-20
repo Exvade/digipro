@@ -13,6 +13,7 @@ class Part extends Model
 
     protected $fillable = [
         'no_parts',
+        'no_barang',
         'nama_part',
         'type',
         'quantity',
@@ -29,4 +30,8 @@ class Part extends Model
     {
         return $this->hasMany(Checksheet::class);
     }
-} 
+    public function bomDetails()
+    {
+        return $this->hasMany(BomDetail::class);
+    }
+}

@@ -12,80 +12,36 @@ $(document).ready(function() {
     
     // Initialize popovers
     $('[data-toggle="popover"]').popover();
+        
+    // Event listener for create button
+    $(document).on('click', '.btn-create-meja', function() {
+        openCreateModal();
+    });
     
-    // Show welcome message
-    showWelcomeMessage();
+    // Event listener for edit button
+    $(document).on('click', '.btn-edit-meja', function() {
+        const mejaId = $(this).data('meja-id');
+        openEditModal(mejaId);
+    });
+    
+    // Event listener for delete button
+    $(document).on('click', '.btn-delete-meja', function() {
+        const mejaId = $(this).data('meja-id');
+        const mejaName = $(this).data('meja-name');
+        deleteMeja(mejaId, mejaName);
+    });
 });
-
-/**
- * Show welcome message on page load
- */
-function showWelcomeMessage() {
-    if (!localStorage.getItem('mejaWelcomeShown')) {
-        Swal.fire({
-            title: 'Selamat Datang!',
-            text: 'Selamat datang di halaman manajemen data meja. Anda dapat menambah, mengedit, dan menghapus data meja di sini.',
-            icon: 'info',
-            confirmButtonText: 'Mengerti',
-            confirmButtonColor: '#4e73df',
-            timer: 5000,
-            timerProgressBar: true
-        });
-        localStorage.setItem('mejaWelcomeShown', 'true');
-    }
-}
 
 /**
  * Initialize DataTable with custom configuration
  */
 function initializeDataTable() {
     $('#mejaTable').DataTable({
-        responsive: true,
-        dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>' +
+        responsive: false,
+        scrollX: true,
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
              '<"row"<"col-sm-12"tr>>' +
              '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-        buttons: [
-            {
-                extend: 'copy',
-                text: '<i class="fas fa-copy"></i> Copy',
-                className: 'btn btn-secondary btn-sm',
-                exportOptions: {
-                    columns: [0, 1, 2]
-                }
-            },
-            {
-                extend: 'csv',
-                text: '<i class="fas fa-file-csv"></i> CSV',
-                className: 'btn btn-secondary btn-sm',
-                exportOptions: {
-                    columns: [0, 1, 2]
-                }
-            },
-            {
-                extend: 'excel',
-                text: '<i class="fas fa-file-excel"></i> Excel',
-                className: 'btn btn-secondary btn-sm',
-                exportOptions: {
-                    columns: [0, 1, 2]
-                }
-            },
-            {
-                extend: 'pdf',
-                text: '<i class="fas fa-file-pdf"></i> PDF',
-                className: 'btn btn-secondary btn-sm',
-                exportOptions: {
-                    columns: [0, 1, 2]
-                }
-            },
-            {
-                extend: 'print',
-                text: '<i class="fas fa-print"></i> Print',
-                className: 'btn btn-secondary btn-sm',
-                exportOptions: {
-                    columns: [0, 1, 2]
-                }
-            }
-        ],
         language: {
             url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
         },
@@ -110,23 +66,11 @@ function initializeDataTable() {
  * Open create modal and load form
  */
 function openCreateModal() {
-    // Show loading state with SweetAlert
-    Swal.fire({
-        title: 'Memuat Form...',
-        text: 'Mohon tunggu sebentar',
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        willOpen: () => {
-            Swal.showLoading();
-        }
-    });
-    
     // Load create form
     $.ajax({
         url: window.createModalUrl,
         method: 'GET',
         success: function(response) {
-            Swal.close();
             $('#addModalBody').html(response);
             $('#addModal').modal('show');
         },
@@ -152,42 +96,36 @@ function openCreateModal() {
  * @param {number} id - The meja ID
  */
 function openEditModal(id) {
-    // Show loading state with SweetAlert
-    Swal.fire({
-        title: 'Memuat Data...',
-        text: 'Mohon tunggu sebentar',
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        willOpen: () => {
-            Swal.showLoading();
-        }
-    });
-    
+    if (!id) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'ID meja tidak ditemukan.',
+        });
+        return;
+    }
+
     // Load edit form
     $.ajax({
         url: `/meja/${id}/edit-modal`,
-        method: 'GET',
+        type: 'GET',
         success: function(response) {
-            Swal.close();
+            // Masukkan form hasil dari controller ke dalam modal
             $('#editModalBody').html(response);
+
+            // Tampilkan modal edit
             $('#editModal').modal('show');
         },
         error: function(xhr) {
-            let errorMessage = 'Terjadi kesalahan saat memuat form edit.';
-            
-            if (xhr.responseJSON && xhr.responseJSON.error) {
-                errorMessage = xhr.responseJSON.error;
-            }
-            
             Swal.fire({
                 icon: 'error',
-                title: 'Error!',
-                text: errorMessage,
-                confirmButtonColor: '#e74a3b'
+                title: 'Gagal!',
+                text: xhr.responseJSON?.message || 'Tidak dapat memuat form edit.',
             });
         }
     });
 }
+
 
 /**
  * Delete meja with confirmation
@@ -196,19 +134,15 @@ function openEditModal(id) {
  */
 function deleteMeja(id, nama) {
     Swal.fire({
-        title: 'Konfirmasi Hapus',
-        text: `Apakah Anda yakin ingin menghapus meja "${nama}"?`,
+        title: 'Yakin hapus meja "' + nama + '"?',
+        text: "Data yang dihapus tidak bisa dikembalikan!",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#e74a3b',
-        cancelButtonColor: '#858796',
-        confirmButtonText: '<i class="fas fa-trash mr-1"></i>Ya, Hapus!',
-        cancelButtonText: '<i class="fas fa-times mr-1"></i>Batal',
-        reverseButtons: true,
-        customClass: {
-            confirmButton: 'btn btn-danger',
-            cancelButton: 'btn btn-secondary'
-        }
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
             // Show loading state
@@ -224,20 +158,20 @@ function deleteMeja(id, nama) {
             
             // Send delete request
             $.ajax({
-                url: `/meja/${id}`,
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                url: '/meja/' + id,
+                type: 'POST',
+                data: {
+                    _method: 'DELETE',
+                    _token: $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function(response) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Berhasil!',
-                        text: 'Data meja berhasil dihapus.',
-                        showConfirmButton: false,
-                        timer: 1500,
-                        timerProgressBar: true
-                    }).then(function() {
+                        title: 'Berhasil',
+                        text: 'Data meja berhasil dihapus!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
                         location.reload();
                     });
                 },
@@ -250,9 +184,8 @@ function deleteMeja(id, nama) {
                     
                     Swal.fire({
                         icon: 'error',
-                        title: 'Error!',
-                        text: errorMessage,
-                        confirmButtonColor: '#e74a3b'
+                        title: 'Gagal!',
+                        text: errorMessage
                     });
                 }
             });
@@ -274,42 +207,9 @@ function refreshTable() {
         }
     });
     
-    $('#mejaTable').DataTable().ajax.reload(function() {
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            text: 'Data telah diperbarui.',
-            showConfirmButton: false,
-            timer: 1000
-        });
-    });
-}
-
-/**
- * Export table data
- * @param {string} type - Export type (csv, excel, pdf, etc.)
- */
-function exportTable(type) {
-    Swal.fire({
-        title: 'Mengekspor Data...',
-        text: 'Mohon tunggu sebentar',
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        willOpen: () => {
-            Swal.showLoading();
-        }
-    });
-    
     setTimeout(() => {
-        $('#mejaTable').DataTable().button(type).trigger();
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            text: 'Data berhasil diekspor.',
-            showConfirmButton: false,
-            timer: 1500
-        });
-    }, 1000);
+        location.reload();
+    }, 500);
 }
 
 /**
@@ -572,7 +472,6 @@ window.mejaModule = {
     openEditModal,
     deleteMeja,
     refreshTable,
-    exportTable,
     searchTable,
     clearSearch,
     showLoading,
@@ -588,4 +487,4 @@ window.mejaModule = {
     validateForm,
     clearValidationErrors,
     showValidationErrors
-}; 
+};

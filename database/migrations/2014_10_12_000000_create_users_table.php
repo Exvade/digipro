@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('nama');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('nik');
             $table->enum('role', ['super_admin', 'leader', 'operator', 'foreman', 'kabag', 'staff', 'manager_plant']);
             $table->enum('bagian', ['inject', 'assy'])->nullable();
             $table->rememberToken();

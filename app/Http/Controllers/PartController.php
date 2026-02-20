@@ -15,7 +15,7 @@ class PartController extends Controller
     public function index()
     {
         $parts = Part::orderBy('created_at', 'desc')->get();
-        
+
         return view('parts.index', compact('parts'));
     }
 
@@ -34,6 +34,7 @@ class PartController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'no_parts' => 'required|string|max:50|unique:parts,no_parts',
+            'no_barang' => 'nullable|string|max:100',
             'nama_part' => 'required|string|max:255',
             'type' => 'required|string|max:100',
             'quantity' => 'required|integer|min:0',
@@ -58,7 +59,7 @@ class PartController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
-            
+
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
@@ -69,6 +70,7 @@ class PartController extends Controller
 
             $part = Part::create([
                 'no_parts' => $request->no_parts,
+                'no_barang' => $request->no_barang,
                 'nama_part' => $request->nama_part,
                 'type' => $request->type,
                 'quantity' => $request->quantity,
@@ -87,17 +89,16 @@ class PartController extends Controller
 
             return redirect()->route('parts.index')
                 ->with('success', 'Part berhasil ditambahkan');
-
         } catch (\Exception $e) {
             DB::rollback();
-            
+
             if ($request->ajax()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat menyimpan data')
                 ->withInput();
@@ -117,6 +118,9 @@ class PartController extends Controller
      */
     public function edit(Part $part)
     {
+        if (request()->ajax()) {
+            return response()->json($part);
+        }
         return view('parts.update', compact('part'));
     }
 
@@ -127,6 +131,7 @@ class PartController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'no_parts' => 'required|string|max:50|unique:parts,no_parts,' . $part->id,
+            'no_barang' => 'nullable|string|max:100',
             'nama_part' => 'required|string|max:255',
             'type' => 'required|string|max:100',
             'quantity' => 'required|integer|min:0',
@@ -151,7 +156,7 @@ class PartController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
-            
+
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
@@ -162,6 +167,7 @@ class PartController extends Controller
 
             $part->update([
                 'no_parts' => $request->no_parts,
+                'no_barang' => $request->no_barang,
                 'nama_part' => $request->nama_part,
                 'type' => $request->type,
                 'quantity' => $request->quantity,
@@ -180,17 +186,16 @@ class PartController extends Controller
 
             return redirect()->route('parts.index')
                 ->with('success', 'Part berhasil diperbarui');
-
         } catch (\Exception $e) {
             DB::rollback();
-            
+
             if ($request->ajax()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Terjadi kesalahan saat memperbarui data: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat memperbarui data')
                 ->withInput();
@@ -213,7 +218,7 @@ class PartController extends Controller
                         'message' => 'Part tidak dapat dihapus karena masih digunakan dalam checksheet'
                     ], 422);
                 }
-                
+
                 return redirect()->back()
                     ->with('error', 'Part tidak dapat dihapus karena masih digunakan dalam checksheet');
             }
@@ -231,17 +236,16 @@ class PartController extends Controller
 
             return redirect()->route('parts.index')
                 ->with('success', 'Part berhasil dihapus');
-
         } catch (\Exception $e) {
             DB::rollback();
-            
+
             if (request()->ajax()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat menghapus data');
         }
@@ -261,13 +265,14 @@ class PartController extends Controller
     public function search(Request $request)
     {
         $search = $request->get('search');
-        
+
         $parts = Part::where('no_parts', 'like', "%{$search}%")
-                    ->orWhere('nama_part', 'like', "%{$search}%")
-                    ->orWhere('type', 'like', "%{$search}%")
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+            ->orWhere('no_barang', 'like', "%{$search}%")
+            ->orWhere('nama_part', 'like', "%{$search}%")
+            ->orWhere('type', 'like', "%{$search}%")
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return response()->json($parts);
     }
-} 
+}

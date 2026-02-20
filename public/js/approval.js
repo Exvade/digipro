@@ -2,12 +2,38 @@ $(document).ready(function() {
     console.log('Approval.js loaded successfully');
     
     // Initialize DataTable
-    $('#approvalTable').DataTable({
+    var approvalTable = $('#approvalTable').DataTable({
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json"
         },
         "pageLength": 25,
         "order": [[1, "desc"]]
+    });
+
+    // =========================================
+    // Tab Filter Bagian (All, Inject, Assy) - Approval Checksheet Page
+    // =========================================
+    $('#bagianTabsApprovalChecksheet .nav-link').on('click', function(e) {
+        e.preventDefault();
+        const bagian = $(this).data('bagian');
+        
+        // Update URL with filter parameter
+        const currentUrl = new URL(window.location);
+        
+        if (bagian === 'all') {
+            currentUrl.searchParams.delete('filter');
+        } else {
+            currentUrl.searchParams.set('filter', bagian);
+        }
+        
+        // Preserve grup filter if exists
+        const grupFilter = currentUrl.searchParams.get('grup_filter');
+        if (grupFilter) {
+            currentUrl.searchParams.set('grup_filter', grupFilter);
+        }
+        
+        // Redirect to new URL
+        window.location.href = currentUrl.toString();
     });
 
     // Approve form submission
@@ -99,6 +125,34 @@ $(document).ready(function() {
                 });
             }
         });
+    });
+    // Event Listeners for Action Buttons
+    $(document).on('click', '.btn-view-checksheet', function() {
+        const id = $(this).data('id');
+        console.log('View checksheet:', id);
+        $.get(`/approval/${id}`, function(response) {
+            $('#checksheetDetailContent').html(response);
+            $('#viewChecksheetModal').modal('show');
+        }).fail(function(xhr, status, error) {
+            console.error('View checksheet error:', xhr.responseText);
+            Swal.fire('Error!', 'Gagal memuat detail checksheet', 'error');
+        });
+    });
+
+    $(document).on('click', '.btn-approve-checksheet', function() {
+        const id = $(this).data('id');
+        console.log('Approve checksheet function called with ID:', id);
+        $('#approve_checksheet_id').val(id);
+        $('#approval_note').val('');
+        $('#approveModal').modal('show');
+    });
+
+    $(document).on('click', '.btn-reject-checksheet', function() {
+        const id = $(this).data('id');
+        console.log('Reject checksheet function called with ID:', id);
+        $('#reject_checksheet_id').val(id);
+        $('#rejection_reason').val('');
+        $('#rejectModal').modal('show');
     });
 });
 

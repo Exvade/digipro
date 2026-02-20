@@ -1,0 +1,1 @@
+<script>window.location.href = "{{ route('input-produksi.index') }}";</script>

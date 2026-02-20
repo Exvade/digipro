@@ -1,0 +1,159 @@
+/**
+ * BOM Details Index - Custom CSS
+ */
+
+/* Custom styling untuk DataTables */
+#tableBomDetails_wrapper {
+    padding: 0.5rem 1rem;
+}
+
+.dataTables_filter {
+    text-align: right;
+    margin-bottom: 1rem;
+}
+
+.dataTables_length {
+    margin-bottom: 1rem;
+}
+
+#tableBomDetails_wrapper .dataTables_paginate {
+    margin-top: 1rem;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .dataTables_filter,
+    .dataTables_length,
+    .dt-buttons {
+        text-align: center !important;
+    }
+
+    #tableBomDetails_wrapper .dataTables_filter input {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+
+    #tableBomDetails_wrapper .dataTables_length select {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+}
+
+/* Button styling */
+#tableBomDetails_wrapper .dt-buttons .btn {
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Info styling */
+.dataTables_info {
+    padding-top: 1rem !important;
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+/* ===== Table Styles ===== */
+.table th,
+.table td {
+    vertical-align: middle;
+}
+
+.table thead th {
+    background-color: #007bff;
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table tbody td {
+    font-size: 0.9rem;
+}
+
+/* Card Styles */
+.card-outline.card-primary {
+    border-top: 3px solid #007bff;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.card-title {
+    font-weight: 600;
+    color: #495057;
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: 0.5rem;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Button Action Styles */
+.d-flex.gap-1 {
+    gap: 0.5rem !important;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+    color: #212529;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+    color: #fff;
+}
+
+/* Empty State */
+.table tbody td.text-muted {
+    font-size: 0.95rem;
+    padding: 2rem 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}

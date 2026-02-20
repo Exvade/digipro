@@ -34,7 +34,9 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'nik' => 'required|numeric|unique:users',
             'username' => 'required|string|max:255|unique:users',
+            'departemen' => 'required|string|max:255',
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
@@ -42,10 +44,12 @@ class UserController extends Controller
             'bagian' => 'nullable|in:inject,assy',
             'grup_id' => 'nullable|exists:grups,id',
         ]);
-
+        
         User::create([
+            'nik' => $request->nik,
             'username' => $request->username,
             'nama' => $request->nama,
+            'departemen' => $request->departemen,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
@@ -65,11 +69,19 @@ class UserController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified resource (in modal).
      */
     public function show(User $user)
     {
-        return view('user.show', compact('user'));
+        return view('user.show-modal', compact('user'));
+    }
+
+    /**
+     * Show the specified resource in modal (alias for backward compatibility).
+     */
+    public function showModal(User $user)
+    {
+        return $this->show($user);
     }
 
     /**
@@ -96,7 +108,9 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
+            'nik' => 'required|numeric|unique:users,nik,' . $user->id,
             'username' => 'required|string|max:255|unique:users,username,' . $user->id,
+            'departemen' => 'required|string|max:255',
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
@@ -104,15 +118,17 @@ class UserController extends Controller
             'bagian' => 'nullable|in:inject,assy',
             'grup_id' => 'nullable|exists:grups,id',
         ]);
-
+        
         $data = [
+            'nik' => $request->nik,
             'username' => $request->username,
+            'departemen' => $request->departemen,
             'nama' => $request->nama,
             'email' => $request->email,
             'role' => $request->role,
             'bagian' => $request->bagian,
             'grup_id' => $request->grup_id,
-        ];
+        ];        
 
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
@@ -167,4 +183,4 @@ class UserController extends Controller
         $grups = Grup::where('bagian', $bagian)->get();
         return response()->json($grups);
     }
-} 
+}

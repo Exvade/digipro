@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -20,6 +19,8 @@ class User extends Authenticatable
     protected $fillable = [
         'nama',
         'username',
+        'nik',
+        'departemen',
         'email',
         'password',
         'role',
@@ -52,114 +53,99 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the grup that this user leads.
+     * Override username untuk Laravel's built-in auth
      */
+    public function username()
+    {
+        return 'nik';
+    }
+
+    /**
+     * Find user by NIK or Username for authentication
+     */
+    public static function findForAuth($login)
+    {
+        return self::where(function ($query) use ($login) {
+            $query->where('nik', $login)
+                ->orWhere('username', $login);
+        })->where('is_active', true)->first();
+    }
+
+    // ... rest of your existing methods remain the same ...
+
     public function leadingGrup()
     {
         return $this->hasOne(Grup::class, 'leader_id');
     }
 
-    /**
-     * Get the checksheets for the user.
-     */
     public function checksheets()
     {
         return $this->hasMany(Checksheet::class);
     }
 
-    /**
-     * Get the approved checksheets for the user.
-     */
     public function approvedChecksheets()
     {
         return $this->hasMany(Checksheet::class, 'approved_by');
     }
 
-    /**
-     * Scope untuk user berdasarkan grup
-     */
     public function scopeGrup($query, $grup)
     {
         return $query->where('grup', $grup);
     }
 
-    /**
-     * Scope untuk leaders
-     */
     public function scopeLeaders($query)
     {
         return $query->where('role', 'leader');
     }
 
-    /**
-     * Scope untuk operators
-     */
     public function scopeOperators($query)
     {
         return $query->where('role', 'operator');
     }
 
-    /**
-     * Scope untuk user berdasarkan bagian
-     */
     public function scopeBagian($query, $bagian)
     {
         return $query->where('bagian', $bagian);
     }
 
-    /**
-     * Check if user is a leader
-     */
     public function isLeader()
     {
         return $this->role === 'leader';
     }
 
-    /**
-     * Check if user is an operator
-     */
     public function isOperator()
     {
         return $this->role === 'operator';
     }
 
-    /**
-     * Check if user is a super admin
-     */
     public function isSuperAdmin()
     {
         return $this->role === 'super_admin';
     }
 
-    /**
-     * Get user's full group information
-     */
     public function getGroupInfoAttribute()
     {
         $info = [];
-        
+
         if ($this->bagian) {
             $info[] = "Bagian: " . ucfirst($this->bagian);
         }
-        
+
         if ($this->grup) {
             $info[] = "Grup: {$this->grup}";
         }
-        
+
         return implode(' | ', $info);
     }
 
-    /**
-     * Get user's display name with role and group
-     */
     public function getDisplayNameAttribute()
     {
         $display = $this->nama;
-        
+
         if ($this->grup) {
             $display .= " (Grup {$this->grup})";
         }
-        
+
         return $display;
     }
 
@@ -168,7 +154,11 @@ class User extends Authenticatable
         return $this->belongsTo(\App\Models\Grup::class, 'grup_id');
     }
 
-    // Scopes
+    public function jadwalKerjas()
+    {
+        return $this->hasMany(\App\Models\JadwalKerja::class, 'user_id');
+    }
+
     public function scopeByRole($query, $role)
     {
         return $query->where('role', $role);
@@ -179,25 +169,16 @@ class User extends Authenticatable
         return $query->where('bagian', $bagian);
     }
 
-    /**
-     * Get user status color
-     */
     public function getStatusColorAttribute()
     {
         return $this->is_active ? 'success' : 'secondary';
     }
 
-    /**
-     * Get role display name
-     */
     public function getRoleDisplayAttribute()
     {
         return ucfirst(str_replace('_', ' ', $this->role));
     }
 
-    /**
-     * Get role badge color
-     */
     public function getRoleBadgeColorAttribute()
     {
         switch ($this->role) {
@@ -220,17 +201,11 @@ class User extends Authenticatable
         }
     }
 
-    /**
-     * Check if user can be deleted
-     */
     public function canBeDeleted()
     {
         return $this->id !== auth()->id();
     }
 
-    /**
-     * Get user's last login in human readable format
-     */
     public function getLastLoginHumanAttribute()
     {
         return $this->last_login_at ? $this->last_login_at->diffForHumans() : 'Belum pernah login';

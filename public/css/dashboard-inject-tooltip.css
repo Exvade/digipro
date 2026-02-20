@@ -1,0 +1,78 @@
+/* Tooltip Container */
+.machine-tooltip {
+    position: fixed;
+    display: none;
+    background-color: #2d2d2d; /* Dark grey/black */
+    color: #ffffff;
+    padding: 12px 16px;
+    border-radius: 6px;
+    z-index: 10000;
+    pointer-events: none; /* Allow mouse events to pass through */
+    font-size: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    max-width: 280px;
+    line-height: 1.5;
+    border: 1px solid #444;
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Tooltip Close Icon (Visual only) */
+.tooltip-close {
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    font-size: 14px;
+    color: #888;
+    line-height: 1;
+}
+
+/* Tooltip Header (Machine Name) */
+.tooltip-header {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 6px;
+    padding-right: 15px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 6px;
+}
+
+/* Tooltip Body */
+.tooltip-body {
+    color: #ddd;
+    font-size: 13px;
+}
+
+/* Tooltip Row (Brand, Tonase) */
+.tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2px;
+}
+
+.tooltip-label {
+    color: #aaa;
+}
+
+/* Tooltip Status Section */
+.tooltip-status {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.status-text {
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 12px;
+}

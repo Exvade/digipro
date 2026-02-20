@@ -1,0 +1,533 @@
+/* ===== DARK MODE TOGGLE SWITCH - MENU PAGE ===== */
+
+.dark-mode-toggle-wrapper {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+/* Toggle Switch Container */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+/* Hide default checkbox */
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The slider */
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 30px;
+    box-shadow: 0 4px 15px rgba(129, 140, 248, 0.3);
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Icon inside slider */
+.toggle-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+}
+
+.toggle-icon.sun {
+    right: 8px;
+    color: #fbbf24;
+    opacity: 0;
+}
+
+.toggle-icon.moon {
+    left: 8px;
+    color: #ffffff;
+    opacity: 1;
+}
+
+/* When checked */
+input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    box-shadow: 0 4px 15px rgba(30, 41, 59, 0.5);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(30px);
+}
+
+input:checked + .toggle-slider .toggle-icon.sun {
+    opacity: 1;
+}
+
+input:checked + .toggle-slider .toggle-icon.moon {
+    opacity: 0;
+}
+
+/* Hover effect */
+.toggle-slider:hover {
+    box-shadow: 0 6px 20px rgba(129, 140, 248, 0.4);
+}
+
+input:checked + .toggle-slider:hover {
+    box-shadow: 0 6px 20px rgba(30, 41, 59, 0.6);
+}
+
+/* Active/Click effect */
+.toggle-slider:active:before {
+    width: 26px;
+}
+
+/* ===== DARK MODE STYLES FOR MENU PAGE ===== */
+
+/* Dark Mode Base */
+body.dark-mode {
+    background-color: #0f172a;
+    color: #e2e8f0;
+}
+
+/* Animated Background - Dark Mode Soft */
+body.dark-mode .animated-bg {
+    background: linear-gradient(
+        135deg,
+        #1e293b 0%,
+        #334155 20%,
+        #1e1b4b 40%,
+        #312e81 60%,
+        #1e293b 80%,
+        #1e293b 100%
+    );
+    background-size: 400% 400%;
+    animation: gradientShift 25s ease infinite;
+}
+
+body.dark-mode .gradient-overlay {
+    background: radial-gradient(
+            circle at 20% 50%,
+            rgba(99, 102, 241, 0.15) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 80% 80%,
+            rgba(139, 92, 246, 0.12) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 50% 20%,
+            rgba(59, 130, 246, 0.1) 0%,
+            transparent 50%
+        );
+    animation: overlayPulse 18s ease-in-out infinite;
+}
+
+/* Geometric Pattern - Dark Mode */
+body.dark-mode .geometric-pattern {
+    background-image: linear-gradient(
+            30deg,
+            rgba(99, 102, 241, 0.03) 12%,
+            transparent 12.5%,
+            transparent 87%,
+            rgba(99, 102, 241, 0.03) 87.5%,
+            rgba(99, 102, 241, 0.03)
+        ),
+        linear-gradient(
+            150deg,
+            rgba(139, 92, 246, 0.03) 12%,
+            transparent 12.5%,
+            transparent 87%,
+            rgba(139, 92, 246, 0.03) 87.5%,
+            rgba(139, 92, 246, 0.03)
+        ),
+        linear-gradient(
+            30deg,
+            rgba(59, 130, 246, 0.03) 12%,
+            transparent 12.5%,
+            transparent 87%,
+            rgba(59, 130, 246, 0.03) 87.5%,
+            rgba(59, 130, 246, 0.03)
+        ),
+        linear-gradient(
+            150deg,
+            rgba(99, 102, 241, 0.03) 12%,
+            transparent 12.5%,
+            transparent 87%,
+            rgba(99, 102, 241, 0.03) 87.5%,
+            rgba(99, 102, 241, 0.03)
+        );
+    opacity: 0.3;
+}
+
+/* Menu Card */
+body.dark-mode .menu-card {
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(99, 102, 241, 0.15) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4),
+        0 8px 16px rgba(99, 102, 241, 0.1);
+}
+
+body.dark-mode .menu-card:hover {
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5),
+        0 10px 20px rgba(99, 102, 241, 0.15);
+}
+
+/* Welcome Section */
+body.dark-mode .welcome-section {
+    border: none !important;
+}
+
+body.dark-mode .welcome-text {
+    color: #94a3b8;
+}
+
+body.dark-mode .text-primary {
+    color: #818cf8 !important;
+}
+
+/* Profile Avatar */
+body.dark-mode .profile-avatar {
+    border: none !important;
+}
+
+body.dark-mode .profile-avatar img {
+    border: none !important;
+    box-shadow: 0 8px 20px rgba(129, 140, 248, 0.3);
+}
+
+body.dark-mode .profile-avatar img:hover {
+    box-shadow: 0 12px 28px rgba(129, 140, 248, 0.4);
+}
+
+/* Menu Buttons */
+body.dark-mode .menu-btn {
+    background: rgba(51, 65, 85, 0.5);
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    color: #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .menu-btn::before {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(99, 102, 241, 0.15),
+        transparent
+    );
+}
+
+body.dark-mode .menu-btn:hover {
+    background: rgba(51, 65, 85, 0.7);
+    border-color: rgba(99, 102, 241, 0.3) !important;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
+    transform: translateY(-2px);
+    color: #e2e8f0;
+}
+
+body.dark-mode .menu-btn i {
+    color: #818cf8;
+}
+
+/* Specific button colors in dark mode - Soft */
+body.dark-mode .employee-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(129, 140, 248, 0.2) 0%,
+        rgba(167, 139, 250, 0.2) 100%
+    );
+    border-color: rgba(129, 140, 248, 0.3) !important;
+    color: #c7d2fe;
+}
+
+body.dark-mode .employee-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(129, 140, 248, 0.3) 0%,
+        rgba(167, 139, 250, 0.3) 100%
+    );
+    box-shadow: 0 8px 20px rgba(129, 140, 248, 0.3);
+    color: #e0e7ff;
+}
+
+body.dark-mode .schedule-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(249, 168, 212, 0.2) 0%,
+        rgba(251, 207, 232, 0.2) 100%
+    );
+    border-color: rgba(249, 168, 212, 0.3) !important;
+    color: #fbcfe8;
+}
+
+body.dark-mode .schedule-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(249, 168, 212, 0.3) 0%,
+        rgba(251, 207, 232, 0.3) 100%
+    );
+    box-shadow: 0 8px 20px rgba(249, 168, 212, 0.3);
+    color: #fce7f3;
+}
+
+body.dark-mode .planning-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(125, 211, 252, 0.2) 0%,
+        rgba(186, 230, 253, 0.2) 100%
+    ) !important;
+    border-color: rgba(125, 211, 252, 0.3) !important;
+    color: #bae6fd;
+}
+
+body.dark-mode .planning-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(125, 211, 252, 0.3) 0%,
+        rgba(186, 230, 253, 0.3) 100%
+    ) !important;
+    box-shadow: 0 8px 20px rgba(125, 211, 252, 0.3);
+    color: #e0f2fe;
+}
+
+body.dark-mode .machine-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(134, 239, 172, 0.2) 0%,
+        rgba(187, 247, 208, 0.2) 100%
+    ) !important;
+    border-color: rgba(134, 239, 172, 0.3) !important;
+    color: #bbf7d0;
+}
+
+body.dark-mode .machine-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(134, 239, 172, 0.3) 0%,
+        rgba(187, 247, 208, 0.3) 100%
+    ) !important;
+    box-shadow: 0 8px 20px rgba(134, 239, 172, 0.3);
+    color: #dcfce7;
+}
+
+body.dark-mode .moldshop-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(253, 164, 175, 0.2) 0%,
+        rgba(254, 205, 211, 0.2) 100%
+    ) !important;
+    border-color: rgba(253, 164, 175, 0.3) !important;
+    color: #fecdd3;
+}
+
+body.dark-mode .moldshop-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(253, 164, 175, 0.3) 0%,
+        rgba(254, 205, 211, 0.3) 100%
+    ) !important;
+    box-shadow: 0 8px 20px rgba(253, 164, 175, 0.3);
+    color: #ffe4e6;
+}
+
+body.dark-mode .control-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(196, 181, 253, 0.2) 0%,
+        rgba(221, 214, 254, 0.2) 100%
+    );
+    border-color: rgba(196, 181, 253, 0.3) !important;
+    color: #ddd6fe;
+}
+
+body.dark-mode .control-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(196, 181, 253, 0.3) 0%,
+        rgba(221, 214, 254, 0.3) 100%
+    );
+    box-shadow: 0 8px 20px rgba(196, 181, 253, 0.3);
+    color: #ede9fe;
+}
+
+/* Dashboard & Control Accents - Dark Mode */
+body.dark-mode .dashboard-assy-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(6, 182, 212, 0.2) 0%,
+        rgba(34, 211, 238, 0.2) 100%
+    );
+    border-color: rgba(6, 182, 212, 0.3) !important;
+    color: #67e8f9;
+}
+body.dark-mode .dashboard-assy-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(6, 182, 212, 0.3) 0%,
+        rgba(34, 211, 238, 0.3) 100%
+    );
+    box-shadow: 0 8px 20px rgba(6, 182, 212, 0.3);
+    color: #a5f3fc;
+}
+
+body.dark-mode .dashboard-inject-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(79, 70, 229, 0.2) 0%,
+        rgba(99, 102, 241, 0.2) 100%
+    );
+    border-color: rgba(79, 70, 229, 0.3) !important;
+    color: #a5b4fc;
+}
+body.dark-mode .dashboard-inject-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(79, 70, 229, 0.3) 0%,
+        rgba(99, 102, 241, 0.3) 100%
+    );
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+    color: #c7d2fe;
+}
+
+body.dark-mode .ploting-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(139, 92, 246, 0.2) 0%,
+        rgba(167, 139, 250, 0.2) 100%
+    );
+    border-color: rgba(139, 92, 246, 0.3) !important;
+    color: #ddd6fe;
+}
+body.dark-mode .ploting-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(139, 92, 246, 0.3) 0%,
+        rgba(167, 139, 250, 0.3) 100%
+    );
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+    color: #ede9fe;
+}
+
+body.dark-mode .production-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(254, 215, 170, 0.2) 0%,
+        rgba(254, 243, 199, 0.2) 100%
+    );
+    border-color: rgba(254, 215, 170, 0.3) !important;
+    color: #fef3c7;
+}
+
+body.dark-mode .production-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(254, 215, 170, 0.3) 0%,
+        rgba(254, 243, 199, 0.3) 100%
+    );
+    box-shadow: 0 8px 20px rgba(254, 215, 170, 0.3);
+    color: #fefce8;
+}
+
+body.dark-mode .oee-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(191, 219, 254, 0.2) 0%,
+        rgba(219, 234, 254, 0.2) 100%
+    );
+    border-color: rgba(191, 219, 254, 0.3) !important;
+    color: #dbeafe;
+}
+
+body.dark-mode .oee-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(191, 219, 254, 0.3) 0%,
+        rgba(219, 234, 254, 0.3) 100%
+    );
+    box-shadow: 0 8px 20px rgba(191, 219, 254, 0.3);
+    color: #eff6ff;
+}
+
+body.dark-mode .report-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(253, 230, 138, 0.2) 0%,
+        rgba(254, 243, 199, 0.2) 100%
+    ) !important;
+    border-color: rgba(253, 230, 138, 0.3) !important;
+    color: #fef3c7;
+}
+
+body.dark-mode .report-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(253, 230, 138, 0.3) 0%,
+        rgba(254, 243, 199, 0.3) 100%
+    ) !important;
+    box-shadow: 0 8px 20px rgba(253, 230, 138, 0.3);
+    color: #fefce8;
+}
+
+body.dark-mode .logout-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(252, 165, 165, 0.2) 0%,
+        rgba(254, 202, 202, 0.2) 100%
+    );
+    border-color: rgba(252, 165, 165, 0.3) !important;
+    color: #fecaca;
+}
+
+body.dark-mode .logout-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(252, 165, 165, 0.3) 0%,
+        rgba(254, 202, 202, 0.3) 100%
+    );
+    border-color: rgba(252, 165, 165, 0.4) !important;
+    box-shadow: 0 8px 20px rgba(252, 165, 165, 0.3);
+    color: #fee2e2;
+}
+
+/* Footer */
+body.dark-mode .footer {
+    background-color: rgba(30, 41, 59, 0.8) !important;
+    border-top: 1px solid rgba(99, 102, 241, 0.15) !important;
+}
+
+body.dark-mode .footer .text-muted {
+    color: #94a3b8 !important;
+}
+
+/* Smooth transitions */
+body,
+.menu-card,
+.menu-btn,
+.footer,
+.animated-bg,
+.gradient-overlay,
+.geometric-pattern {
+    transition: all 0.3s ease;
+}

@@ -97,15 +97,21 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <li class="nav-item">
+                            <a href="{{ route('produksi.index') }}" class="nav-link">
+                                <i class="nav-icon fas fa-camera"></i>
+                                <p>Scan QR Code Product</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{{ route('qrcode.index') }}" class="nav-link active">
                                 <i class="nav-icon fas fa-qrcode"></i>
                                 <p>Generate QR Code</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('produksi.index') }}" class="nav-link">
-                                <i class="nav-icon fas fa-camera"></i>
-                                <p>Scan Product</p>
+                            <a href="{{ route('input-produksi.index') }}" class="nav-link">
+                                <i class="nav-icon fas fa-plus"></i>
+                                <p>Input Produksi</p>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -238,11 +244,11 @@
 
         <!-- Footer -->
         <footer class="main-footer">
-            <div class="float-right d-none d-sm-inline">
-                DIGIPRO v1.0
+            <!-- To the right -->
+            <div class="container text-center">
+                <span class="text-muted">© {{ date('Y') }} All rights reserved | IT Department PT Mada Wikri Tunggal</span>
             </div>
-            <strong>Copyright &copy; {{ date('Y') }} <a href="#">Digital Production</a>.</strong> All rights reserved.
-        </footer>
+        </footer> 
     </div>
 
     <!-- jQuery -->

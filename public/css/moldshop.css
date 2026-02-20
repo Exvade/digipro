@@ -1,0 +1,609 @@
+/* Moldshop CSS */
+.modal-header.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.modal-header.bg-warning .close {
+    color: #212529 !important;
+    opacity: 0.8;
+}
+
+.modal-header.bg-warning .close:hover {
+    opacity: 1;
+}
+
+/* Ensure modal content is visible */
+.modal-content {
+    background-color: white !important;
+    color: black !important;
+}
+
+.modal-body {
+    background-color: white !important;
+    color: black !important;
+}
+
+.modal-footer {
+    background-color: white !important;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Form styling */
+.form-group label {
+    color: black !important;
+    font-weight: bold;
+}
+
+.form-control {
+    background-color: white !important;
+    color: black !important;
+    border: 1px solid #ced4da;
+}
+
+.form-control:focus {
+    background-color: white !important;
+    color: black !important;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* DataTable styling */
+.table thead th {
+    background-color: #007bff;
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Button styling */
+.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+    color: #212529;
+}
+
+/* Modal specific fixes - simplified */
+.modal.show {
+    display: block !important;
+}
+
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+    transform: translate(0, -50px);
+}
+
+.modal.fade.show .modal-dialog {
+    transform: none;
+}
+
+/* AdminLTE compatibility */
+/* AdminLTE compatibility - Removed incorrect white background enforcement for dark mode */
+
+/* ===== Table Styles ===== */
+.table th,
+.table td {
+    vertical-align: middle;
+}
+
+.table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.table tbody td {
+    font-size: 0.9rem;
+}
+
+/* Card Styles */
+.card-outline.card-primary {
+    border-top: 3px solid #007bff;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.card-title {
+    font-weight: 600;
+    color: #495057;
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: 0.5rem;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Badge Styles */
+.badge {
+    font-size: 0.85rem;
+    padding: 0.4em 0.7em;
+    font-weight: 500;
+}
+
+.badge-success {
+    background-color: #28a745;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+}
+
+/* Button Action Styles */
+.d-flex.gap-1 {
+    gap: 0.5rem !important;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+    color: #212529;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+    color: #fff;
+}
+
+/* Pagination Styles */
+.pagination-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.pagination-wrapper .pagination {
+    margin-bottom: 0;
+}
+
+.pagination-wrapper .pagination .page-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    min-width: 38px;
+    text-align: center;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    color: #007bff;
+    background-color: #fff;
+    transition: all 0.2s ease;
+}
+
+.pagination-wrapper .pagination .page-link:hover {
+    color: #0056b3;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.pagination-wrapper .pagination .page-item.active .page-link {
+    z-index: 1;
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+    font-weight: 600;
+}
+
+.pagination-wrapper .pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    cursor: auto;
+    background-color: #fff;
+    border-color: #dee2e6;
+    opacity: 0.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* ===== DARK MODE STYLES (Consolidated from mesin.css) ===== */
+
+/* Dark Mode Toggle Switch Styling */
+.custom-control-label {
+    cursor: pointer;
+    user-select: none;
+}
+
+.custom-control-label::before {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+#darkModeSwitch:checked ~ .custom-control-label::before {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+#darkModeIcon {
+    font-size: 14px;
+    margin-left: 5px;
+    transition: all 0.3s ease;
+}
+
+/* Dark Mode Base */
+html,
+body {
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
+}
+
+html.dark-mode,
+body.dark-mode {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+/* Ensure no white flash on page load */
+html.dark-mode {
+    background-color: #1a1a1a !important;
+}
+
+/* Navbar Dark Mode */
+body.dark-mode .main-header {
+    background-color: #1f1f1f !important;
+    border-bottom: 1px solid #333333 !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .navbar-light .navbar-nav .nav-link {
+    color: #e0e0e0 !important;
+}
+
+body.dark-mode .navbar-light .navbar-nav .nav-link i,
+body.dark-mode .navbar-light .navbar-nav .nav-link span {
+    color: #ffffff !important;
+}
+
+body.dark-mode .navbar-light .navbar-nav .nav-link:hover {
+    color: #4a90e2 !important;
+}
+
+body.dark-mode .dropdown-menu {
+    background-color: #2d2d2d !important;
+    border-color: #404040 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.dark-mode .dropdown-item {
+    color: #e0e0e0 !important;
+}
+
+body.dark-mode .dropdown-item:hover,
+body.dark-mode .dropdown-item:focus {
+    background-color: #3a3a3a !important;
+    color: #ffffff !important;
+}
+
+/* Content wrapper */
+body.dark-mode .content-wrapper {
+    background-color: #1a1a1a;
+}
+
+/* Cards */
+body.dark-mode .card {
+    background-color: #2d2d2d;
+    border-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .card-header {
+    background-color: #252525;
+    border-bottom-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .card-title {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+body.dark-mode .card-body {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+}
+
+/* Tables */
+body.dark-mode .table {
+    color: #e0e0e0;
+    background-color: #2d2d2d;
+}
+
+body.dark-mode .table thead th {
+    background-color: #1a4d6d !important;
+    color: #ffffff !important;
+    border-color: #155a7a;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .table tbody td {
+    color: #e0e0e0 !important;
+    border-color: #404040;
+}
+
+body.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #333333;
+}
+
+body.dark-mode .table-striped tbody tr:nth-of-type(even) {
+    background-color: #2d2d2d;
+}
+
+body.dark-mode .table-hover tbody tr:hover {
+    background-color: #3a3a3a;
+    color: #ffffff;
+}
+
+/* Buttons */
+body.dark-mode .btn-outline-secondary {
+    color: #e0e0e0;
+    border-color: #6c757d;
+}
+
+body.dark-mode .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: #ffffff;
+}
+
+/* Forms */
+body.dark-mode .form-control {
+    background-color: #3a3a3a;
+    border-color: #555555;
+    color: #e0e0e0;
+}
+
+body.dark-mode .form-control:focus {
+    background-color: #404040;
+    border-color: #6c757d;
+    color: #e0e0e0;
+    box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+}
+
+body.dark-mode .form-control::placeholder {
+    color: #888888;
+    opacity: 1;
+}
+
+/* Select Dropdown */
+body.dark-mode select.form-control {
+    background-color: #3a3a3a !important;
+    color: #e0e0e0 !important;
+    border-color: #555555 !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.75rem center !important;
+    background-size: 16px 12px !important;
+    padding: 0.375rem 3rem 0.375rem 0.75rem !important;
+    height: auto !important;
+    min-height: 38px !important;
+    line-height: 1.5 !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+}
+
+body.dark-mode select.form-control:focus {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236c757d' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-color: #404040 !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode select.form-control option {
+    background-color: #3a3a3a !important;
+    color: #e0e0e0 !important;
+    padding: 8px !important;
+}
+
+/* Modals in Dark Mode */
+body.dark-mode .modal-content {
+    background-color: #2d2d2d !important;
+    color: #e0e0e0 !important;
+    border: 2px solid #4a90e2 !important;
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.8),
+        0 0 20px rgba(74, 144, 226, 0.3) !important;
+    border-radius: 8px !important;
+}
+
+body.dark-mode .modal-header {
+    background: linear-gradient(135deg, #1a4d6d 0%, #2d5a7b 100%) !important;
+    border-bottom: 2px solid #4a90e2 !important;
+    border-radius: 6px 6px 0 0 !important;
+    padding: 1rem 1.25rem !important;
+}
+
+/* Override specific bg classes in modal header */
+body.dark-mode .modal-header.bg-primary,
+body.dark-mode .modal-header.bg-warning,
+body.dark-mode .modal-header.bg-success,
+body.dark-mode .modal-header.bg-danger,
+body.dark-mode .modal-header.bg-info {
+    background: linear-gradient(135deg, #1a4d6d 0%, #2d5a7b 100%) !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .modal-title {
+    color: #ffffff !important;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .modal-title i {
+    color: #4a90e2;
+}
+
+body.dark-mode .modal-body {
+    background-color: #2d2d2d !important;
+    color: #e0e0e0 !important;
+    padding: 1.5rem 1.25rem !important;
+}
+
+body.dark-mode .modal-footer {
+    background-color: #252525 !important;
+    border-top: 2px solid #404040 !important;
+    border-radius: 0 0 6px 6px !important;
+    padding: 1rem 1.25rem !important;
+}
+
+body.dark-mode .close {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    opacity: 0.9;
+    font-size: 1.5rem;
+}
+
+body.dark-mode .close:hover {
+    color: #ffffff !important;
+    opacity: 1;
+}
+
+/* Modal Form Labels */
+body.dark-mode .modal label,
+body.dark-mode .modal-body label {
+    color: #ffffff !important;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+/* Modal Form Controls */
+body.dark-mode .modal .form-control {
+    background-color: #3a3a3a !important;
+    border: 1.5px solid #555555 !important;
+    color: #ffffff !important;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .modal .form-control:focus {
+    background-color: #404040 !important;
+    border-color: #4a90e2 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25) !important;
+}
+
+body.dark-mode .modal .form-control::placeholder {
+    color: #999999 !important;
+}
+
+/* Modal Select Dropdown */
+body.dark-mode .modal select.form-control {
+    background-color: #3a3a3a !important;
+    color: #ffffff !important;
+    border: 1.5px solid #555555 !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.75rem center !important;
+    background-size: 16px 12px !important;
+    padding: 0.375rem 3rem 0.375rem 0.75rem !important;
+    height: auto !important;
+    min-height: 38px !important;
+    line-height: 1.5 !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+}
+
+body.dark-mode .modal select.form-control:focus {
+    background-color: #404040 !important;
+    border-color: #4a90e2 !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%234a90e2' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25) !important;
+}
+
+body.dark-mode .modal select.form-control option {
+    background-color: #3a3a3a !important;
+    color: #ffffff !important;
+    padding: 8px !important;
+}
+
+/* Modal Buttons */
+body.dark-mode .modal .btn-secondary,
+body.dark-mode .modal .btn-outline-secondary {
+    background-color: #4a4a4a !important;
+    border-color: #555555 !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .modal .btn-secondary:hover,
+body.dark-mode .modal .btn-outline-secondary:hover {
+    background-color: #5a5a5a !important;
+    border-color: #666666 !important;
+}
+
+body.dark-mode .modal .btn-primary,
+body.dark-mode .modal .btn-success,
+body.dark-mode .modal .btn-warning {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%) !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3) !important;
+}
+
+body.dark-mode .modal .btn-primary:hover,
+body.dark-mode .modal .btn-success:hover,
+body.dark-mode .modal .btn-warning:hover {
+    background: linear-gradient(135deg, #357abd 0%, #2868a8 100%) !important;
+    box-shadow: 0 6px 16px rgba(74, 144, 226, 0.4) !important;
+}

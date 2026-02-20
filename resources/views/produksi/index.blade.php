@@ -27,7 +27,7 @@
                     <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="{{ route('produksi.index') }}" class="nav-link">Scan QR Code</a>
+                    <a href="{{ route('produksi.index') }}" class="nav-link">Scan QR Code Product</a>
                 </li>
             </ul>
 
@@ -87,13 +87,19 @@
                         <li class="nav-item">
                             <a href="{{ route('produksi.index') }}" class="nav-link active">
                                 <i class="nav-icon fas fa-camera"></i>
-                                <p>Scan QR Code</p>
+                                <p>Scan QR Code Product</p>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="{{ route('qrcode.index') }}" class="nav-link">
                                 <i class="nav-icon fas fa-qrcode"></i>
                                 <p>Generate QR Code</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('input-produksi.index') }}" class="nav-link">
+                                <i class="nav-icon fas fa-plus"></i>
+                                <p>Input Produksi</p>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -230,11 +236,11 @@
 
         <!-- Footer -->
         <footer class="main-footer">
-            <div class="float-right d-none d-sm-inline">
-                DIGIPRO v1.0
+            <!-- To the right -->
+            <div class="container text-center">
+                <span class="text-muted">© {{ date('Y') }} All rights reserved | IT Department PT Mada Wikri Tunggal</span>
             </div>
-            <strong>Copyright &copy; {{ date('Y') }} <a href="#">Digital Production</a>.</strong> All rights reserved.
-        </footer>
+        </footer> 
     </div>
 
     <!-- Modal for QR Scanner -->
@@ -244,7 +250,7 @@
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">
                         <i class="fas fa-qrcode mr-2"></i>
-                        Scan QR Code
+                        Scan QR Code Product
                     </h5>
                     <button type="button" class="close text-white" data-dismiss="modal">
                         <span>&times;</span>
@@ -257,6 +263,19 @@
                             <strong>Penting:</strong> Hanya QR code yang di-generate dari sistem yang dapat di-scan
                         </div>
                         <div id="cameraContainer" class="mb-3">
+                            <div id="cameraLoading" class="text-center py-4" style="display: none;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Menginisialisasi kamera...</p>
+                            </div>
+                            
+                            <!-- Camera Status Indicator -->
+                            <div id="cameraStatus" class="alert alert-info mb-2" style="display: none;">
+                                <i class="fas fa-camera mr-2"></i>
+                                <span id="cameraStatusText">Menggunakan kamera belakang</span>
+                            </div>
+                            
                             <div id="interactive" class="viewport border rounded"></div>
                         </div>
                         <div class="alert alert-info">
@@ -278,7 +297,7 @@
                     </button>
                     <button type="button" class="btn btn-primary" id="switchCameraBtn" style="display: none;">
                         <i class="fas fa-sync-alt mr-2"></i>
-                        Ganti Kamera
+                        <span id="cameraButtonText">Ganti Kamera</span>
                     </button>
                 </div>
             </div>
