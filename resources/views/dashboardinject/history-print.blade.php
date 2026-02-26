@@ -387,8 +387,8 @@
                     </td>
                     <td>
                         <div class="d-flex flex-column" style="line-height: 1.2;">
-                            <span class="font-weight-bold">{{ $event->user->name ?? $event->user->nama ?? '-' }}</span><br>
-                            <small class="text-muted" style="font-size: 7pt; color: #666;">{{ strtolower($event->user->role ?? '-') }}</small>
+                            <span class="font-weight-bold">{{ $event->user?->name ?? ($event->user?->nama ?? '-') }}</span><br>
+                            <small class="text-muted" style="font-size: 7pt; color: #666;">{{ strtolower($event->user?->role ?? '-') }}</small>
                         </div>
                     </td>
                     <td class="text-center">{{ $start->format('H:i:s') }}</td>

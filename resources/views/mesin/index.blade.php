@@ -26,10 +26,15 @@
 @endsection
 
 @section('content')
+@php
+$user = Auth::user();
+$isRMStaff = $user->role === 'staff' && $user->departemen === 'Repair & Maintenance';
+@endphp
+
 {{-- Action Button --}}
 <div class="row mb-3">
     <div class="col-12 text-right">
-        @if(!in_array(Auth::user()->role, ['leader', 'staff']))
+        @if(!in_array($user->role, ['leader', 'staff']) || $isRMStaff)
         <button type="button" class="btn btn-primary btn-create-mesin">
             <i class="fas fa-plus"></i> Tambah Mesin
         </button>
@@ -75,7 +80,7 @@
                                 <th>Tonase</th>
                                 <th>Status</th>
                                 <th>Keterangan</th>
-                                @if(!in_array(Auth::user()->role, ['staff', 'operator']))
+                                @if(!in_array($user->role, ['staff', 'operator']) || $isRMStaff)
                                 <th style="width:120px;">Aksi</th>
                                 @endif
                             </tr>
@@ -103,10 +108,10 @@
                                     @endif
                                 </td>
                                 <td>{{ $mesin->keterangan ?? '-' }}</td>
-                                @if(!in_array(Auth::user()->role, ['staff', 'operator']))
+                                @if(!in_array($user->role, ['staff', 'operator']) || $isRMStaff)
                                 <td class="text-center">
                                     <div class="d-flex gap-1 justify-content-center">
-                                        @if(!in_array(Auth::user()->role, ['leader', 'staff', 'operator']))
+                                        @if(!in_array($user->role, ['leader', 'staff', 'operator']) || $isRMStaff)
                                         <button type="button"
                                             class="btn btn-sm btn-info btn-edit-mesin"
                                             title="Edit"
@@ -115,7 +120,7 @@
                                         </button>
                                         @endif
 
-                                        @if(in_array(Auth::user()->role, ['leader']))
+                                        @if(in_array($user->role, ['leader']))
                                         <button type="button"
                                             class="btn btn-sm btn-info btn-edit-mesin"
                                             title="Update Status"
@@ -124,7 +129,7 @@
                                         </button>
                                         @endif
 
-                                        @if(!in_array(Auth::user()->role, ['leader', 'staff', 'operator']))
+                                        @if(!in_array($user->role, ['leader', 'staff', 'operator']))
                                         <button type="button"
                                             class="btn btn-sm btn-danger btn-delete-mesin"
                                             title="Hapus"

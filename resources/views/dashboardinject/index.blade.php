@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="{{ asset('css/dashboard-inject.css') }}">
 <link rel="stylesheet" href="{{ asset('css/dashboard-inject-oee.css') }}">
 <link rel="stylesheet" href="{{ asset('css/dashboard-inject-tooltip.css') }}">
+<link rel="stylesheet" href="{{ asset('css/dashboard-inject-responsive-custom.css') }}">
 @endpush
 
 @section('content')
@@ -106,61 +107,7 @@
     </div>
 </div>
 
-<style>
-    .col-lg-custom-5 {
-        flex: 0 0 50%;
-        max-width: 50%;
-    }
 
-    @media (min-width: 768px) {
-        .col-lg-custom-5 {
-            flex: 0 0 33.333333%;
-            max-width: 33.333333%;
-        }
-    }
-
-    @media (min-width: 992px) {
-        .col-lg-custom-5 {
-            flex: 0 0 20% !important;
-            max-width: 20% !important;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .info-boxes-row {
-            margin-left: -5px;
-            margin-right: -5px;
-        }
-
-        .info-boxes-row [class*="col-"] {
-            padding-left: 5px;
-            padding-right: 5px;
-        }
-    }
-
-    .aggregate-hours-value {
-        font-size: 1.1rem;
-        font-weight: 800;
-        color: #2c3e50;
-        letter-spacing: 0.5px;
-        font-family: 'Courier New', Courier, monospace;
-    }
-
-    body.dark-mode .aggregate-hours-value {
-        color: #ffffff;
-    }
-
-    @media (max-width: 576px) {
-        .aggregate-hours-value {
-            font-size: 0.9rem;
-        }
-
-        .aggregate-hours-container {
-            padding-top: 2px !important;
-            margin-top: 4px !important;
-        }
-    }
-</style>
 
 <div class="row">
     <!-- Kolom daftar mesin -->
@@ -178,9 +125,6 @@
                         <button class="filter-btn" data-limit="16">16</button>
                         <button class="filter-btn active" data-limit="all">Semua</button>
                     </div>
-                    <button id="shareWhatsappBtn" class="btn btn-sm btn-success rounded-pill ml-2 px-3 shadow-sm" title="Bagikan ke WhatsApp">
-                        <i class="fab fa-whatsapp mr-1"></i> <span class="d-none d-md-inline">WhatsApp</span>
-                    </button>
                 </div>
             </div>
             <div class="card-body p-2">

@@ -118,6 +118,7 @@
                     </div>
                 </div>
                 <!-- Stepper/Progress Bar -->
+                @auth
                 @if(Auth::user()->role !== 'staff')
                 <div class="mb-4" id="checksheet-form-section" style="display: none;">
                     <div class="progress">
@@ -501,6 +502,7 @@
                     <strong>Informasi:</strong> Role Staff Produksi hanya memiliki akses lihat. Pengisian checksheet hanya dapat dilakukan oleh Leader.
                 </div>
                 @endif
+                @endauth
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">

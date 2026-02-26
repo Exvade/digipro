@@ -144,20 +144,22 @@
                     </div>
                 </button>
 
-                <div class="divider-container my-3">
-                    <div class="divider-line"></div>
-                    <span class="divider-text">Atau</span>
-                    <div class="divider-line"></div>
-                </div>
-
-                <!-- Public Dashboard Button -->
-                <a href="{{ route('dashboard.inject.public') }}" class="btn btn-outline-primary btn-block animated-button py-2">
-                    <span class="button-text">
-                        <i class="fas fa-chart-pie mr-2"></i>
-                        Lihat Dashboard
-                    </span>
-                </a>
             </form>
+
+            <div class="divider-container my-3">
+                <div class="divider-line"></div>
+                <span class="divider-text">Atau</span>
+                <div class="divider-line"></div>
+            </div>
+
+            <!-- Public Dashboard Button -->
+            <a href="{{ route('dashboard.inject.public') }}" class="btn btn-outline-primary btn-block animated-button py-2">
+                <span class="button-text">
+                    <i class="fas fa-chart-pie mr-2"></i>
+                    Lihat Dashboard
+                </span>
+            </a>
+
 
             <!-- Footer -->
             <div class="login-footer">

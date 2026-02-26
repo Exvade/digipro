@@ -568,8 +568,8 @@
 
 @push('scripts')
 @php
-$currentUserName = auth()->user()->nama ?? 'Guest';
-$currentUserRole = auth()->user()->role ?? 'Viewer';
+$currentUserName = auth()->user()?->nama ?? 'Guest';
+$currentUserRole = auth()->user()?->role ?? 'Viewer';
 @endphp
 <div id="history-log-data" data-logs="{{ base64_encode(json_encode($historyLog)) }}" style="display: none;"></div>
 

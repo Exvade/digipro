@@ -50,7 +50,10 @@ class MesinController extends Controller
      */
     public function store(Request $request)
     {
-        if (in_array(auth()->user()->role, ['leader', 'staff'])) {
+        $user = auth()->user();
+        $isRMStaff = $user->role === 'staff' && $user->departemen === 'Repair & Maintenance';
+
+        if (in_array($user->role, ['leader', 'staff']) && !$isRMStaff) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -139,7 +142,10 @@ class MesinController extends Controller
      */
     public function edit(Mesin $mesin)
     {
-        if (in_array(auth()->user()->role, ['staff', 'operator'])) {
+        $user = auth()->user();
+        $isRMStaff = $user->role === 'staff' && $user->departemen === 'Repair & Maintenance';
+
+        if (in_array($user->role, ['staff', 'operator']) && !$isRMStaff) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -158,14 +164,18 @@ class MesinController extends Controller
     {
         Log::critical('DEBUG: MesinController@update hit!', $request->all());
 
-        if (auth()->user()->role === 'staff') {
+        $user = auth()->user();
+        $isRMStaff = $user->role === 'staff' && $user->departemen === 'Repair & Maintenance';
+
+        if ($user->role === 'staff' && !$isRMStaff) {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda tidak memiliki hak akses untuk mengedit data mesin.'
             ], 403);
         }
 
-        if (auth()->user()->role === 'leader') {
+        // Leaders can only update status/keterangan/reason, but RM Staff can update everything
+        if ($user->role === 'leader' && !$isRMStaff) {
             $request->merge([
                 'nama_mesin' => $mesin->nama_mesin,
                 'brand_mesin' => $mesin->brand_mesin,

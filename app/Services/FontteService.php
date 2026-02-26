@@ -267,7 +267,8 @@ class FontteService
 
         // 🔴 BREAKDOWN SECTION (Non-Running First)
         if (!empty($groups['BREAKDOWN'])) {
-            $message .= "🔴 *DAFTAR MESIN BREAKDOWN*\n";
+            $count = count($groups['BREAKDOWN']);
+            $message .= "🔴 *DAFTAR MESIN BREAKDOWN ({$count} MC)*\n";
             foreach ($groups['BREAKDOWN'] as $row) {
                 $message .= "{$row}\n";
             }
@@ -276,7 +277,8 @@ class FontteService
 
         // 🟡 STANDBY SECTION
         if (!empty($groups['STANDBY'])) {
-            $message .= "🟡 *DAFTAR MESIN STANDBY*\n";
+            $count = count($groups['STANDBY']);
+            $message .= "🟡 *DAFTAR MESIN STANDBY ({$count} MC)*\n";
             foreach ($groups['STANDBY'] as $row) {
                 $message .= "{$row}\n";
             }
@@ -285,7 +287,8 @@ class FontteService
 
         // ⚫ STOP SECTION
         if (!empty($groups['STOP'])) {
-            $message .= "⚫ *DAFTAR MESIN STOP (OFF)*\n";
+            $count = count($groups['STOP']);
+            $message .= "⚫ *DAFTAR MESIN STOP (OFF) ({$count} MC)*\n";
             foreach ($groups['STOP'] as $row) {
                 $message .= "{$row}\n";
             }
@@ -294,7 +297,8 @@ class FontteService
 
         // 🟢 RUNNING SECTION (Running Last)
         if (!empty($groups['RUNNING'])) {
-            $message .= "🟢 *DAFTAR MESIN RUNNING*\n";
+            $count = count($groups['RUNNING']);
+            $message .= "🟢 *DAFTAR MESIN RUNNING ({$count} MC)*\n";
             foreach ($groups['RUNNING'] as $row) {
                 $message .= "{$row}\n";
             }

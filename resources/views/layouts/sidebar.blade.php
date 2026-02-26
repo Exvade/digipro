@@ -37,7 +37,7 @@
                 data-accordion="false">
 
                 <!-- Mold Shop Section -->
-                @if (!$isRestrictedPloting && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant']) || ($user->role === 'staff' && $user->departemen === 'Moldshop')))
+                @if (!$isRestrictedPloting && $user && ($user->role !== 'super_admin' && (in_array($user->role, ['kabag', 'manager_plant']) || ($user->role === 'staff' && $user->departemen === 'Moldshop'))))
                 <li class="nav-header">MOLD SHOP</li>
                 <li class="nav-item">
                     <a href="{{ route('moldshop.index') }}" class="nav-link {{ request()->routeIs('moldshop.index') ? 'active' : '' }}">
@@ -51,6 +51,8 @@
                         <p>Riwayat Mold</p>
                     </a>
                 </li>
+                @elseif (!$isRestrictedPloting && $user->role === 'super_admin')
+                {{-- Only show history for super_admin in moldshop related sections if needed, but not in main sidebar master data --}}
                 @endif
 
                 <!-- Master Data Section -->
@@ -64,6 +66,14 @@
                         <p>Data User</p>
                     </a>
                 </li>
+                @if ($user->role === 'super_admin')
+                <li class="nav-item">
+                    <a href="{{ route('moldshop.index') }}" class="nav-link {{ request()->routeIs('moldshop.index') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-tools"></i>
+                        <p>Data Mold</p>
+                    </a>
+                </li>
+                @endif
                 @endif
 
                 <li class="nav-item">

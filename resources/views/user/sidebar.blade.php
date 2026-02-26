@@ -55,6 +55,17 @@
                         <p>Data Dokumen</p>
                     </a>
                 </li>
+
+
+                @if ($user->role === 'super_admin')
+                <li class="nav-item">
+                    <a href="{{ route('moldshop.index') }}" class="nav-link {{ request()->routeIs('moldshop.index') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-tools"></i>
+                        <p>Data Mold</p>
+                    </a>
+                </li>
+                @endif
+
                 @endif
                 @endif
             </ul>
