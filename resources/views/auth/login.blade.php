@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/login.css') }}?v={{ time() }}" rel="stylesheet">
+    <link href="{{ asset('css/login.css') }}" rel="stylesheet">
 
     <style>
         /* CRITICAL: High-priority override for browser-default password icons */
@@ -133,6 +133,16 @@
                     @enderror
                 </div>
 
+                <!-- Remember Me -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="remember" name="remember">
+                        <label class="custom-control-label text-sm text-gray-600" for="remember">
+                            {{ __('Ingat Saya') }}
+                        </label>
+                    </div>
+                </div>
+
                 <!-- Login Button -->
                 <button type="submit" class="btn btn-login btn-block animated-button">
                     <span class="button-text">
@@ -178,7 +188,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Custom JavaScript -->
-    <script src="{{ asset('js/login.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/login.js') }}"></script>
 </body>
 
 </html>

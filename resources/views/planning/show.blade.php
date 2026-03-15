@@ -175,7 +175,7 @@
                                         <tbody>
                                             <tr id="shift-siang-row">
                                                 @for ($i = 15; $i <= 22; $i++)
-                                                    <td id="siang_jam_{{ $i }}">0</td>
+                                                    <td id="siang_jam_{{ sprintf('%02d', $i) }}">0</td>
                                                     @endfor
                                             </tr>
                                         </tbody>

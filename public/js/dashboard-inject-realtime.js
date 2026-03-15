@@ -7,7 +7,7 @@
     'use strict';
     
     // Configuration
-    const REFRESH_INTERVAL = 1000; // 1 second for realtime updates
+    const REFRESH_INTERVAL = 10000; // 10 seconds for realtime updates
     const API_URL = '/dashboard/inject/realtime-production';
     let refreshTimer = null;
     

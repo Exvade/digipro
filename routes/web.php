@@ -81,32 +81,28 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    // Print/Cetak routes (must be before other planning routes)
     Route::prefix('planning')->name('planning.')->group(function () {
-        Route::get('/cetak', [PlanningController::class, 'cetak'])->name('cetak');
-        Route::get('/cetak/tanggal', [PlanningController::class, 'cetakByTanggal'])->name('cetak.tanggal');
-        Route::get('/cetak/range', [PlanningController::class, 'cetakByRange'])->name('cetak.range');
-
-        // Import Excel routes
-        Route::get('/download-template', [PlanningController::class, 'downloadTemplate'])->name('download-template');
-        Route::post('/import-excel', [PlanningController::class, 'importExcel'])->name('import-excel');
-
-        // Approval routes
-        Route::get('/approval/page', [PlanningController::class, 'approvalPage'])->name('approval.page');
-        Route::post('/approval', [PlanningController::class, 'approval'])->name('approval');
-
-        // QR Code route (must be before /planning/{id})
-        Route::get('/{id}/qrcode/{type}', [PlanningController::class, 'secureQrCode'])->name('qrcode.secure');
-
-        // Standard CRUD routes
+        // Core CRUD
         Route::get('/', [PlanningController::class, 'index'])->name('index');
         Route::get('/history', [PlanningController::class, 'history'])->name('history');
-        Route::get('/create', [PlanningController::class, 'create'])->name('create');
         Route::post('/', [PlanningController::class, 'store'])->name('store');
-        Route::get('/{planning}/edit', [PlanningController::class, 'edit'])->name('edit');
         Route::put('/{planning}', [PlanningController::class, 'update'])->name('update');
         Route::delete('/{planning}', [PlanningController::class, 'destroy'])->name('destroy');
         Route::get('/{id}', [PlanningController::class, 'show'])->name('show');
+        Route::get('/{id}/qrcode/{type}', [PlanningController::class, 'secureQrCode'])->name('qrcode.secure');
+
+        // Approval
+        Route::get('/approval/page', [\App\Http\Controllers\PlanningApprovalController::class, 'approvalPage'])->name('approval.page');
+        Route::post('/approval', [\App\Http\Controllers\PlanningApprovalController::class, 'approval'])->name('approval');
+
+        // Reports / Printing
+        Route::get('/cetak', [\App\Http\Controllers\PlanningReportController::class, 'cetak'])->name('cetak');
+        Route::get('/cetak/tanggal', [\App\Http\Controllers\PlanningReportController::class, 'cetakByTanggal'])->name('cetak.tanggal');
+        Route::get('/cetak/range', [\App\Http\Controllers\PlanningReportController::class, 'cetakByRange'])->name('cetak.range');
+
+        // Excel Import/Export
+        Route::get('/download-template', [\App\Http\Controllers\PlanningExcelController::class, 'downloadTemplate'])->name('download-template');
+        Route::post('/import-excel', [\App\Http\Controllers\PlanningExcelController::class, 'importExcel'])->name('import-excel');
     });
 
     /*

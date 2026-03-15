@@ -115,52 +115,39 @@ class FontteService
     public function formatMachineStatusMessage($mesin, $oldStatus, $newStatus, $oldReason = null, $newReason = null, $keterangan = null)
     {
         $statusLabels = [
-            'running' => '🟢 RUNNING',
-            'stop' => '🟡 STAND BY',
-            'maintenance' => '🔴 BREAKDOWN',
-            'offline' => '⚫ OFF'
+            'running' => ['label' => 'RUNNING', 'emoji' => '🟢'],
+            'stop' => ['label' => 'STAND BY', 'emoji' => '🟡'],
+            'maintenance' => ['label' => 'BREAKDOWN', 'emoji' => '🔴'],
+            'offline' => ['label' => 'STOP / OFF', 'emoji' => '⚫']
         ];
 
+        $oldInfo = $statusLabels[$oldStatus] ?? ['label' => strtoupper($oldStatus), 'emoji' => ''];
+        $newInfo = $statusLabels[$newStatus] ?? ['label' => strtoupper($newStatus), 'emoji' => ''];
 
-        // Format Old Status
-        $baseOld = $statusLabels[$oldStatus] ?? strtoupper($oldStatus);
-        if ($oldStatus !== 'running' && $oldReason) {
-            $oldStatusText = "{$baseOld} ({$oldReason})";
-        } else {
-            $oldStatusText = $baseOld;
-        }
+        $oldText = $oldInfo['label'] . ($oldReason ? " ({$oldReason})" : "");
+        $newText = $newInfo['label'] . ($newReason ? " ({$newReason})" : "");
 
-        // Format New Status
-        $baseNew = $statusLabels[$newStatus] ?? strtoupper($newStatus);
-        if ($newStatus !== 'running' && $newReason) {
-            $newStatusText = "{$baseNew} ({$newReason})";
-        } else {
-            $newStatusText = $baseNew;
-        }
+        $now = now()->locale('id');
+        $message = "🏭 *LAPORAN UPDATE STATUS MESIN*\n";
+        $message .= "*PT MADA WIKRI TUNGGAL – PLANT 3*\n";
+        $message .= "🗓 " . $now->translatedFormat('l, d F Y') . "\n";
+        $message .= "⏰ " . $now->format('H.i') . " WIB\n\n";
 
-        // Get User Name
-        $user = auth()->user();
-        $userName = $user ? ($user->name ?? $user->username ?? 'User') : 'System';
-
-        // Construct Message
-        $message = "🔔 *UPDATE STATUS MESIN*\n";
-        $message .= "========================\n";
-        $message .= "⚙️ *Info Mesin*\n";
-        $message .= "Nama : *{$mesin->nama_mesin}*\n";
-        $message .= "Brand : {$mesin->brand_mesin}\n";
-        $message .= "Tonase : {$mesin->tonase_mesin} Ton\n\n";
-
-        $message .= "➡️ *Perubahan*\n";
-        $message .= "Dari : {$oldStatusText}\n";
-        $message .= "Ke   : *{$newStatusText}*\n\n";
+        $message .= "━━━━━━━━━━━━━━━━━━\n\n";
+        $message .= "🔄 *PERUBAHAN STATUS*\n";
+        $message .= "🛠 {$mesin->nama_mesin}\n";
+        $message .= "{$oldInfo['emoji']} Dari : {$oldText}\n";
+        $message .= "{$newInfo['emoji']} Ke   : *{$newText}*\n";
 
         if (!empty($keterangan)) {
-            $message .= "📝 *Keterangan*\n";
-            $message .= "_{$keterangan}_\n\n";
+            $message .= "📌 Catatan: {$keterangan}\n";
         }
 
-        $message .= "👨‍🔧 *Oleh:* {$userName}\n";
-        $message .= "🕒 *Waktu:* " . now()->format('d/m/Y H:i');
+        $message .= "\n━━━━━━━━━━━━━━━━━━\n\n";
+
+        $user = auth()->user();
+        $userName = $user ? ($user->name ?? $user->username ?? 'User') : 'System';
+        $message .= "👤 *Updated By:* {$userName}";
 
         return $message;
     }
@@ -178,137 +165,108 @@ class FontteService
      */
     public function formatFullMachineReport($mesin = null, $oldStatus = null, $newStatus = null, $oldReason = null, $newReason = null, $keterangan = null)
     {
-        // Change logic for Summary
-        $summary = "";
+        $statusMap = [
+            'running' => ['label' => 'RUNNING', 'emoji' => '🟢'],
+            'stop' => ['label' => 'STAND BY', 'emoji' => '🟡'],
+            'maintenance' => ['label' => 'BREAKDOWN', 'emoji' => '🔴'],
+            'offline' => ['label' => 'STOP / OFF', 'emoji' => '⚫'],
+        ];
+
+        // Build Header
+        $now = \Carbon\Carbon::now()->locale('id');
+        $message = "🏭 *LAPORAN UPDATE STATUS MESIN*\n";
+        $message .= "*PT MADA WIKRI TUNGGAL – PLANT 3*\n";
+        $message .= "🗓 " . $now->translatedFormat('l, d F Y') . "\n";
+        $message .= "⏰ " . $now->format('H.i') . " WIB\n\n";
+
+        $message .= "━━━━━━━━━━━━━━━━━━\n\n";
+
+        // Perubahan Status (Summary)
         if ($mesin && $oldStatus && $newStatus) {
-            $statusLabels = [
-                'running' => '🟢 RUNNING',
-                'stop' => '🟡 STAND BY',
-                'maintenance' => '🔴 BREAKDOWN',
-                'offline' => '⚫ OFF'
-            ];
+            $oldEmoji = $statusMap[$oldStatus]['emoji'] ?? '';
+            $oldLabel = $statusMap[$oldStatus]['label'] ?? strtoupper($oldStatus);
+            $oldText = $oldLabel . ($oldReason ? " ({$oldReason})" : "");
 
-            // Format Old Status
-            $baseOld = $statusLabels[$oldStatus] ?? strtoupper($oldStatus);
-            $oldStatusText = ($oldStatus !== 'running' && $oldReason) ? "{$baseOld} ({$oldReason})" : $baseOld;
+            $newEmoji = $statusMap[$newStatus]['emoji'] ?? '';
+            $newLabel = $statusMap[$newStatus]['label'] ?? strtoupper($newStatus);
+            $newText = $newLabel . ($newReason ? " ({$newReason})" : "");
 
-            // Format New Status
-            $baseNew = $statusLabels[$newStatus] ?? strtoupper($newStatus);
-            $newStatusText = ($newStatus !== 'running' && $newReason) ? "{$baseNew} ({$newReason})" : $baseNew;
-
-            $shortName = $mesin->nama_mesin;
-
-            $summary = "Perubahan Status\n";
-            $summary .= "- {$shortName}\n";
-            $summary .= "- - dari {$oldStatusText}\n";
-            $summary .= "- - ke {$newStatusText}\n\n";
+            $message .= "🔄 *PERUBAHAN STATUS*\n";
+            $message .= "🛠 {$mesin->nama_mesin}\n";
+            $message .= "{$oldEmoji} Dari : {$oldText}\n";
+            $message .= "{$newEmoji} Ke   : *{$newText}*\n";
 
             if (!empty($keterangan)) {
-                $summary .= "Catatan: {$keterangan}\n\n";
+                $message .= "📌 Catatan: {$keterangan}\n";
             }
+
+            $message .= "\n━━━━━━━━━━━━━━━━━━\n\n";
         }
 
         // Get all machines sorted naturally
         $machines = \App\Models\Mesin::orderByRaw('CAST(SUBSTRING_INDEX(nama_mesin, " ", -1) AS UNSIGNED)')->get();
-        $today = \Carbon\Carbon::today();
 
-        // Categorized arrays
         $groups = [
-            'BREAKDOWN' => [],
-            'STANDBY' => [],
-            'STOP' => [],
-            'RUNNING' => []
+            'maintenance' => [],
+            'stop' => [],
+            'offline' => [],
+            'running' => []
         ];
 
         foreach ($machines as $m) {
-            // Get Planning for Part Name
-            $planning = \App\Models\PlanningProduksi::with('part')
-                ->where('mesin_id', $m->id)
-                ->whereDate('tanggal', $today)
-                ->latest()
-                ->first();
-
-            $partName = ($planning && $planning->part) ? $planning->part->nama_part : 'No Part';
-            $shortName = $m->nama_mesin;
-
-            // Determine Category & Detail
-            $category = 'STOP'; // Default
-            $detail = '';
-
-            if ($m->status === 'running') {
-                $category = 'RUNNING';
-            } elseif ($m->status === 'maintenance') {
-                $category = 'BREAKDOWN';
-                $detail = $m->stop_reason ?? 'On Maintenance';
-            } elseif ($m->status === 'stop') {
-                $category = 'STANDBY';
-                $detail = $m->stop_reason ?? 'Wait';
-            } elseif ($m->status === 'offline') {
-                $category = 'STOP';
-                $detail = $m->stop_reason ?? 'Off';
-            }
-
-            // Format line: Mc X - Part = Status (Detail)
-            $statusDisplay = $category;
-            if ($detail) {
-                $statusDisplay .= " ({$detail})";
-            }
-
-            $groups[$category][] = "{$shortName} = {$statusDisplay}";
+            $groups[$m->status][] = $m;
         }
 
-        // Build Message
-        $now = \Carbon\Carbon::now();
-        $now->locale('id');
-
-        $message = $summary; // Start with summary if available
-        $message .= "*Laporan Update Status Mesin PT MADA WIKRI TUNGGAL PLANT 3*\n";
-        $message .= $now->translatedFormat('l, d F Y') . " | " . $now->format('H.i') . "\n\n";
-
-        // 🔴 BREAKDOWN SECTION (Non-Running First)
-        if (!empty($groups['BREAKDOWN'])) {
-            $count = count($groups['BREAKDOWN']);
-            $message .= "🔴 *DAFTAR MESIN BREAKDOWN ({$count} MC)*\n";
-            foreach ($groups['BREAKDOWN'] as $row) {
-                $message .= "{$row}\n";
+        // 🔴 BREAKDOWN SECTION
+        if (!empty($groups['maintenance'])) {
+            $count = count($groups['maintenance']);
+            $message .= "🔴 *BREAKDOWN ({$count} MC)*\n";
+            foreach ($groups['maintenance'] as $m) {
+                $message .= "{$m->nama_mesin}\n";
+                $reason = $m->stop_reason ?? 'Dalam Perbaikan';
+                $message .= "* {$reason}\n";
             }
             $message .= "\n";
         }
 
         // 🟡 STANDBY SECTION
-        if (!empty($groups['STANDBY'])) {
-            $count = count($groups['STANDBY']);
-            $message .= "🟡 *DAFTAR MESIN STANDBY ({$count} MC)*\n";
-            foreach ($groups['STANDBY'] as $row) {
-                $message .= "{$row}\n";
+        if (!empty($groups['stop'])) {
+            $count = count($groups['stop']);
+            $message .= "🟡 *STANDBY ({$count} MC)*\n";
+            foreach ($groups['stop'] as $m) {
+                $reason = $m->stop_reason ?? 'Menunggu';
+                $message .= "{$m->nama_mesin} – {$reason}\n";
             }
             $message .= "\n";
         }
 
-        // ⚫ STOP SECTION
-        if (!empty($groups['STOP'])) {
-            $count = count($groups['STOP']);
-            $message .= "⚫ *DAFTAR MESIN STOP (OFF) ({$count} MC)*\n";
-            foreach ($groups['STOP'] as $row) {
-                $message .= "{$row}\n";
+        // ⚫ STOP / OFF SECTION
+        if (!empty($groups['offline'])) {
+            $count = count($groups['offline']);
+            $message .= "⚫ *STOP / OFF ({$count} MC)*\n";
+            foreach ($groups['offline'] as $m) {
+                $reason = $m->stop_reason ?? 'Tidak ada jadwal produksi';
+                $message .= "{$m->nama_mesin} – {$reason}\n";
             }
             $message .= "\n";
         }
 
-        // 🟢 RUNNING SECTION (Running Last)
-        if (!empty($groups['RUNNING'])) {
-            $count = count($groups['RUNNING']);
-            $message .= "🟢 *DAFTAR MESIN RUNNING ({$count} MC)*\n";
-            foreach ($groups['RUNNING'] as $row) {
-                $message .= "{$row}\n";
+        // 🟢 RUNNING SECTION
+        if (!empty($groups['running'])) {
+            $count = count($groups['running']);
+            $message .= "🟢 *RUNNING ({$count} MC)*\n";
+            foreach ($groups['running'] as $m) {
+                $message .= "{$m->nama_mesin}\n";
             }
             $message .= "\n";
         }
+
+        $message .= "━━━━━━━━━━━━━━━━━━\n\n";
 
         $user = auth()->user();
         $userName = $user ? ($user->name ?? $user->username ?? 'User') : 'System';
         $message .= "👤 *Updated By:* {$userName}";
 
-        return $message;
+        return trim($message);
     }
 }

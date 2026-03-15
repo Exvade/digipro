@@ -1,4 +1,4 @@
-@extends('planning.app')
+@extends('layouts.app')
 
 @section('content-header')
 <div class="content-header">
@@ -485,7 +485,5 @@
 </script>
 
 <!-- Planning Scripts -->
-<script src="{{ asset('js/planning-init.js') }}"></script>
 <script src="{{ asset('js/planning.js') }}"></script>
-<script src="{{ asset('js/planning-dark-mode.js') }}"></script>
 @endpush

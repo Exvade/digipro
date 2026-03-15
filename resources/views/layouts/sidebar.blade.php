@@ -18,6 +18,8 @@
     }
 
     $isRestrictedPloting = $user && in_array($user->role, ['super_admin', 'kabag']) && request()->routeIs('ploting.index');
+    $isChecksheetModule = request()->routeIs(['checksheet.*', 'approval.*', 'report.*', 'ploting.*']);
+    $isPlanningModule = request()->routeIs('planning.*');
     @endphp
     <a href="{{ $dashboardRoute }}" class="brand-link">
         <img src="{{ asset('images/logo2.png') }}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
@@ -37,7 +39,7 @@
                 data-accordion="false">
 
                 <!-- Mold Shop Section -->
-                @if (!$isRestrictedPloting && $user && ($user->role !== 'super_admin' && (in_array($user->role, ['kabag', 'manager_plant']) || ($user->role === 'staff' && $user->departemen === 'Moldshop'))))
+                @if (!$isPlanningModule && !$isChecksheetModule && !$isRestrictedPloting && $user && ($user->role !== 'super_admin' && (in_array($user->role, ['kabag', 'manager_plant']) || ($user->role === 'staff' && $user->departemen === 'Moldshop'))))
                 <li class="nav-header">MOLD SHOP</li>
                 <li class="nav-item">
                     <a href="{{ route('moldshop.index') }}" class="nav-link {{ request()->routeIs('moldshop.index') ? 'active' : '' }}">
@@ -56,7 +58,7 @@
                 @endif
 
                 <!-- Master Data Section -->
-                @if (!$isRestrictedPloting && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant']) || (in_array($user->role, ['leader', 'staff']) && $user->bagian != 'assy')))
+                @if (!$isPlanningModule && !$isChecksheetModule && !$isRestrictedPloting && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant']) || (in_array($user->role, ['leader', 'staff']) && $user->bagian != 'assy')))
                 <li class="nav-header">MASTER DATA</li>
 
                 @if (in_array($user->role, ['super_admin', 'kabag', 'manager_plant']))
@@ -108,9 +110,11 @@
 
                 <!-- Produksi Section -->
                 @if ($user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
+                @if (!$isPlanningModule && !$isChecksheetModule)
                 <li class="nav-header">PRODUKSI</li>
+                @endif
 
-                @if (!$isRestrictedPloting && in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'staff']))
+                @if (!$isChecksheetModule && !$isRestrictedPloting && in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'staff']))
                 <li class="nav-item {{ request()->routeIs('planning.*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->routeIs('planning.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-calendar-check"></i>
@@ -145,7 +149,7 @@
                 @endif
 
 
-                @if ($user && in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'foreman', 'leader']))
+                @if (!$isPlanningModule && $user && in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'foreman', 'leader']))
                 <li class="nav-item">
                     <a href="{{ route('ploting.index') }}" class="nav-link {{ request()->routeIs('ploting.index') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-users-cog"></i>
@@ -154,7 +158,7 @@
                 </li>
                 @endif
 
-                @if (!$isRestrictedPloting && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
+                @if (!$isPlanningModule && !$isChecksheetModule && !$isRestrictedPloting && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
                 <li class="nav-item">
                     <a href="{{ route('jadwal-kerja.index') }}" class="nav-link {{ request()->routeIs('jadwal-kerja.index') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-calendar-alt"></i>
@@ -163,7 +167,7 @@
                 </li>
                 @endif
 
-                @if (!$isRestrictedPloting && $user && !in_array($user->role, ['staff', 'manager_plant']))
+                @if (!$isPlanningModule && !$isChecksheetModule && !$isRestrictedPloting && $user && !in_array($user->role, ['staff', 'manager_plant']))
                 <li class="nav-item">
                     <a href="{{ route('input-produksi.index') }}" class="nav-link {{ request()->routeIs('input-produksi.index') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-edit"></i>
@@ -172,7 +176,7 @@
                 </li>
                 @endif
 
-                @if (!$isRestrictedPloting && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
+                @if (!$isPlanningModule && !$isChecksheetModule && !$isRestrictedPloting && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
                 <li class="nav-item">
                     <a href="{{ route('oee.index') }}" class="nav-link {{ request()->routeIs('oee.index') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-chart-line"></i>
@@ -181,7 +185,7 @@
                 </li>
                 @endif
 
-                @if (!$isRestrictedPloting && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
+                @if (!$isPlanningModule && !$isChecksheetModule && !$isRestrictedPloting && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
                 <li class="nav-item">
                     <a href="{{ route('laporan-produksi.index') }}" class="nav-link {{ request()->routeIs('laporan-produksi.index') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-file-invoice"></i>
@@ -199,7 +203,7 @@
                 @endif {{-- End of Produksi Section Check --}}
 
                 <!-- Checksheet Section -->
-                @if ($user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
+                @if (!$isPlanningModule && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
                 <li class="nav-item {{ request()->routeIs('checksheet.*') || request()->routeIs('approval.*') || request()->routeIs('report.*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->routeIs('checksheet.*') || request()->routeIs('approval.*') || request()->routeIs('report.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-clipboard-list"></i>

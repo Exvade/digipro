@@ -40,8 +40,8 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'login.required' => 'Username atau NIK harus diisi.',
-            'password.required' => 'Password harus diisi.',
+            'login.required' => __('Username atau NIK harus diisi.'),
+            'password.required' => __('Password harus diisi.'),
         ];
     }
 
@@ -74,7 +74,7 @@ class LoginRequest extends FormRequest
         RateLimiter::hit($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'login' => 'Username/NIK atau password salah, atau akun tidak aktif.',
+            'login' => __('Username/NIK atau password salah, atau akun tidak aktif.'),
         ]);
     }
 
