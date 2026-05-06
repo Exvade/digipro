@@ -123,8 +123,14 @@ if ($hour >= 7 && $hour < 15) {
         : 0;
         $efficiency = $total > 0 ? round(($ok / $total) * 100, 1) : 100;
         $isCompleted = $gap <= 0;
-            $progressBarClass=$percentage>= 100 ? 'bg-success' : ($percentage >= 70 ? 'bg-info' : 'bg-warning');
-            @endphp
+        $progressBarClass=$percentage>= 100 ? 'bg-success' : ($percentage >= 70 ? 'bg-info' : 'bg-warning');
+
+        // Check for active ANDON call (not yet resolved)
+        $activeCall = \App\Models\DowntimeEvent::where('mesin_id', $planning->mesin_id)
+            ->whereIn('status', ['pending', 'escalated'])
+            ->where('title', 'like', 'CALL:%')
+            ->first();
+        @endphp
 
             {{-- ================= PERSIAPAN PRODUKSI MODAL ================= --}}
             <div class="modal fade" id="persiapanModal-{{ $planning->id }}" tabindex="-1" role="dialog" aria-labelledby="persiapanModalLabel-{{ $planning->id }}" aria-hidden="true" data-backdrop="static" data-keyboard="false">
@@ -398,6 +404,23 @@ if ($hour >= 7 && $hour < 15) {
                                     <i class="fas fa-clipboard-check fa-4x mb-3 text-info"></i>
                                     <h3 class="font-weight-bold">BELUM PERSIAPAN</h3>
                                 </div>
+                                @elseif ($activeCall)
+                                <div class="alert alert-danger text-center w-100 py-4 shadow-lg mb-4" style="border-radius: 25px;">
+                                    <div class="pulsate-icon mb-3">
+                                        <i class="fas fa-bullhorn fa-4x text-white"></i>
+                                    </div>
+                                    <h3 class="font-weight-bold text-white mb-2">WAITING FOR SUPPORT</h3>
+                                    <p class="text-white-50 mb-0">Help requested for: <strong>{{ str_replace('CALL: ', '', $activeCall->title) }}</strong></p>
+                                    <p class="text-white-50 small mt-2">Downtime is active. Production buttons disabled until resolved by Leader.</p>
+                                </div>
+
+                                {{-- Still show CALL button in case they need to re-call or change category, or just to keep layout consistent --}}
+                                <button type="button" class="btn btn-warning btn-lg shadow-lg w-100 btn-andon-trigger btn-action-custom btn-call-custom"
+                                    data-planning-id="{{ $planning->id }}"
+                                    data-part-name="{{ $planning->part->nama_part ?? 'Part' }}">
+                                    <i class="fas fa-bullhorn fa-3x mr-4"></i>
+                                    <strong style="font-size: 2.2rem; letter-spacing: 2px;">RE-CALL</strong>
+                                </button>
                                 @else
                                 <div class="w-100 d-flex flex-column align-items-center p-2">
                                     {{-- GOOD BUTTON --}}

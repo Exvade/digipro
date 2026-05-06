@@ -11,6 +11,7 @@ use App\Models\ProduksiPerJam;
 use App\Models\User;
 use App\Models\PersiapanProduksiCheck;
 use App\Models\DowntimeEvent;
+use App\Services\FontteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -731,6 +732,19 @@ class InputProduksiController extends Controller
                 ], 400);
             }
 
+            // Cek apakah ada panggilan bantuan (ANDON) yang belum diselesaikan
+            $activeCall = DowntimeEvent::where('mesin_id', $planning->mesin_id)
+                ->whereIn('status', ['pending', 'escalated'])
+                ->where('title', 'like', 'CALL:%')
+                ->first();
+
+            if ($activeCall) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Panggilan bantuan aktif. Harap tunggu leader menyelesaikan panggilan sebelum melanjutkan produksi.'
+                ], 400);
+            }
+
             // Cek shift aktif
             $shiftAktif = $this->cekShiftAktif($user->id, $ploting);
             if ($shiftAktif === false) {
@@ -906,6 +920,19 @@ class InputProduksiController extends Controller
 
             if ($ploting->status !== 'on_progress') {
                 return response()->json(['success' => false, 'message' => 'Status planning tidak valid: ' . $ploting->status], 400);
+            }
+
+            // Cek apakah ada panggilan bantuan (ANDON) yang belum diselesaikan
+            $activeCall = DowntimeEvent::where('mesin_id', $planning->mesin_id)
+                ->whereIn('status', ['pending', 'escalated'])
+                ->where('title', 'like', 'CALL:%')
+                ->first();
+
+            if ($activeCall) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Panggilan bantuan aktif. Harap tunggu leader menyelesaikan panggilan sebelum melanjutkan produksi.'
+                ], 400);
             }
 
             // Tentukan shift aktif berdasarkan jam sekarang
@@ -2353,6 +2380,100 @@ class InputProduksiController extends Controller
         } catch (\Exception $e) {
             Log::error('Error in storePersiapan: ' . $e->getMessage());
             return response()->json(['message' => 'Server error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Handle Andon Call resolution or escalation by Leader/Foreman
+     */
+    public function handleAndonCall(Request $request, $id)
+    {
+        $user = Auth::user();
+        $action = $request->input('action'); // 'resolve' or 'escalate'
+        $fontteService = new FontteService();
+
+        try {
+            $event = DowntimeEvent::with(['mesin', 'user'])->findOrFail($id);
+
+            // Perbolehkan handle jika statusnya pending atau escalated (untuk eskalasi ulang jika perlu)
+            if ($event->status === 'resolved') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Panggilan ini sudah diselesaikan.'
+                ], 400);
+            }
+
+            if ($action === 'resolve') {
+                $event->update([
+                    'status' => 'resolved',
+                    'end_time' => now()->format('H:i:s'),
+                    'resolved_by' => $user->id,
+                    'resolved_at' => now(),
+                    'duration_minutes' => DB::raw('TIMESTAMPDIFF(MINUTE, CONCAT(tanggal, " ", start_time), NOW())'),
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Panggilan bantuan berhasil diselesaikan.'
+                ]);
+            } elseif ($action === 'escalate') {
+                // Update status to escalated
+                $event->update([
+                    'status' => 'escalated',
+                    'description' => ($event->description ?: '') . " | Eskalasi oleh {$user->nama}"
+                ]);
+
+                // Prepare WhatsApp Message
+                $now = now()->locale('id');
+                
+                // Cari planning yang sedang berjalan di mesin tersebut
+                $planning = PlanningProduksi::where('mesin_id', $event->mesin_id)
+                    ->orderBy('created_at', 'desc')
+                    ->with(['part', 'moldshop'])
+                    ->first();
+
+                $message = "🚨 *ESKALASI PANGGILAN BANTUAN (ANDON)* 🚨\n";
+                $message .= "━━━━━━━━━━━━━━━━━━\n";
+                $message .= "🛠 *Mesin:* " . ($event->mesin->nama_mesin ?? 'Unknown') . "\n";
+                $message .= "👤 *Operator:* " . ($event->user->nama ?? 'Unknown') . "\n";
+                $message .= "📋 *Part:* " . ($planning->part->nama_part ?? '-') . "\n";
+                $message .= "📦 *Mold:* " . ($planning->moldshop->nama_mold ?? '-') . "\n";
+                $message .= "⚠️ *Kendala:* " . str_replace('CALL: ', '', $event->title) . "\n";
+                $message .= "🕒 *Waktu Panggil:* " . Carbon::parse($event->start_time)->format('H:i') . " WIB\n";
+                $message .= "━━━━━━━━━━━━━━━━━━\n";
+                $message .= "👨🏻‍💻 *Dicek Oleh (Leader):* {$user->nama}\n";
+                $message .= "📌 *Status:* MASIH KENDALA (Butuh Perbaikan)\n";
+                $message .= "📅 " . $now->translatedFormat('l, d F Y') . "\n";
+                $message .= "━━━━━━━━━━━━━━━━━━\n";
+                $message .= "_Mohon segera ditindaklanjuti oleh tim terkait._";
+
+                $whatsappResult = $fontteService->sendGroupNotification($message);
+
+                if (isset($whatsappResult['success']) && !$whatsappResult['success']) {
+                    Log::error('WhatsApp Escalation Failed', ['error' => $whatsappResult['message']]);
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Status diperbarui ke Eskalasi, namun gagal mengirim WhatsApp: ' . $whatsappResult['message']
+                    ]);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Panggilan berhasil dieskalasi ke WhatsApp Group.'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Aksi tidak valid.'
+            ], 400);
+
+        } catch (\Exception $e) {
+            Log::error('Error in handleAndonCall: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

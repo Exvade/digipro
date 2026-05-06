@@ -20,6 +20,7 @@
     $isRestrictedPloting = $user && in_array($user->role, ['super_admin', 'kabag']) && request()->routeIs('ploting.index');
     $isChecksheetModule = request()->routeIs(['checksheet.*', 'approval.*', 'report.*', 'ploting.*']);
     $isPlanningModule = request()->routeIs('planning.*');
+    $isMaintenanceModule = request()->routeIs('jadwal-pemeliharaan.*');
     @endphp
     <a href="{{ $dashboardRoute }}" class="brand-link">
         <img src="{{ asset('images/logo2.png') }}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
@@ -38,8 +39,25 @@
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                 data-accordion="false">
 
+                <!-- Maintenance Section -->
+                @if ($isMaintenanceModule)
+                <li class="nav-header">MAINTENANCE</li>
+                <li class="nav-item">
+                    <a href="{{ route('mesin.index') }}" class="nav-link">
+                        <i class="nav-icon fas fa-industry"></i>
+                        <p>Data Mesin</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('jadwal-pemeliharaan.index') }}" class="nav-link {{ request()->routeIs('jadwal-pemeliharaan.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-tools"></i>
+                        <p>Jadwal Pemeliharaan</p>
+                    </a>
+                </li>
+                @endif
+
                 <!-- Mold Shop Section -->
-                @if (!$isPlanningModule && !$isChecksheetModule && !$isRestrictedPloting && $user && ($user->role !== 'super_admin' && (in_array($user->role, ['kabag', 'manager_plant']) || ($user->role === 'staff' && $user->departemen === 'Moldshop'))))
+                @if (!$isMaintenanceModule && !$isPlanningModule && !$isChecksheetModule && !$isRestrictedPloting && $user && ($user->role !== 'super_admin' && (in_array($user->role, ['kabag', 'manager_plant']) || ($user->role === 'staff' && $user->departemen === 'Moldshop'))))
                 <li class="nav-header">MOLD SHOP</li>
                 <li class="nav-item">
                     <a href="{{ route('moldshop.index') }}" class="nav-link {{ request()->routeIs('moldshop.index') ? 'active' : '' }}">
@@ -58,7 +76,7 @@
                 @endif
 
                 <!-- Master Data Section -->
-                @if (!$isPlanningModule && !$isChecksheetModule && !$isRestrictedPloting && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant']) || (in_array($user->role, ['leader', 'staff']) && $user->bagian != 'assy')))
+                @if (!$isMaintenanceModule && !$isPlanningModule && !$isChecksheetModule && !$isRestrictedPloting && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant']) || (in_array($user->role, ['leader', 'staff']) && $user->bagian != 'assy')))
                 <li class="nav-header">MASTER DATA</li>
 
                 @if (in_array($user->role, ['super_admin', 'kabag', 'manager_plant']))
@@ -109,7 +127,7 @@
 
 
                 <!-- Produksi Section -->
-                @if ($user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
+                @if (!$isMaintenanceModule && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
                 @if (!$isPlanningModule && !$isChecksheetModule)
                 <li class="nav-header">PRODUKSI</li>
                 @endif
@@ -203,7 +221,7 @@
                 @endif {{-- End of Produksi Section Check --}}
 
                 <!-- Checksheet Section -->
-                @if (!$isPlanningModule && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
+                @if (!$isMaintenanceModule && !$isPlanningModule && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
                 <li class="nav-item {{ request()->routeIs('checksheet.*') || request()->routeIs('approval.*') || request()->routeIs('report.*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->routeIs('checksheet.*') || request()->routeIs('approval.*') || request()->routeIs('report.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-clipboard-list"></i>

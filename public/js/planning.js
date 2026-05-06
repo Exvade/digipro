@@ -148,13 +148,10 @@
         });
 
         $(document).on('click', '.rejectBtn', function() {
-            $('#approval_planning_id').val($(this).data('id'));
-            $('#approval_action').val('reject');
+            const id = $(this).data('id');
+            $('#reject_planning_id').val(id);
             $('#rejection_reason').val('');
-            $('#approveContent').hide(); $('#rejectContent').show();
-            $('#approvalModalHeader').attr('class', 'modal-header bg-danger text-white');
-            $('#submitApprovalBtn').attr('class', 'btn btn-danger').html('<i class="fas fa-times"></i> Tolak').show();
-            $('#modalApproval').modal('show');
+            $('#modalReject').modal('show');
         });
 
         $(document).on('click', '.viewBtn', function() {
@@ -215,14 +212,45 @@
     }
 
     window.submitApproval = function() {
-        const a = $('#approval_action').val();
-        if (a === 'reject' && !$('#rejection_reason').val().trim()) return Swal.fire({ icon: 'error', title: 'Error', text: 'Alasan penolakan wajib diisi!' });
-        $('#submitApprovalBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>...');
-        $.ajax({ url: '/planning/approval', method: 'POST', data: { planning_id: $('#approval_planning_id').val(), action: a, rejection_reason: $('#rejection_reason').val() }, 
-            success: (r) => { if (r.success) Swal.fire({ icon: 'success', title: 'Berhasil', text: r.message, timer: 1500 }).then(() => location.reload()); else { Swal.fire({ icon: 'error', text: r.message }); $('#submitApprovalBtn').prop('disabled', false); } },
-            error: (x) => { Swal.fire({ icon: 'error', text: x.responseJSON?.message || 'Gagal.' }); $('#submitApprovalBtn').prop('disabled', false); }
+        const isReject = $('#modalReject').hasClass('show');
+        const planningId = isReject ? $('#reject_planning_id').val() : $('#approval_planning_id').val();
+        const action = isReject ? 'reject' : $('#approval_action').val();
+        const reason = $('#rejection_reason').val();
+
+        if (action === 'reject' && (!reason || !reason.trim())) {
+            return Swal.fire({ icon: 'error', title: 'Error', text: 'Alasan penolakan wajib diisi!' });
+        }
+
+        $('#submitApprovalBtn, #btnConfirmReject').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>...');
+        
+        $.ajax({ 
+            url: '/planning/approval', 
+            method: 'POST', 
+            data: { 
+                planning_id: planningId, 
+                action: action, 
+                rejection_reason: reason 
+            }, 
+            success: (r) => { 
+                if (r.success) {
+                    Swal.fire({ icon: 'success', title: 'Berhasil', text: r.message, timer: 1500 }).then(() => location.reload()); 
+                } else { 
+                    Swal.fire({ icon: 'error', text: r.message }); 
+                    $('#submitApprovalBtn').prop('disabled', false).html('<i class="fas fa-check"></i> Konfirmasi Approve');
+                    $('#btnConfirmReject').prop('disabled', false).html('<i class="fas fa-times"></i> Konfirmasi Reject');
+                } 
+            },
+            error: (x) => { 
+                Swal.fire({ icon: 'error', text: x.responseJSON?.message || 'Gagal.' }); 
+                $('#submitApprovalBtn').prop('disabled', false).html('<i class="fas fa-check"></i> Konfirmasi Approve');
+                $('#btnConfirmReject').prop('disabled', false).html('<i class="fas fa-times"></i> Konfirmasi Reject');
+            }
         });
     };
+
+    $(document).on('click', '#submitApprovalBtn, #btnConfirmReject', function() {
+        window.submitApproval();
+    });
 
     window.submitCetak = function() {
         const t = $('#tanggalFilter').val(), c = $('#customDate').val(), b = $('#bagianFilter').val();

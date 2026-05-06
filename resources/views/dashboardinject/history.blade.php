@@ -374,6 +374,7 @@
                                 <th class="text-center text-nowrap">Waktu Selesai</th>
                                 <th class="text-nowrap">Durasi</th>
                                 <th>Keterangan</th>
+                                <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -391,6 +392,21 @@
                             $statusColor = 'dark'; $statusLabel = 'Off'; break;
                             default:
                             $statusColor = 'warning'; $statusLabel = 'Stand By'; break;
+                            }
+
+                            // Khusus untuk panggil bantuan (Andon)
+                            if (str_contains(strtolower($event->title), 'call:')) {
+                                $statusLabel = 'Andon Call';
+                                if ($event->status === 'pending') {
+                                    $statusColor = 'danger';
+                                    $statusLabel = 'SOS: Pending';
+                                } elseif ($event->status === 'escalated') {
+                                    $statusColor = 'warning';
+                                    $statusLabel = 'SOS: Escalated';
+                                } elseif ($event->status === 'resolved') {
+                                    $statusColor = 'success';
+                                    $statusLabel = 'SOS: Resolved';
+                                }
                             }
 
                             $eventDate = is_string($event->tanggal) ? $event->tanggal : $event->tanggal->format('Y-m-d');
@@ -470,6 +486,18 @@
                                         {!! $duration !!}
                                     </td>
                                     <td class="align-middle">{{ $event->description ?? $event->keterangan ?? '-' }}</td>
+                                    <td class="text-center align-middle">
+                                        @if(str_contains(strtolower($event->title), 'call:') && ($event->status === 'pending' || $event->status === 'escalated') && in_array(Auth::user()->role, ['leader', 'foreman', 'kabag', 'super_admin']))
+                                            <button class="btn btn-xs btn-primary btn-handle-call" 
+                                                    data-id="{{ $event->id }}" 
+                                                    data-machine="{{ $event->mesin->nama_mesin }}"
+                                                    data-title="{{ $event->title }}">
+                                                <i class="fas fa-search-plus mr-1"></i> Check
+                                            </button>
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
                                 </tr>
                                 @empty
                                 <tr>

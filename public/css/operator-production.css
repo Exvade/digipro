@@ -216,3 +216,23 @@
     border-bottom: 3px solid #007bff;
     color: inherit;
 }
+
+/* WAITING FOR SUPPORT ALERT ANIMATION */
+.pulsate-icon {
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% {
+        transform: scale(0.95);
+        filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0.7));
+    }
+    70% {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0));
+    }
+    100% {
+        transform: scale(0.95);
+        filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+    }
+}

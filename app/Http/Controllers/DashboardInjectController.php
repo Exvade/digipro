@@ -340,6 +340,8 @@ class DashboardInjectController extends Controller
             }
 
             return [
+                'id' => $e->id,
+                'status' => $e->status,
                 'mesin_id' => $e->mesin_id,
                 'mesin_nama' => $e->mesin->nama_mesin ?? '-',
                 'type' => $e->downtime_type,

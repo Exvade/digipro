@@ -98,6 +98,16 @@
                         </a>
                         @endif
 
+                        {{-- Jadwal Pemeliharaan Mesin --}}
+                        @if (
+                        in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'staff', 'leader']) &&
+                        !($user->role == 'leader' && $user->bagian == 'assy')
+                        )
+                        <a href="{{ route('jadwal-pemeliharaan.index') }}" class="menu-btn" style="background-image: linear-gradient(135deg, #1cc88a, #13855c); color: white;">
+                            <i class="fas fa-tools"></i> Jadwal Pemeliharaan
+                        </a>
+                        @endif
+
                         {{-- Jadwal Kerja --}}
                         @if (in_array($user->role, [
                         'super_admin',

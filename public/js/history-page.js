@@ -634,4 +634,80 @@ $(document).ready(function () {
         $('html, body').animate({scrollTop:0}, 300);
         return false;
     });
+
+    // --- Handle Andon Call ---
+    $(document).on('click', '.btn-handle-call', function() {
+        const id = $(this).data('id');
+        const machine = $(this).data('machine');
+        const title = $(this).data('title');
+
+        Swal.fire({
+            title: 'Penanganan Panggilan Bantuan',
+            html: `
+                <div class="text-left mb-3">
+                    <p><b>Unit:</b> ${machine}</p>
+                    <p><b>Kategori:</b> ${title.replace('CALL: ', '')}</p>
+                    <p>Silakan pilih tindakan penanganan untuk panggilan ini:</p>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: '<i class="fas fa-check-circle mr-1"></i> Selesai (Resolved)',
+            denyButtonText: '<i class="fab fa-whatsapp mr-1"></i> Eskalasi ke WA Group',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#28a745',
+            denyButtonColor: '#ffc107',
+            reverseButtons: true,
+            customClass: {
+                denyButton: 'text-dark font-weight-bold'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Resolve
+                sendHandleCallAction(id, 'resolve');
+            } else if (result.isDenied) {
+                // Escalate
+                sendHandleCallAction(id, 'escalate');
+            }
+        });
+    });
+
+    function sendHandleCallAction(id, action) {
+        Swal.fire({
+            title: 'Sedang memproses...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        $.ajax({
+            url: `/andon/handle/${id}`,
+            method: 'POST',
+            data: {
+                _token: $('meta[name="csrf-token"]').attr('content'),
+                action: action
+            },
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: response.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('Gagal', response.message, 'error');
+                }
+            },
+            error: function(xhr) {
+                const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Terjadi kesalahan sistem';
+                Swal.fire('Error', msg, 'error');
+            }
+        });
+    }
 });

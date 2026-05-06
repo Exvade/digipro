@@ -1,0 +1,117 @@
+/**
+ * Jadwal Pemeliharaan Custom Styles (Official Company Format)
+ * Perbaikan Bug Dark Mode & Print
+ */
+
+/* Kontainer utama tabel */
+.table-responsive-pm {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: 85vh; /* Tinggi lebih lega */
+}
+
+/* Header Tabel */
+.table-pm thead th {
+    position: sticky;
+    top: 0;
+    z-index: 30; /* Lebih tinggi dari sticky-col */
+    border: 1px solid #000 !important;
+}
+
+/* Kolom Mesin Tetap (Sticky Left) */
+.sticky-col {
+    position: sticky;
+    z-index: 25;
+    border-right: 2px solid #000 !important;
+}
+
+/* Baris khusus PLAN (Putih di Terang, Gelap di Dark Mode) */
+.row-plan {
+    background-color: inherit;
+}
+
+/* Baris khusus ACTUAL */
+.row-actual {
+    background-color: rgba(255, 255, 0, 0.1); /* Kuning tipis untuk web */
+}
+
+/* Hover Effect */
+td.edit-trigger:hover {
+    background-color: rgba(0, 123, 255, 0.4) !important;
+    cursor: pointer;
+}
+
+/* High Visibility for Dark Mode */
+.dark-mode .table-pm {
+    color: #fff !important;
+}
+
+/* =========================================
+   PRINT STYLES - PENYEMPURNAAN FINAL
+   ========================================= */
+@media print {
+    @page {
+        size: A4 landscape !important;
+        margin: 3mm !important;
+    }
+
+    body {
+        background-color: #fff !important;
+        color: #000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        zoom: 58% !important; /* Ukuran paling pas untuk A4 Landscape */
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Sembunyikan semua elemen UI Web */
+    .d-print-none, .btn, .sidebar, .navbar, .main-footer, form, .navbar, .card-header, .input-group, .h3 {
+        display: none !important;
+    }
+
+    /* Paksa kolom sticky menjadi statis agar warna muncul */
+    .sticky-col {
+        position: static !important;
+        background-color: #fff !important;
+        color: #000 !important;
+    }
+
+    .table-pm {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        table-layout: fixed !important;
+        background-color: #fff !important;
+    }
+
+    .table-pm th, .table-pm td {
+        border: 1px solid #000 !important;
+        color: #000 !important;
+        padding: 1px !important;
+    }
+
+    /* Header Tabel Putih-Hitam di Print */
+    .table-pm thead th {
+        background-color: #f2f2f2 !important;
+        color: #000 !important;
+    }
+
+    /* Kuning Stabilo untuk baris ACTUAL di Print */
+    .row-actual {
+        background-color: #ffff00 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Kotak Plan Hijau Tua di Print */
+    .cell-text-plan div, .box-plan {
+        background-color: #006400 !important;
+        color: #fff !important;
+        border: 0.5px solid #000 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}

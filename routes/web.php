@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardInjectController;
 use App\Http\Controllers\GrupController;
 use App\Http\Controllers\InputProduksiController;
 use App\Http\Controllers\JadwalKerjaController;
+use App\Http\Controllers\JadwalPemeliharaanController;
 use App\Http\Controllers\LaporanProduksiController;
 use App\Http\Controllers\MejaController;
 use App\Http\Controllers\MesinController;
@@ -321,7 +322,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('meja', MejaController::class);
         Route::get('/meja/{meja}/edit-modal', [MejaController::class, 'editModal'])->name('meja.editModal');
         Route::resource('checksheet', ChecksheetController::class);
-
+        
         // Approval routes
         Route::prefix('approval')->name('approval.')->group(function () {
             Route::get('/', [ApprovalController::class, 'index'])->name('index');
@@ -332,6 +333,14 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/approve-all', [ApprovalController::class, 'approveAll'])->name('approveAll');
         });
     });
+
+    // Jadwal Pemeliharaan - Dapat diakses oleh operator juga untuk update actual
+    Route::middleware('role:super_admin,kabag,manager_plant,staff,leader,operator')->group(function () {
+        Route::get('/jadwal-pemeliharaan', [JadwalPemeliharaanController::class, 'index'])->name('jadwal-pemeliharaan.index');
+        Route::get('/jadwal-pemeliharaan/print', [JadwalPemeliharaanController::class, 'print'])->name('jadwal-pemeliharaan.print');
+        Route::post('/jadwal-pemeliharaan/update-cell', [JadwalPemeliharaanController::class, 'updateCell'])->name('jadwal-pemeliharaan.update-cell');
+    });
+
 
     // Report Routes (Super Admin, Kabag, Manager Plant, Leader, Foreman, Staff)
     Route::middleware('role:super_admin,kabag,manager_plant,leader,foreman,staff')->group(function () {
@@ -381,6 +390,7 @@ Route::middleware(['auth'])->group(function () {
     */
 
     Route::get('/notifications', [NotificationController::class, 'getNotifications'])->name('notifications');
+    Route::post('/andon/handle/{id}', [InputProduksiController::class, 'handleAndonCall'])->name('andon.handle');
 
     Route::get('/secure-signature', function () {
         $path = public_path('images/TTD.png');

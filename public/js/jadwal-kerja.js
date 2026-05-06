@@ -300,6 +300,51 @@ $("#createForm").on("submit", function (e) {
 
         return false;
     });
+
+    // =========================================
+    // Real-time Availability Check
+    // =========================================
+    function checkAvailability(userId, tanggal, currentId = null, $userSelect) {
+        if (!userId || !tanggal) return;
+
+        $.ajax({
+            url: "/jadwal-kerja/get-user-shift",
+            method: 'GET',
+            data: {
+                user_id: userId,
+                tanggal: tanggal,
+                ignore_id: currentId
+            },
+            success: function(response) {
+                if (response.success && response.source === 'jadwal_kerja') {
+                    Swal.fire({
+                        title: "Karyawan Sudah Terjadwal",
+                        html: `Karyawan tersebut sudah memiliki jadwal <b>${response.shift_display}</b> pada tanggal ini.<br>Satu karyawan hanya bisa memiliki satu jadwal per hari.`,
+                        icon: "warning",
+                        confirmButtonText: "OK",
+                        confirmButtonColor: "#3085d6"
+                    }).then(() => {
+                        $userSelect.val('');
+                    });
+                }
+            }
+        });
+    }
+
+    // Create Form Events
+    $('#user_id, #tanggal').on('change', function() {
+        const userId = $('#user_id').val();
+        const tanggal = $('#tanggal').val();
+        checkAvailability(userId, tanggal, null, $('#user_id'));
+    });
+
+    // Update Form Events
+    $('#update_user_id, #update_tanggal').on('change', function() {
+        const userId = $('#update_user_id').val();
+        const tanggal = $('#update_tanggal').val();
+        const currentId = $('#update_id').val();
+        checkAvailability(userId, tanggal, currentId, $('#update_user_id'));
+    });
 });
 
 // =========================================

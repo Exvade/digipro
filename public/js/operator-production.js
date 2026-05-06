@@ -123,6 +123,8 @@ $(document).ready(function() {
                         text: 'Leader & Tim Support telah mendapatkan notifikasi. Silakan ditunggu di area mesin.',
                         confirmButtonText: 'Siap',
                         confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        location.reload(); // Reload to show WAITING FOR SUPPORT alert
                     });
                 } else {
                     Swal.fire({
