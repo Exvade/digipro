@@ -60,19 +60,10 @@
         <div class="card shadow-sm">
             <div class="card-body p-2">
                 <ul class="nav nav-pills nav-fill bagian-tabs" id="bagianTabsApproval" role="tablist">
+                    <!-- Sembunyikan All dan Assy -->
                     <li class="nav-item">
-                        <a class="nav-link active" id="all-tab-approval" href="#" data-bagian="all">
-                            <i class="fas fa-list"></i> All
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="inject-tab-approval" href="#" data-bagian="inject">
+                        <a class="nav-link active" id="inject-tab-approval" href="#" data-bagian="inject">
                             <i class="fas fa-cog"></i> Inject
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="assy-tab-approval" href="#" data-bagian="assy">
-                            <i class="fas fa-tools"></i> Assy
                         </a>
                     </li>
                 </ul>
@@ -86,9 +77,16 @@
     <div class="col-12">
         <div class="card card-outline card-primary">
             <div class="card-header">
-                <h3 class="card-title">
-                    Daftar Planning Pending Approval
-                </h3>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">
+                        Daftar Planning Pending Approval
+                    </h3>
+                    <div id="bulkActionGroup" style="display: none;">
+                        <button class="btn btn-success btn-sm" id="btnBulkApprove">
+                            <i class="fas fa-check-double"></i> Approve Terpilih (<span id="selectedCount">0</span>)
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="card-body">
                 @if($plannings->count() > 0)
@@ -96,11 +94,17 @@
                     <table id="approvalTable" class="table table-striped table-bordered table-hover">
                         <thead class="text-center bg-primary text-white">
                             <tr>
+                                <th style="width:40px;">
+                                    <div class="custom-control custom-checkbox">
+                                        <input class="custom-control-input" type="checkbox" id="checkAll">
+                                        <label for="checkAll" class="custom-control-label"></label>
+                                    </div>
+                                </th>
                                 <th style="width:50px;">No</th>
                                 <th>No Part</th>
                                 <th>Nama Part</th>
                                 <th>Bagian</th>
-                                <th>Mesin/Meja</th>
+                                <th>Mesin</th>
                                 <th>Tanggal</th>
                                 <th style="width:150px;">Qty Planning</th>
                                 <th style="width:200px;">Aksi</th>
@@ -108,7 +112,13 @@
                         </thead>
                         <tbody>
                             @foreach ($plannings as $planning)
-                            <tr>
+                            <tr id="row-{{ $planning->id }}">
+                                <td class="text-center">
+                                    <div class="custom-control custom-checkbox">
+                                        <input class="custom-control-input planning-checkbox" type="checkbox" id="check-{{ $planning->id }}" value="{{ $planning->id }}">
+                                        <label for="check-{{ $planning->id }}" class="custom-control-label"></label>
+                                    </div>
+                                </td>
                                 <td class="text-center">
                                     {{ $plannings->firstItem() + $loop->index }}
                                 </td>
@@ -145,12 +155,12 @@
                                         data-nama_part="{{ $planning->part->nama_part ?? '-' }}"
                                         data-qty="{{ number_format($planning->qty_planning_produksi) }}"
                                         title="Approve Planning">
-                                        <i class="fas fa-check"></i> Approve
+                                        <i class="fas fa-check"></i>
                                     </button>
                                     <button class="btn btn-danger btn-sm rejectBtn mr-1"
                                         data-id="{{ $planning->id }}"
                                         title="Reject Planning">
-                                        <i class="fas fa-times"></i> Reject
+                                        <i class="fas fa-times"></i>
                                     </button>
                                     <button class="btn btn-info btn-sm viewBtn"
                                         data-id="{{ $planning->id }}"

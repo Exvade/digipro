@@ -200,71 +200,35 @@ class LaporanProduksiController extends Controller
                     'shift_3' => null
                 ];
 
+                $processedOperators = ['shift_1' => [], 'shift_2' => [], 'shift_3' => []];
                 foreach ($allInputs as $input) {
                     $ploting = $input->ploting;
                     if (!$ploting || !$ploting->operator) continue;
 
-                    // Tentukan shift dari jadwal kerja operator (prioritas utama)
-                    $inputShift = null;
                     $tanggalInput = $input->created_at ? $input->created_at->format('Y-m-d') : date('Y-m-d');
-
                     $jadwal = $jadwalKerjasGrouped->get($ploting->operator->id)?->get($tanggalInput)?->first();
 
-                    if ($jadwal && $jadwal->shift && $jadwal->shift !== 'off') {
-                        $inputShift = strtolower($jadwal->shift);
-                    }
+                    $inputShift = null;
+                    if ($jadwal && $jadwal->shift && $jadwal->shift !== 'off') $inputShift = strtolower($jadwal->shift);
 
-                    // Jika shift tidak ditemukan dari jadwal, gunakan planning atau waktu created_at
                     if (!$inputShift || !in_array($inputShift, ['pagi', 'siang', 'malam'])) {
                         $inputShift = $this->normalizeShift($planning->shift ?? null);
                         if (!$inputShift || !in_array($inputShift, ['pagi', 'siang', 'malam'])) {
                             $hour = $input->created_at->hour;
-                            if ($hour >= 7 && $hour < 15) {
-                                $inputShift = 'pagi';
-                            } elseif ($hour >= 15 && $hour < 23) {
-                                $inputShift = 'siang';
-                            } else {
-                                $inputShift = 'malam';
-                            }
+                            if ($hour >= 7 && $hour < 15) $inputShift = 'pagi';
+                            elseif ($hour >= 15 && $hour < 23) $inputShift = 'siang';
+                            else $inputShift = 'malam';
                         }
                     }
 
-                    // Map shift ke shift key
-                    $shiftKey = null;
-                    if ($inputShift === 'pagi') $shiftKey = 'shift_1';
-                    elseif ($inputShift === 'siang') $shiftKey = 'shift_2';
-                    elseif ($inputShift === 'malam') $shiftKey = 'shift_3';
-
-                    if ($shiftKey) {
-                        // Simpan input untuk shift leader
-                        if (!$shiftInputs[$shiftKey]) {
-                            $shiftInputs[$shiftKey] = $input;
-                        }
-
-                        if ($ploting->operator) {
-                            $operatorExists = false;
-                            foreach ($operatorsByShift[$shiftKey] as $existingOperator) {
-                                if ($existingOperator['id'] === $ploting->operator->id) {
-                                    $operatorExists = true;
-                                    break;
-                                }
-                            }
-
-                            if (!$operatorExists) {
-                                $operatorQrPath = null;
-                                if (!empty($input->operator_signature_qr)) {
-                                    $operatorQrPath = $this->getQrCodePath($input->operator_signature_qr);
-                                } else {
-                                    $operatorQrPath = $this->getTtdQrCodePath($input->id, 'operator', $ploting->operator);
-                                }
-
-                                $operatorsByShift[$shiftKey][] = [
-                                    'id' => $ploting->operator->id,
-                                    'nama' => $ploting->operator->nama ?? '-',
-                                    'nik' => $ploting->operator->nik ?? '-'
-                                ];
-                                $operatorsQrByShift[$shiftKey][] = $operatorQrPath;
-                            }
+                    $sk = $inputShift === 'pagi' ? 'shift_1' : ($inputShift === 'siang' ? 'shift_2' : ($inputShift === 'malam' ? 'shift_3' : null));
+                    if ($sk) {
+                        if (!$shiftInputs[$sk]) $shiftInputs[$sk] = $input;
+                        $opId = $ploting->operator->id;
+                        if (!isset($processedOperators[$sk][$opId])) {
+                            $operatorsByShift[$sk][] = ['id' => $opId, 'nama' => $ploting->operator->nama ?? '-', 'nik' => $ploting->operator->nik ?? '-'];
+                            $operatorsQrByShift[$sk][] = !empty($input->operator_signature_qr) ? $this->getQrCodeBase64($input->operator_signature_qr) : $this->getTtdQrCodeBase64($input->id, 'operator', $ploting->operator);
+                            $processedOperators[$sk][$opId] = true;
                         }
                     }
                 }
@@ -290,9 +254,9 @@ class LaporanProduksiController extends Controller
                             $leadersByShift[$shiftKey] = $leader;
 
                             if (!empty($shiftInput->leader_signature_qr)) {
-                                $leadersQrByShift[$shiftKey] = $this->getQrCodePath($shiftInput->leader_signature_qr);
+                                $leadersQrByShift[$shiftKey] = $this->getQrCodeBase64($shiftInput->leader_signature_qr);
                             } else {
-                                $leadersQrByShift[$shiftKey] = $this->getTtdQrCodePath($shiftInput->id, 'leader', $leader);
+                                $leadersQrByShift[$shiftKey] = $this->getTtdQrCodeBase64($shiftInput->id, 'leader', $leader);
                             }
                         }
                     }
@@ -822,9 +786,9 @@ class LaporanProduksiController extends Controller
 
                         // Leader QR
                         if (!empty($shiftInput->leader_signature_qr)) {
-                            $leadersQrByShift[$shiftKey] = $this->getQrCodePath($shiftInput->leader_signature_qr);
+                            $leadersQrByShift[$shiftKey] = $this->getQrCodeBase64($shiftInput->leader_signature_qr);
                         } else {
-                            $leadersQrByShift[$shiftKey] = $this->getTtdQrCodePath($shiftInput->id, 'leader', $leader);
+                            $leadersQrByShift[$shiftKey] = $this->getTtdQrCodeBase64($shiftInput->id, 'leader', $leader);
                         }
                     }
                 }
@@ -1350,6 +1314,11 @@ class LaporanProduksiController extends Controller
                 }
             }
 
+            // Setting limit yang lebih besar untuk proses PDF yang berat
+            ini_set('memory_limit', '1024M');
+            ini_set('max_execution_time', '300'); // Tingkatkan ke 5 menit
+            set_time_limit(300);
+
             // Kelompokkan operator per shift dari semua plotings di planning ini
             $operatorsByShift = [
                 'shift_1' => [],
@@ -1387,140 +1356,101 @@ class LaporanProduksiController extends Controller
                 'shift_3' => null
             ];
 
+            // Optimization: Use a map for leader and operator lookups
+            $processedOperators = [
+                'shift_1' => [],
+                'shift_2' => [],
+                'shift_3' => []
+            ];
+
             foreach ($allInputs as $input) {
                 $ploting = $input->ploting;
                 if (!$ploting || !$ploting->operator) continue;
 
-                // Tentukan shift dari jadwal kerja operator (prioritas utama)
-                $inputShift = null;
                 $tanggalInput = $input->created_at ? $input->created_at->format('Y-m-d') : date('Y-m-d');
-
                 $jadwal = $jadwalKerjas->get($ploting->operator->id)?->get($tanggalInput)?->first();
 
+                $inputShift = null;
                 if ($jadwal && $jadwal->shift && $jadwal->shift !== 'off') {
                     $inputShift = strtolower($jadwal->shift);
                 }
 
-                // Jika shift tidak ditemukan dari jadwal, gunakan planning atau waktu created_at
                 if (!$inputShift || !in_array($inputShift, ['pagi', 'siang', 'malam'])) {
                     $inputShift = $this->normalizeShift($planning->shift ?? null);
                     if (!$inputShift || !in_array($inputShift, ['pagi', 'siang', 'malam'])) {
                         $hour = $input->created_at->hour;
-                        if ($hour >= 7 && $hour < 15) {
-                            $inputShift = 'pagi';
-                        } elseif ($hour >= 15 && $hour < 23) {
-                            $inputShift = 'siang';
-                        } else {
-                            $inputShift = 'malam';
-                        }
+                        if ($hour >= 7 && $hour < 15) $inputShift = 'pagi';
+                        elseif ($hour >= 15 && $hour < 23) $inputShift = 'siang';
+                        else $inputShift = 'malam';
                     }
                 }
 
-                // Map shift ke shift key
-                $shiftKey = null;
-                if ($inputShift === 'pagi') {
-                    $shiftKey = 'shift_1';
-                } elseif ($inputShift === 'siang') {
-                    $shiftKey = 'shift_2';
-                } elseif ($inputShift === 'malam') {
-                    $shiftKey = 'shift_3';
-                }
+                $shiftKey = $inputShift === 'pagi' ? 'shift_1' : ($inputShift === 'siang' ? 'shift_2' : ($inputShift === 'malam' ? 'shift_3' : null));
 
                 if ($shiftKey) {
-                    // Simpan input untuk shift leader (ambil yang pertama kali ditemukan untuk shift ini)
                     if (!$shiftInputs[$shiftKey]) {
                         $shiftInputs[$shiftKey] = $input;
                     }
 
-                    if ($ploting->operator) {
-                        // Cek apakah operator sudah ada di shift ini
-                        $operatorExists = false;
-                        foreach ($operatorsByShift[$shiftKey] as $existingOperator) {
-                            if ($existingOperator['id'] === $ploting->operator->id) {
-                                $operatorExists = true;
-                                break;
-                            }
-                        }
+                    $opId = $ploting->operator->id;
+                    if (!isset($processedOperators[$shiftKey][$opId])) {
+                        $operatorQrPath = !empty($input->operator_signature_qr) 
+                            ? $this->getQrCodePath($input->operator_signature_qr)
+                            : $this->getTtdQrCodePath($input->id, 'operator', $ploting->operator);
 
-                        if (!$operatorExists) {
-                            // Operator QR - gunakan QR dari input produksi ini atau generate baru
-                            $operatorQrPath = null;
-                            if (!empty($input->operator_signature_qr)) {
-                                $operatorQrPath = $this->getQrCodePath($input->operator_signature_qr);
-                            } else {
-                                $operatorQrPath = $this->getTtdQrCodePath($input->id, 'operator', $ploting->operator);
-                            }
-
-                            $operatorsByShift[$shiftKey][] = [
-                                'id' => $ploting->operator->id,
-                                'nama' => $ploting->operator->nama ?? '-',
-                                'nik' => $ploting->operator->nik ?? '-'
-                            ];
-                            $operatorsQrByShift[$shiftKey][] = $operatorQrPath;
-                        }
+                        $operatorsByShift[$shiftKey][] = [
+                            'id' => $opId,
+                            'nama' => $ploting->operator->nama ?? '-',
+                            'nik' => $ploting->operator->nik ?? '-'
+                        ];
+                        $operatorsQrByShift[$shiftKey][] = $operatorQrPath;
+                        $processedOperators[$shiftKey][$opId] = true;
                     }
                 }
             }
 
             // Get leaders per shift
-            $leadersByShift = [
-                'shift_1' => null,
-                'shift_2' => null,
-                'shift_3' => null
-            ];
-            $leadersQrByShift = [
-                'shift_1' => null,
-                'shift_2' => null,
-                'shift_3' => null
-            ];
+            $leadersByShift = ['shift_1' => null, 'shift_2' => null, 'shift_3' => null];
+            $leadersQrByShift = ['shift_1' => null, 'shift_2' => null, 'shift_3' => null];
 
-            foreach (['shift_1', 'shift_2', 'shift_3'] as $shiftKey) {
-                $shiftInput = $shiftInputs[$shiftKey];
-
-                if ($shiftInput) {
-                    $leader = $this->getLeaderByShiftAndGrup($shiftInput);
+            foreach (['shift_1', 'shift_2', 'shift_3'] as $sk) {
+                if ($shiftInputs[$sk]) {
+                    $leader = $this->getLeaderByShiftAndGrup($shiftInputs[$sk]);
                     if ($leader) {
-                        $leadersByShift[$shiftKey] = $leader;
-
-                        if (!empty($shiftInput->leader_signature_qr)) {
-                            $leadersQrByShift[$shiftKey] = $this->getQrCodePath($shiftInput->leader_signature_qr);
-                        } else {
-                            $leadersQrByShift[$shiftKey] = $this->getTtdQrCodePath($shiftInput->id, 'leader', $leader);
-                        }
+                        $leadersByShift[$sk] = $leader;
+                        $leadersQrByShift[$sk] = !empty($shiftInputs[$sk]->leader_signature_qr)
+                            ? $this->getQrCodePath($shiftInputs[$sk]->leader_signature_qr)
+                            : $this->getTtdQrCodePath($shiftInputs[$sk]->id, 'leader', $leader);
                     }
                 }
             }
 
-            // Prepare QR code untuk operator dan leader dari data ini (untuk kompatibilitas)
+            // Prepare QR code for current data
             if (empty($data->operator_signature_qr)) {
-                $operator = $data->ploting->operator ?? null;
-                $data->operator_qr_base64 = $this->getTtdQrCodeBase64($data->id, 'operator', $operator);
+                $data->operator_qr_path = $this->getTtdQrCodePath($data->id, 'operator', $data->ploting->operator ?? null);
             } else {
-                $data->operator_qr_base64 = $this->getQrCodeBase64($data->operator_signature_qr);
+                $data->operator_qr_path = $this->getQrCodePath($data->operator_signature_qr);
             }
 
-            // Get leader berdasarkan shift dan grup dari ploting
-            $leader = $this->getLeaderByShiftAndGrup($data);
-            $data->shift_leader = $leader;
-
+            $currentLeader = $this->getLeaderByShiftAndGrup($data);
+            $data->shift_leader = $currentLeader;
             if (empty($data->leader_signature_qr)) {
-                $data->leader_qr_base64 = $this->getTtdQrCodeBase64($data->id, 'leader', $leader);
+                $data->leader_qr_path = $this->getTtdQrCodePath($data->id, 'leader', $currentLeader);
             } else {
-                $data->leader_qr_base64 = $this->getQrCodeBase64($data->leader_signature_qr);
+                $data->leader_qr_path = $this->getQrCodePath($data->leader_signature_qr);
             }
 
             // Prepare logo path
-            $logoBase64 = $this->getLogoBase64();
+            $logoPathPath = $this->getLogoPath(); // Use path instead of base64
 
             // Set DomPDF options as array
             $options = [
                 'isHtml5ParserEnabled' => true,
-                'isPhpEnabled' => true,
+                'isPhpEnabled' => false, // Set ke false untuk keamanan dan kecepatan
                 'isRemoteEnabled' => false,
                 'chroot' => [public_path(), storage_path()],
-                'debugKeepTemp' => true,
-                'debugCss' => false,
-                'debugLayout' => false,
+                'debugKeepTemp' => false,
+                'isFontSubsettingEnabled' => true, // Menyeimbangkan kualitas dan kecepatan
             ];
 
             try {
@@ -1603,309 +1533,82 @@ class LaporanProduksiController extends Controller
                 $targetPerJamSiang = $targetShiftSiang > 0 ? floor($targetShiftSiang / 8) : 0;
                 $targetPerJamMalam = $targetShiftMalam > 0 ? floor($targetShiftMalam / 8) : 0;
 
-                // Hitung sisa target yang belum terdistribusi (untuk distribusi ke jam-jam tertentu)
-                $sisaTargetPagi = $targetShiftPagi - ($targetPerJamPagi * 8);
-                $sisaTargetSiang = $targetShiftSiang - ($targetPerJamSiang * 8);
-                $sisaTargetMalam = $targetShiftMalam - ($targetPerJamMalam * 8);
-
-                Log::info('PDF Single - Produksi per jam data', [
-                    'planning_id' => $planning->id,
-                    'total_records' => $produksiPerJam->count(),
-                    'planning_jam_count' => $planningJam->count(),
-                    'target_shift' => [
-                        'pagi' => $targetShiftPagi,
-                        'siang' => $targetShiftSiang,
-                        'malam' => $targetShiftMalam,
-                    ],
-                    'sample_data' => $produksiPerJam->take(3)->map(function ($item) {
-                        return [
-                            'shift' => $item->shift,
-                            'jam' => $item->jam,
-                            'ok_count' => $item->ok_count,
-                            'ng_part' => $item->ng_part,
-                            'target' => $item->target
-                        ];
-                    })
-                ]);
+                // Sisa target
+                $sisaTargetPagi = max(0, $targetShiftPagi - ($targetPerJamPagi * 8));
+                $sisaTargetSiang = max(0, $targetShiftSiang - ($targetPerJamSiang * 8));
+                $sisaTargetMalam = max(0, $targetShiftMalam - ($targetPerJamMalam * 8));
 
                 // Format data per shift dan jam untuk view
-                $produksiPerJamData = [
-                    'pagi' => [],
-                    'siang' => [],
-                    'malam' => []
-                ];
-
-                // Hitung total per shift untuk summary
+                $produksiPerJamData = ['pagi' => [], 'siang' => [], 'malam' => []];
                 $totalPerShift = [
                     'pagi' => ['target' => 0, 'ok' => 0, 'ng' => 0],
                     'siang' => ['target' => 0, 'ok' => 0, 'ng' => 0],
                     'malam' => ['target' => 0, 'ok' => 0, 'ng' => 0]
                 ];
 
-                // Daftar semua jam yang harus ditampilkan
-                $allJamSlots = [
-                    'pagi' => [
-                        '07.00 - 08.00',
-                        '08.00 - 09.00',
-                        '09.00 - 10.00',
-                        '10.00 - 11.00',
-                        '11.00 - 12.00',
-                        '12.00 - 13.00',
-                        '13.00 - 14.00',
-                        '14.00 - 15.00',
-                    ],
-                    'siang' => [
-                        '15.00 - 16.00',
-                        '16.00 - 17.00',
-                        '17.00 - 18.00',
-                        '18.00 - 19.00',
-                        '19.00 - 20.00',
-                        '20.00 - 21.00',
-                        '21.00 - 22.00',
-                        '22.00 - 23.00',
-                    ],
-                    'malam' => [
-                        '23.00 - 24.00',
-                        '24.00 - 01.00',
-                        '01.00 - 02.00',
-                        '02.00 - 03.00',
-                        '03.00 - 04.00',
-                        '04.00 - 05.00',
-                        '05.00 - 06.00',
-                        '06.00 - 07.00',
-                    ],
-                ];
-
-                // Kelompokkan data produksi per jam berdasarkan shift dan jam untuk menggabungkan multiple operator
-                $groupedProduksiPerJam = [];
+                // Group data by shift/jam first for O(1) lookup
+                $mappedProduksi = [];
                 foreach ($produksiPerJam as $item) {
                     $key = $item->shift . '_' . $item->jam;
-                    if (!isset($groupedProduksiPerJam[$key])) {
-                        $groupedProduksiPerJam[$key] = [];
+                    if (!isset($mappedProduksi[$key])) {
+                        $mappedProduksi[$key] = [
+                            'ok' => 0, 'ng' => 0, 'ops' => [], 'm' => '', 't' => '', 'c1' => '', 'c2' => '',
+                            'ngs' => [1=>0,2=>0,3=>0,4=>0,5=>0,6=>0,7=>0], 'target_db' => $item->target
+                        ];
                     }
-                    $groupedProduksiPerJam[$key][] = $item;
+                    $mappedProduksi[$key]['ok'] += (int)$item->ok_count;
+                    $mappedProduksi[$key]['ng'] += (int)$item->ng_part;
+                    if ($item->operator_code && !in_array($item->operator_code, $mappedProduksi[$key]['ops'])) $mappedProduksi[$key]['ops'][] = $item->operator_code;
+                    for ($i=1;$i<=7;$i++) $mappedProduksi[$key]['ngs'][$i] += (int)($item->{"ng_subpart_$i"} ?? 0);
+                    if ($item->masalah) $mappedProduksi[$key]['m'] = $item->masalah;
+                    if ($item->tindakan) $mappedProduksi[$key]['t'] = $item->tindakan;
+                    if ($item->checker_prd) $mappedProduksi[$key]['c1'] = $item->checker_prd;
+                    if ($item->checker_qc) $mappedProduksi[$key]['c2'] = $item->checker_qc;
                 }
 
-                // Proses data produksi per jam yang sudah dikelompokkan
-                foreach ($groupedProduksiPerJam as $key => $items) {
-                    // Ambil shift dan jam dari key
-                    $firstItem = $items[0];
-                    $shift = $firstItem->shift;
-                    $jam = $firstItem->jam;
+                // Fill all slots
+                $allJamSlots = [
+                    'pagi' => ['07.00 - 08.00', '08.00 - 09.00', '09.00 - 10.00', '10.00 - 11.00', '11.00 - 12.00', '12.00 - 13.00', '13.00 - 14.00', '14.00 - 15.00'],
+                    'siang' => ['15.00 - 16.00', '16.00 - 17.00', '17.00 - 18.00', '18.00 - 19.00', '19.00 - 20.00', '20.00 - 21.00', '21.00 - 22.00', '22.00 - 23.00'],
+                    'malam' => ['23.00 - 24.00', '24.00 - 01.00', '01.00 - 02.00', '02.00 - 03.00', '03.00 - 04.00', '04.00 - 05.00', '05.00 - 06.00', '06.00 - 07.00'],
+                ];
 
-                    // Cari target dari planning_produksi_jam (prioritas utama)
-                    $targetFromPlanning = null;
-                    if (isset($jamMapping[$shift][$jam])) {
-                        $jamKey = $jamMapping[$shift][$jam];
-                        $planningJamKey = $shift . '_' . $jamKey;
-                        if ($planningJam->has($planningJamKey)) {
-                            $targetFromPlanning = $planningJam[$planningJamKey]->target;
-                        }
-                    }
-
-                    // Gunakan target dari planning_produksi_jam jika ada
-                    // Jika tidak ada, gunakan dari produksi_per_jam (ambil dari record pertama)
-                    // Jika masih 0, gunakan target per jam default berdasarkan shift
-                    $target = $targetFromPlanning;
-                    if ($target === null || $target == 0) {
-                        $target = $firstItem->target;
-                        if ($target == 0) {
-                            // Jika masih 0, gunakan target per jam default berdasarkan shift
-                            // Tentukan index jam untuk distribusi sisa target
-                            $jamIndex = array_search($jam, $allJamSlots[$shift] ?? []);
-                            $jamIndex = $jamIndex !== false ? $jamIndex : 0;
-
-                            switch ($shift) {
-                                case 'pagi':
-                                    $target = $targetPerJamPagi;
-                                    // Tambahkan sisa target ke jam-jam awal shift
-                                    if ($sisaTargetPagi > 0 && $jamIndex < $sisaTargetPagi) {
-                                        $target += 1;
-                                    }
-                                    break;
-                                case 'siang':
-                                    $target = $targetPerJamSiang;
-                                    if ($sisaTargetSiang > 0 && $jamIndex < $sisaTargetSiang) {
-                                        $target += 1;
-                                    }
-                                    break;
-                                case 'malam':
-                                    $target = $targetPerJamMalam;
-                                    if ($sisaTargetMalam > 0 && $jamIndex < $sisaTargetMalam) {
-                                        $target += 1;
-                                    }
-                                    break;
-                            }
-                        }
-                    }
-
-                    // Gabungkan data dari semua record untuk shift dan jam yang sama
-                    $totalOkCount = 0;
-                    $totalNgPart = 0;
-                    $operatorCodes = [];
-                    $totalNgSubpart = [
-                        1 => 0,
-                        2 => 0,
-                        3 => 0,
-                        4 => 0,
-                        5 => 0,
-                        6 => 0,
-                        7 => 0
-                    ];
-                    $masalah = '';
-                    $tindakan = '';
-                    $checkerPrd = '';
-                    $checkerQc = '';
-
-                    foreach ($items as $item) {
-                        // Data OK dan NG dari produksi_per_jam (realtime dari input)
-                        // Pastikan ok_count dan ng_part adalah integer, bukan string atau null
-                        // Gunakan getRawOriginal untuk mendapatkan nilai mentah dari database
-                        $okCountRaw = $item->getRawOriginal('ok_count');
-                        $ngPartRaw = $item->getRawOriginal('ng_part');
-                        $operatorCodeRaw = $item->getRawOriginal('operator_code');
-
-                        // Cast ke tipe yang benar
-                        $okCount = is_numeric($okCountRaw) ? (int)$okCountRaw : 0;
-                        $ngPart = is_numeric($ngPartRaw) ? (int)$ngPartRaw : 0;
-                        $operatorCode = is_string($operatorCodeRaw) ? trim($operatorCodeRaw) : '';
-
-                        // Akumulasi OK dan NG
-                        $totalOkCount += $okCount;
-                        $totalNgPart += $ngPart;
-
-                        // Kumpulkan operator code (jika ada dan belum ada di array)
-                        if (!empty($operatorCode) && !in_array($operatorCode, $operatorCodes)) {
-                            $operatorCodes[] = $operatorCode;
-                        }
-
-                        // Akumulasi NG subpart
-                        for ($i = 1; $i <= 7; $i++) {
-                            $ngSubpartRaw = $item->getRawOriginal('ng_subpart_' . $i);
-                            $ngSubpart = is_numeric($ngSubpartRaw) ? (int)$ngSubpartRaw : 0;
-                            $totalNgSubpart[$i] += $ngSubpart;
-                        }
-
-                        // Ambil masalah, tindakan, checker dari record yang memiliki data (prioritas record terakhir yang memiliki data)
-                        if (!empty($item->masalah)) {
-                            $masalah = (string)$item->masalah;
-                        }
-                        if (!empty($item->tindakan)) {
-                            $tindakan = (string)$item->tindakan;
-                        }
-                        if (!empty($item->checker_prd)) {
-                            $checkerPrd = (string)$item->checker_prd;
-                        }
-                        if (!empty($item->checker_qc)) {
-                            $checkerQc = (string)$item->checker_qc;
-                        }
-                    }
-
-                    // Gabungkan operator codes dengan "/" (seperti di contoh: "C57/C56" atau "057/C56")
-                    // Jika hanya satu operator, tampilkan tanpa separator
-                    $operatorCodeCombined = count($operatorCodes) > 1 ? implode('/', $operatorCodes) : (count($operatorCodes) == 1 ? $operatorCodes[0] : '');
-
-                    // Debug log untuk setiap kelompok yang memiliki data
-                    if ($totalOkCount > 0 || $totalNgPart > 0 || !empty($operatorCodeCombined)) {
-                        Log::info('PDF Single - Processing grouped produksi_per_jam', [
-                            'shift' => $shift,
-                            'jam' => $jam,
-                            'records_count' => count($items),
-                            'total_ok_count' => $totalOkCount,
-                            'total_ng_part' => $totalNgPart,
-                            'operator_codes' => $operatorCodes,
-                            'operator_code_combined' => $operatorCodeCombined,
-                        ]);
-                    }
-
-                    $produksiPerJamData[$shift][$jam] = [
-                        'target' => (int)$target,
-                        'ok_count' => $totalOkCount,
-                        'ng_part' => $totalNgPart,
-                        'operator_code' => $operatorCodeCombined,
-                        'ng_subpart_1' => $totalNgSubpart[1],
-                        'ng_subpart_2' => $totalNgSubpart[2],
-                        'ng_subpart_3' => $totalNgSubpart[3],
-                        'ng_subpart_4' => $totalNgSubpart[4],
-                        'ng_subpart_5' => $totalNgSubpart[5],
-                        'ng_subpart_6' => $totalNgSubpart[6],
-                        'ng_subpart_7' => $totalNgSubpart[7],
-                        'masalah' => $masalah,
-                        'tindakan' => $tindakan,
-                        'checker_prd' => $checkerPrd,
-                        'checker_qc' => $checkerQc,
-                    ];
-
-                    // Akumulasi total per shift (target tidak diakumulasi karena akan diganti dengan target shift)
-                    $totalPerShift[$shift]['ok'] += $totalOkCount;
-                    $totalPerShift[$shift]['ng'] += $totalNgPart;
-                }
-
-                // Isi jam yang belum ada input produksi dengan target dari planning
                 foreach ($allJamSlots as $shift => $jamSlots) {
-                    foreach ($jamSlots as $jamSlot) {
-                        if (!isset($produksiPerJamData[$shift][$jamSlot])) {
-                            // Cari target dari planning_produksi_jam (prioritas utama)
-                            $targetFromPlanning = null;
-                            if (isset($jamMapping[$shift][$jamSlot])) {
-                                $jamKey = $jamMapping[$shift][$jamSlot];
-                                $planningJamKey = $shift . '_' . $jamKey;
-                                if ($planningJam->has($planningJamKey)) {
-                                    $targetFromPlanning = $planningJam[$planningJamKey]->target;
-                                }
-                            }
+                    foreach ($jamSlots as $idx => $jamSlot) {
+                        $key = $shift . '_' . $jamSlot;
+                        $dataJam = $mappedProduksi[$key] ?? null;
 
-                            // Gunakan target dari planning_produksi_jam jika ada
-                            // Jika tidak, gunakan target per jam default berdasarkan shift
-                            // Distribusikan sisa target ke jam-jam awal shift
-                            $target = $targetFromPlanning;
-                            if ($target === null || $target == 0) {
-                                // Tentukan sisa target dan target per jam untuk shift ini
-                                $sisaTarget = 0;
-                                $targetPerJam = 0;
-                                switch ($shift) {
-                                    case 'pagi':
-                                        $sisaTarget = $sisaTargetPagi;
-                                        $targetPerJam = $targetPerJamPagi;
-                                        break;
-                                    case 'siang':
-                                        $sisaTarget = $sisaTargetSiang;
-                                        $targetPerJam = $targetPerJamSiang;
-                                        break;
-                                    case 'malam':
-                                        $sisaTarget = $sisaTargetMalam;
-                                        $targetPerJam = $targetPerJamMalam;
-                                        break;
-                                }
-
-                                $target = $targetPerJam;
-                                // Tentukan index jam untuk distribusi sisa target
-                                $jamIndex = array_search($jamSlot, $jamSlots);
-                                if ($jamIndex !== false && $sisaTarget > 0 && $jamIndex < $sisaTarget) {
-                                    $target += 1;
-                                }
-                            }
-
-                            $produksiPerJamData[$shift][$jamSlot] = [
-                                'target' => (int)$target,
-                                'ok_count' => 0,
-                                'ng_part' => 0,
-                                'operator_code' => '',
-                                'ng_subpart_1' => 0,
-                                'ng_subpart_2' => 0,
-                                'ng_subpart_3' => 0,
-                                'ng_subpart_4' => 0,
-                                'ng_subpart_5' => 0,
-                                'ng_subpart_6' => 0,
-                                'ng_subpart_7' => 0,
-                                'masalah' => '',
-                                'tindakan' => '',
-                                'checker_prd' => '',
-                                'checker_qc' => '',
-                            ];
-
-                            // Target tidak diakumulasi karena akan diganti dengan target shift dari planning
+                        // Target Logic
+                        $target = 0;
+                        if ($dataJam && $dataJam['target_db'] > 0) {
+                            $target = $dataJam['target_db'];
+                        } else {
+                            $targetMapping = ['pagi' => $targetPerJamPagi, 'siang' => $targetPerJamSiang, 'malam' => $targetPerJamMalam];
+                            $sisaMapping = ['pagi' => $sisaTargetPagi, 'siang' => $sisaTargetSiang, 'malam' => $sisaTargetMalam];
+                            $target = $targetMapping[$shift] ?? 0;
+                            if (($sisaMapping[$shift] ?? 0) > 0 && $idx < $sisaMapping[$shift]) $target += 1;
                         }
+
+                        $produksiPerJamData[$shift][$jamSlot] = [
+                            'target' => (int)$target,
+                            'ok_count' => $dataJam ? $dataJam['ok'] : 0,
+                            'ng_part' => $dataJam ? $dataJam['ng'] : 0,
+                            'operator_code' => $dataJam ? implode('/', $dataJam['ops']) : '',
+                            'ng_subpart_1' => $dataJam ? $dataJam['ngs'][1] : 0,
+                            'ng_subpart_2' => $dataJam ? $dataJam['ngs'][2] : 0,
+                            'ng_subpart_3' => $dataJam ? $dataJam['ngs'][3] : 0,
+                            'ng_subpart_4' => $dataJam ? $dataJam['ngs'][4] : 0,
+                            'ng_subpart_5' => $dataJam ? $dataJam['ngs'][5] : 0,
+                            'ng_subpart_6' => $dataJam ? $dataJam['ngs'][6] : 0,
+                            'ng_subpart_7' => $dataJam ? $dataJam['ngs'][7] : 0,
+                            'masalah' => $dataJam ? $dataJam['m'] : '',
+                            'tindakan' => $dataJam ? $dataJam['t'] : '',
+                            'checker_prd' => $dataJam ? $dataJam['c1'] : '',
+                            'checker_qc' => $dataJam ? $dataJam['c2'] : '',
+                        ];
+
+                        $totalPerShift[$shift]['ok'] += (int)($dataJam ? $dataJam['ok'] : 0);
+                        $totalPerShift[$shift]['ng'] += (int)($dataJam ? $dataJam['ng'] : 0);
                     }
                 }
 
@@ -1915,12 +1618,12 @@ class LaporanProduksiController extends Controller
                 $totalPerShift['siang']['target'] = $targetShiftSiang;
                 $totalPerShift['malam']['target'] = $targetShiftMalam;
 
-                // Ambil total OK dan NG dari InputProduksi untuk planning ini (realtime)
-                // Ini adalah sumber data utama untuk OK/NG
-                $totalOkFromInput = \App\Models\InputProduksi::where('planning_id', $planning->id)
-                    ->sum('ok_count');
-                $totalNgFromInput = \App\Models\InputProduksi::where('planning_id', $planning->id)
-                    ->sum('ng_count');
+                // Hitung grand total - gunakan data yang sudah di-fetch sebelumnya
+                $totalCounts = \App\Models\InputProduksi::where('planning_id', $planning->id)
+                    ->selectRaw('SUM(ok_count) as total_ok, SUM(ng_count) as total_ng')
+                    ->first();
+                $totalOkFromInput = (int)($totalCounts->total_ok ?? 0);
+                $totalNgFromInput = (int)($totalCounts->total_ng ?? 0);
 
                 // Hitung total OK dan NG dari produksi_per_jam yang sudah diakumulasi
                 $totalOkFromProduksiPerJam = $totalPerShift['pagi']['ok'] + $totalPerShift['siang']['ok'] + $totalPerShift['malam']['ok'];
@@ -1966,28 +1669,23 @@ class LaporanProduksiController extends Controller
                     'ng' => $totalNgFromInput   // Gunakan langsung dari InputProduksi
                 ];
 
-                // Prepare Persiapan Produksi data
-                $persiapanData = [];
+                // Prepare Persiapan Produksi data for fast O(1) lookup
+                $persiapanMapped = ['Pagi' => [], 'Siang' => [], 'Malam' => []];
                 if ($data->ploting && $data->ploting->persiapanChecks) {
-                    $persiapanData = $data->ploting->persiapanChecks->groupBy(function ($check) {
-                        // Extract shift from item_name (e.g., "Briefing (Pagi)" -> "Pagi")
-                        if (preg_match('/\((\w+)\)$/', $check->item_name, $matches)) {
-                            return ucfirst(strtolower($matches[1]));
-                        }
-                        return 'Unknown';
-                    })->map(function ($checks, $shift) {
-                        return $checks->map(function ($check) {
-                            // Remove shift suffix from item_name
-                            $itemName = preg_replace('/\s*\([^)]+\)$/', '', $check->item_name);
-                            return [
-                                'item_name' => $itemName,
-                                'operator_checked' => $check->operator_checked,
-                                'leader_checked' => $check->leader_checked,
-                                'keterangan' => $check->keterangan
+                    foreach ($data->ploting->persiapanChecks as $check) {
+                        $shift = 'Unknown';
+                        if (preg_match('/\((\w+)\)$/', $check->item_name, $m)) $shift = ucfirst(strtolower($m[1]));
+                        if (isset($persiapanMapped[$shift])) {
+                            $cleanName = preg_replace('/\s*\([^)]+\)$/', '', $check->item_name);
+                            $persiapanMapped[$shift][$cleanName] = [
+                                'oc' => $check->operator_checked,
+                                'lc' => $check->leader_checked,
+                                'k' => $check->keterangan
                             ];
-                        })->toArray();
-                    })->toArray();
+                        }
+                    }
                 }
+                $persiapanData = $persiapanMapped;
 
                 // Prepare NG Part Types data
                 $ngPartTypesData = [];
@@ -2046,7 +1744,7 @@ class LaporanProduksiController extends Controller
 
                 $pdf = Pdf::loadView('laporan-produksi.cetak-single', compact(
                     'data',
-                    'logoBase64',
+                    'logoPathPath',
                     'operatorsByShift',
                     'operatorsQrByShift',
                     'leadersByShift',
@@ -2064,6 +1762,7 @@ class LaporanProduksiController extends Controller
                 $pdf->setPaper('a4', 'portrait');
                 $pdf->setOptions($options);
 
+                Log::info('PDF Single - Data preparation complete, starting PDF generation and stream');
                 return $pdf->stream('laporan-produksi-' . $data->id . '-' . date('Y-m-d') . '.pdf');
             } catch (\Exception $pdfError) {
                 Log::error('PDF Single Stream Error: ' . $pdfError->getMessage());
@@ -2149,18 +1848,20 @@ class LaporanProduksiController extends Controller
         return (file_exists($logoPath) && is_readable($logoPath)) ? $logoPath : null;
     }
 
-    /**
-     * Helper method untuk convert QR code path ke base64 (KEEP FOR COMPATIBILITY)
-     */
+    private static $qrCodeCache = [];
     private function getQrCodeBase64($qrPath)
     {
         if (!$qrPath) return null;
+        if (isset(self::$qrCodeCache[$qrPath])) return self::$qrCodeCache[$qrPath];
+        
         try {
             $fullPath = storage_path('app/public/' . $qrPath);
             if (file_exists($fullPath) && is_readable($fullPath)) {
                 $qrData = @file_get_contents($fullPath);
                 if ($qrData !== false && !empty($qrData)) {
-                    return 'data:image/png;base64,' . base64_encode($qrData);
+                    $base64 = 'data:image/png;base64,' . base64_encode($qrData);
+                    self::$qrCodeCache[$qrPath] = $base64;
+                    return $base64;
                 }
             }
             return null;
@@ -2169,17 +1870,18 @@ class LaporanProduksiController extends Controller
         }
     }
 
-    /**
-     * Helper method untuk convert logo ke base64 (KEEP FOR COMPATIBILITY)
-     */
+    private static $logoCache = null;
     private function getLogoBase64()
     {
+        if (self::$logoCache !== null) return self::$logoCache;
+
         try {
             $logoPath = public_path('images/logo.png');
             if (file_exists($logoPath) && is_readable($logoPath)) {
                 $logoData = @file_get_contents($logoPath);
                 if ($logoData !== false && !empty($logoData)) {
-                    return 'data:image/png;base64,' . base64_encode($logoData);
+                    self::$logoCache = 'data:image/png;base64,' . base64_encode($logoData);
+                    return self::$logoCache;
                 }
             }
             return null;
@@ -2222,8 +1924,8 @@ class LaporanProduksiController extends Controller
 
             $result = $builder->build(
                 data: $qrContent,
-                size: 200,
-                margin: 5
+                size: 80, // Ukuran diperkecil dari 200 ke 80 agar PDF lebih cepat
+                margin: 2
             );
 
             // Save QR code to storage
@@ -2453,357 +2155,67 @@ class LaporanProduksiController extends Controller
     private function distributeInputProduksiToProduksiPerJam($planningId)
     {
         try {
-            // Ambil semua InputProduksi untuk planning ini
             $inputProduksi = \App\Models\InputProduksi::where('planning_id', $planningId)
-                ->with('ploting.operator')
+                ->where('status', 'approved')
+                ->with(['ploting.operator'])
                 ->get();
 
-            if ($inputProduksi->isEmpty()) {
-                return;
-            }
+            if ($inputProduksi->isEmpty()) return;
 
-            // Hitung total OK/NG dari InputProduksi
-            $totalOkFromInput = $inputProduksi->sum('ok_count');
-            $totalNgFromInput = $inputProduksi->sum('ng_count');
+            $existingData = \App\Models\ProduksiPerJam::where('planning_id', $planningId)->get();
+            
+            $totalInputOk = $inputProduksi->sum('ok_count');
+            $totalInputNg = $inputProduksi->sum('ng_count');
+            if ($existingData->sum('ok_count') >= $totalInputOk && $existingData->sum('ng_part') >= $totalInputNg) return;
 
-            // Hitung total OK/NG dari produksi_per_jam yang sudah ada
-            $totalOkFromProduksiPerJam = \App\Models\ProduksiPerJam::where('planning_id', $planningId)
-                ->sum('ok_count');
-            $totalNgFromProduksiPerJam = \App\Models\ProduksiPerJam::where('planning_id', $planningId)
-                ->sum('ng_part');
-
-            // Jika total di produksi_per_jam sudah sama atau lebih besar dari InputProduksi, tidak perlu distribusi
-            // Ini berarti semua data sudah tersimpan secara realtime melalui saveProduksiPerJamRealtime
-            // ketika tombol OK/NG diklik di input-produksi/index.blade.php
-            // Setiap klik OK/NG akan langsung menambah ok_count atau ng_part di produksi_per_jam untuk jam yang sesuai
-            if ($totalOkFromProduksiPerJam >= $totalOkFromInput && $totalNgFromProduksiPerJam >= $totalNgFromInput) {
-                Log::info('Data produksi_per_jam sudah lengkap (semua data tersimpan realtime)', [
-                    'planning_id' => $planningId,
-                    'ok_from_input' => $totalOkFromInput,
-                    'ok_from_produksi_per_jam' => $totalOkFromProduksiPerJam,
-                    'ng_from_input' => $totalNgFromInput,
-                    'ng_from_produksi_per_jam' => $totalNgFromProduksiPerJam,
-                    'message' => 'Semua data OK/NG sudah tersimpan secara realtime melalui saveProduksiPerJamRealtime ketika tombol diklik. Data akan muncul di PDF sesuai dengan jam input yang sebenarnya.'
-                ]);
-                return;
-            }
-
-            // Jika ada selisih kecil (mungkin karena rounding atau timing), log sebagai info tapi tetap lanjutkan distribusi
-            $okDiff = abs($totalOkFromProduksiPerJam - $totalOkFromInput);
-            $ngDiff = abs($totalNgFromProduksiPerJam - $totalNgFromInput);
-            if ($okDiff <= 1 && $ngDiff <= 1 && $totalOkFromProduksiPerJam > 0) {
-                Log::info('Selisih kecil antara InputProduksi dan produksi_per_jam (mungkin karena timing)', [
-                    'planning_id' => $planningId,
-                    'ok_diff' => $okDiff,
-                    'ng_diff' => $ngDiff,
-                    'message' => 'Selisih kecil, kemungkinan besar data sudah lengkap. Tetap lanjutkan distribusi untuk memastikan.'
-                ]);
-            }
-
-            // Mapping jam dari format waktu ke format "HH.00 - HH.00"
-            // Format harus sama persis dengan getCurrentJam() di InputProduksiController
-            $getJamFromTime = function ($hour) {
-                $jamAwal = $hour;
-                $jamAkhir = $hour + 1;
-
-                // Handle shift malam yang melintasi hari
-                if ($jamAwal == 23) {
-                    // Jam 23:00 - 24:00
-                    return '23.00 - 24.00';
-                } elseif ($jamAwal == 0) {
-                    // Jam 00:00 - 01:00 (format: "24.00 - 01.00")
-                    return '24.00 - 01.00';
-                } elseif ($jamAwal >= 1 && $jamAwal <= 6) {
-                    // Jam 01:00 - 07:00 (format: "01.00 - 02.00", "02.00 - 03.00", dll)
-                    return sprintf('%02d.00 - %02d.00', $jamAwal, $jamAkhir);
-                } else {
-                    // Jam normal 07:00 - 23:00
-                    return sprintf('%02d.00 - %02d.00', $jamAwal, $jamAkhir);
-                }
-            };
-
-            // Tentukan shift dari jam
-            $getShiftFromHour = function ($hour) {
-                if ($hour >= 7 && $hour < 15) {
-                    return 'pagi';
-                } elseif ($hour >= 15 && $hour < 23) {
-                    return 'siang';
-                } else {
-                    return 'malam';
-                }
-            };
-
-            // Ambil semua produksi_per_jam yang sudah ada
-            $existingProduksiPerJam = \App\Models\ProduksiPerJam::where('planning_id', $planningId)
-                ->get()
-                ->keyBy(function ($item) {
-                    return $item->shift . '_' . $item->jam;
-                });
-
-            // Kelompokkan InputProduksi berdasarkan jam input untuk distribusi
-            $inputByHour = [];
+            $groupedInputs = [];
             foreach ($inputProduksi as $input) {
-                // Ambil waktu input (gunakan updated_at karena itu waktu terakhir input)
-                $inputTime = $input->updated_at ?? $input->created_at;
-                if (!$inputTime) {
-                    continue;
-                }
-
-                $hour = (int) $inputTime->format('H');
-                $shift = $getShiftFromHour($hour);
-                $jam = $getJamFromTime($hour);
-
+                $time = $input->updated_at ?? $input->created_at;
+                $hour = (int)$time->format('H');
+                
+                $shift = ($hour >= 7 && $hour < 15) ? 'pagi' : (($hour >= 15 && $hour < 23) ? 'siang' : 'malam');
+                $jam = ($hour == 23) ? '23.00 - 24.00' : (($hour == 0) ? '24.00 - 01.00' : sprintf('%02d.00 - %02d.00', $hour, $hour + 1));
+                
                 $key = $shift . '_' . $jam;
-
-                if (!isset($inputByHour[$key])) {
-                    $inputByHour[$key] = [
-                        'shift' => $shift,
-                        'jam' => $jam,
-                        'ok_count' => 0,
-                        'ng_count' => 0,
-                        'input_produksi_id' => $input->id,
-                        'ploting_id' => $input->ploting_id,
-                        'operator' => $input->ploting->operator ?? null,
+                if (!isset($groupedInputs[$key])) {
+                    $groupedInputs[$key] = [
+                        'ok' => 0, 'ng' => 0, 'operator_codes' => [],
+                        'input_id' => $input->id, 'ploting_id' => $input->ploting_id
                     ];
                 }
-
-                // Akumulasi OK/NG untuk jam ini
-                // Catatan: InputProduksi menyimpan total, jadi kita bagi rata atau gunakan proporsi
-                // Untuk sementara, kita asumsikan setiap InputProduksi adalah 1 unit per jam
-                // Tapi kita perlu cara yang lebih baik untuk mendistribusikan
+                $groupedInputs[$key]['ok'] += $input->ok_count;
+                $groupedInputs[$key]['ng'] += $input->ng_count;
+                $opCode = $input->ploting?->operator?->nik;
+                if ($opCode && !in_array($opCode, $groupedInputs[$key]['operator_codes'])) $groupedInputs[$key]['operator_codes'][] = $opCode;
             }
 
-            // Distribusikan sisa OK/NG yang belum terdistribusi
-            // Prioritas: Gunakan data dari produksi_per_jam yang sudah ada (yang dibuat melalui saveProduksiPerJamRealtime)
-            // Jika masih ada sisa, distribusikan berdasarkan waktu input yang sebenarnya dari InputProduksi
-            $remainingOk = max(0, $totalOkFromInput - $totalOkFromProduksiPerJam);
-            $remainingNg = max(0, $totalNgFromInput - $totalNgFromProduksiPerJam);
+            $existingMapped = $existingData->keyBy(fn($item) => $item->shift . '_' . $item->jam);
 
-            if ($remainingOk > 0 || $remainingNg > 0) {
-                // Strategi: Distribusikan berdasarkan waktu input yang sebenarnya
-                // Urutkan InputProduksi berdasarkan waktu input (dari yang paling awal)
-                $sortedInputs = $inputProduksi->sortBy(function ($input) {
-                    $inputTime = $input->updated_at ?? $input->created_at;
-                    return $inputTime ? $inputTime->timestamp : 0;
-                });
-
-                // Daftar jam untuk setiap shift (dari awal ke akhir)
-                $jamSlotsByShift = [
-                    'pagi' => [
-                        '07.00 - 08.00',
-                        '08.00 - 09.00',
-                        '09.00 - 10.00',
-                        '10.00 - 11.00',
-                        '11.00 - 12.00',
-                        '12.00 - 13.00',
-                        '13.00 - 14.00',
-                        '14.00 - 15.00',
-                    ],
-                    'siang' => [
-                        '15.00 - 16.00',
-                        '16.00 - 17.00',
-                        '17.00 - 18.00',
-                        '18.00 - 19.00',
-                        '19.00 - 20.00',
-                        '20.00 - 21.00',
-                        '21.00 - 22.00',
-                        '22.00 - 23.00',
-                    ],
-                    'malam' => [
-                        '23.00 - 24.00',
-                        '24.00 - 01.00',
-                        '01.00 - 02.00',
-                        '02.00 - 03.00',
-                        '03.00 - 04.00',
-                        '04.00 - 05.00',
-                        '05.00 - 06.00',
-                        '06.00 - 07.00',
-                    ],
-                ];
-
-                // Kelompokkan InputProduksi berdasarkan shift dan jam berdasarkan waktu input yang sebenarnya
-                // Ini akan memastikan distribusi sesuai dengan waktu input yang ditampilkan di tabel super admin
-                $inputByShiftJam = [];
-                foreach ($sortedInputs as $input) {
-                    $inputTime = $input->updated_at ?? $input->created_at;
-                    if (!$inputTime) {
-                        continue;
-                    }
-
-                    $hour = (int) $inputTime->format('H');
-                    $shift = $getShiftFromHour($hour);
-                    $jam = $getJamFromTime($hour);
-
-                    $key = $shift . '_' . $jam;
-                    if (!isset($inputByShiftJam[$key])) {
-                        $inputByShiftJam[$key] = [
-                            'shift' => $shift,
-                            'jam' => $jam,
-                            'inputs' => [],
-                            'input_time' => $inputTime,
-                        ];
-                    }
-                    $inputByShiftJam[$key]['inputs'][] = $input;
-                }
-
-                // Urutkan berdasarkan waktu input (dari yang paling awal)
-                uasort($inputByShiftJam, function ($a, $b) {
-                    return $a['input_time']->timestamp <=> $b['input_time']->timestamp;
-                });
-
-                // Distribusikan OK/NG ke jam-jam yang sesuai dengan waktu input
-                $okDistributed = 0;
-                $ngDistributed = 0;
-
-                foreach ($inputByShiftJam as $key => $data) {
-                    $shift = $data['shift'];
-                    $jam = $data['jam'];
-                    $inputs = $data['inputs'];
-
-                    // Cek apakah sudah ada record untuk jam ini
-                    $produksiPerJam = $existingProduksiPerJam[$key] ?? null;
-
-                    if (!$produksiPerJam && ($remainingOk > 0 || $remainingNg > 0)) {
-                        // Distribusikan OK/NG ke jam ini berdasarkan proporsi
-                        // Setiap input akan mendapat 1 unit OK atau NG sesuai dengan proporsi total
-                        $okForThisJam = 0;
-                        $ngForThisJam = 0;
-
-                        // Hitung proporsi OK/NG untuk jam ini
-                        foreach ($inputs as $input) {
-                            $inputOk = $input->ok_count ?? 0;
-                            $inputNg = $input->ng_count ?? 0;
-                            $inputTotal = $inputOk + $inputNg;
-
-                            if ($inputTotal > 0) {
-                                // Distribusikan proporsional
-                                $okRatio = $inputOk / $inputTotal;
-                                $ngRatio = $inputNg / $inputTotal;
-
-                                // Untuk setiap unit, distribusikan ke jam ini
-                                // Karena kita tidak tahu unit per klik, kita asumsikan 1 unit per input
-                                if ($remainingOk > 0 && $inputOk > 0) {
-                                    $okForThisJam += min(1, $remainingOk);
-                                    $remainingOk -= min(1, $remainingOk);
-                                }
-                                if ($remainingNg > 0 && $inputNg > 0) {
-                                    $ngForThisJam += min(1, $remainingNg);
-                                    $remainingNg -= min(1, $remainingNg);
-                                }
-                            }
-                        }
-
-                        if ($okForThisJam > 0 || $ngForThisJam > 0) {
-                            $firstInput = $inputs[0];
-                            $user = $firstInput->ploting->operator ?? null;
-
-                            \App\Models\ProduksiPerJam::create([
-                                'planning_id' => $planningId,
-                                'input_produksi_id' => $firstInput->id,
-                                'ploting_id' => $firstInput->ploting_id,
-                                'shift' => $shift,
-                                'jam' => $jam,
-                                'target' => 0,
-                                'ok_count' => $okForThisJam,
-                                'ng_part' => $ngForThisJam,
-                                'operator_code' => $user->nik ?? null,
-                            ]);
-
-                            $okDistributed += $okForThisJam;
-                            $ngDistributed += $ngForThisJam;
-
-                            Log::info('Record produksi_per_jam dibuat dengan distribusi OK/NG berdasarkan waktu input', [
-                                'planning_id' => $planningId,
-                                'shift' => $shift,
-                                'jam' => $jam,
-                                'input_time' => $data['input_time']->format('Y-m-d H:i:s'),
-                                'ok_added' => $okForThisJam,
-                                'ng_added' => $ngForThisJam,
-                                'inputs_count' => count($inputs),
-                            ]);
-                        }
-                    }
-                }
-
-                // Jika masih ada sisa setelah distribusi berdasarkan waktu input, distribusikan ke jam-jam awal Shift 1
-                // Ini hanya sebagai fallback jika distribusi berdasarkan waktu input tidak mencukupi
-                if ($remainingOk > 0 || $remainingNg > 0) {
-                    Log::warning('Masih ada sisa OK/NG setelah distribusi berdasarkan waktu input', [
-                        'planning_id' => $planningId,
-                        'remaining_ok' => $remainingOk,
-                        'remaining_ng' => $remainingNg,
-                    ]);
-
-                    $jamSlotsPagi = $jamSlotsByShift['pagi'];
-                    foreach ($jamSlotsPagi as $jamSlot) {
-                        if ($remainingOk <= 0 && $remainingNg <= 0) {
-                            break;
-                        }
-
-                        $key = 'pagi_' . $jamSlot;
-                        $produksiPerJam = $existingProduksiPerJam[$key] ?? null;
-
-                        if (!$produksiPerJam) {
-                            $firstInput = $inputProduksi->first();
-                            $user = $firstInput->ploting->operator ?? null;
-
-                            $okToAdd = min(1, $remainingOk);
-                            $ngToAdd = min(1, $remainingNg);
-
-                            if ($okToAdd > 0 || $ngToAdd > 0) {
-                                \App\Models\ProduksiPerJam::create([
-                                    'planning_id' => $planningId,
-                                    'input_produksi_id' => $firstInput->id,
-                                    'ploting_id' => $firstInput->ploting_id,
-                                    'shift' => 'pagi',
-                                    'jam' => $jamSlot,
-                                    'target' => 0,
-                                    'ok_count' => $okToAdd,
-                                    'ng_part' => $ngToAdd,
-                                    'operator_code' => $user->nik ?? null,
-                                ]);
-
-                                $remainingOk -= $okToAdd;
-                                $remainingNg -= $ngToAdd;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Verifikasi distribusi: Ambil semua data produksi_per_jam setelah distribusi
-            $finalProduksiPerJam = \App\Models\ProduksiPerJam::where('planning_id', $planningId)
-                ->where(function ($q) {
-                    $q->where('ok_count', '>', 0)
-                        ->orWhere('ng_part', '>', 0);
-                })
-                ->orderBy('updated_at', 'desc')
-                ->get();
-
-            Log::info('Data InputProduksi didistribusikan ke produksi_per_jam', [
-                'planning_id' => $planningId,
-                'total_input' => $inputProduksi->count(),
-                'ok_from_input' => $totalOkFromInput,
-                'ok_from_produksi_per_jam' => $totalOkFromProduksiPerJam,
-                'ng_from_input' => $totalNgFromInput,
-                'ng_from_produksi_per_jam' => $totalNgFromProduksiPerJam,
-                'remaining_ok' => $remainingOk,
-                'remaining_ng' => $remainingNg,
-                'ok_distributed' => $okDistributed,
-                'ng_distributed' => $ngDistributed,
-                'final_produksi_per_jam' => $finalProduksiPerJam->map(function ($item) {
-                    return [
-                        'shift' => $item->shift,
-                        'jam' => $item->jam,
-                        'ok_count' => $item->ok_count,
-                        'ng_part' => $item->ng_part,
-                        'updated_at' => $item->updated_at->format('Y-m-d H:i:s'),
+            DB::transaction(function() use ($groupedInputs, $existingMapped, $planningId) {
+                foreach ($groupedInputs as $key => $val) {
+                    $parts = explode('_', $key);
+                    $data = [
+                        'ok_count' => $val['ok'],
+                        'ng_part' => $val['ng'],
+                        'operator_code' => implode('/', $val['operator_codes'])
                     ];
-                })->toArray(),
-            ]);
+
+                    if ($existingMapped->has($key)) {
+                        $existingMapped->get($key)->update($data);
+                    } else {
+                        \App\Models\ProduksiPerJam::create(array_merge($data, [
+                            'planning_id' => $planningId,
+                            'input_produksi_id' => $val['input_id'],
+                            'ploting_id' => $val['ploting_id'],
+                            'shift' => $parts[0],
+                            'jam' => $parts[1],
+                            'target' => 0,
+                        ]));
+                    }
+                }
+            });
         } catch (\Exception $e) {
-            Log::error('Error distributing InputProduksi to produksi_per_jam: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Error in distributeInputProduksiToProduksiPerJam: ' . $e->getMessage());
         }
     }
 }

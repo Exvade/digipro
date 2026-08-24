@@ -20,9 +20,11 @@
                 $canAccessMasterData = in_array($user->role, ['super_admin', 'kabag', 'manager_plant']) ||
                 ($user->role == 'staff' && $user->departemen == 'Moldshop') ||
                 $isLeaderAssy;
+                $isDocumentPage = request()->routeIs('documents.index');
                 @endphp
 
                 @if ($canAccessMasterData)
+                @if (!$isDocumentPage)
                 <li class="nav-header">MASTER DATA</li>
 
                 @if (in_array($user->role, ['super_admin', 'kabag', 'manager_plant']))
@@ -42,12 +44,18 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a href="{{ route('meja.index') }}" class="nav-link {{ request()->routeIs('meja.index') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-table"></i>
                         <p>Data Meja</p>
                     </a>
-                </li>
+                </li> -->
+                @endif
+                @endif
+
+                @if ($isDocumentPage)
+                <li class="nav-header">DOKUMEN</li>
+                @endif
 
                 <li class="nav-item">
                     <a href="{{ route('documents.index') }}" class="nav-link {{ request()->routeIs('documents.index') ? 'active' : '' }}">
@@ -56,7 +64,7 @@
                     </a>
                 </li>
 
-
+                @if (!$isDocumentPage)
                 @if ($user->role === 'super_admin')
                 <li class="nav-item">
                     <a href="{{ route('moldshop.index') }}" class="nav-link {{ request()->routeIs('moldshop.index') ? 'active' : '' }}">
@@ -65,7 +73,6 @@
                     </a>
                 </li>
                 @endif
-
                 @endif
                 @endif
             </ul>

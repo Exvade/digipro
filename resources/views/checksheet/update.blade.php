@@ -2,6 +2,7 @@
     @csrf
     @method('PUT')
     <input type="hidden" id="checksheet_id" value="{{ $checksheet->id }}">
+    <input type="hidden" id="checksheet_user_bagian" value="{{ $checksheet->user->bagian ?? '' }}">
     
     <div class="modal-body">
         <div class="row">
@@ -160,6 +161,33 @@
                     </div>
                 </div>
                 <input type="hidden" id="foto_limit_sampel" name="foto_limit_sampel" value="{{ old('foto_limit_sampel') ?: '' }}">
+            </div>
+        </div>
+
+        <!-- CBM Parameters Section -->
+        <hr>
+        <h6 class="font-weight-bold mb-3">Parameter Kondisi Mesin (Condition-Based Maintenance)</h6>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="form-group">
+                    <label for="suhu_mesin"><i class="fas fa-thermometer-half text-danger mr-1"></i>Suhu Barrel/Heater (°C)</label>
+                    <input type="number" step="0.01" class="form-control" id="suhu_mesin" name="suhu_mesin" value="{{ $checksheet->suhu_mesin }}" placeholder="Contoh: 245.5">
+                    <small class="text-muted">Ambang batas normal: < 280°C</small>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="form-group">
+                    <label for="tekanan_mesin"><i class="fas fa-tachometer-alt text-primary mr-1"></i>Tekanan Hidrolik (Bar)</label>
+                    <input type="number" step="0.01" class="form-control" id="tekanan_mesin" name="tekanan_mesin" value="{{ $checksheet->tekanan_mesin }}" placeholder="Contoh: 125.0">
+                    <small class="text-muted">Ambang batas normal: < 150 Bar</small>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="form-group">
+                    <label for="getaran_mesin"><i class="fas fa-wave-square text-warning mr-1"></i>Getaran Motor (mm/s)</label>
+                    <input type="number" step="0.01" class="form-control" id="getaran_mesin" name="getaran_mesin" value="{{ $checksheet->getaran_mesin }}" placeholder="Contoh: 15.2">
+                    <small class="text-muted">Ambang batas normal: < 25 mm/s</small>
+                </div>
             </div>
         </div>
 
@@ -342,7 +370,7 @@ $('#takePhotoBtn').on('click', function() {
 // Logika disable field mesin/meja sesuai bagian user
 $(document).ready(function() {
     // Ambil bagian user dari data checksheet
-    var userBagian = @json($checksheet->user->bagian ?? null);
+    var userBagian = $('#checksheet_user_bagian').val();
     if (userBagian === 'assy') {
         $('#mesin_id').prop('disabled', true);
         $('#mesinHelp').show();

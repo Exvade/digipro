@@ -122,7 +122,7 @@
 </div>
 @endif
 
-{{-- Tab Filter Section -- Hanya tampilkan jika bukan leader dengan bagian spesifik --}}
+<!-- {{-- Tab Filter Section -- Hanya tampilkan jika bukan leader dengan bagian spesifik --}}
 @if(!isset($isLeaderInject) || !$isLeaderInject)
 @if(!isset($isLeaderAssy) || !$isLeaderAssy)
 <div class="row mb-3">
@@ -151,7 +151,7 @@
     </div>
 </div>
 @endif
-@endif
+@endif -->
 
 {{-- Table Section untuk INJECT --}}
 @if($planningsInject->count() > 0)

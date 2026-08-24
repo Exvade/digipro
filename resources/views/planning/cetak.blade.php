@@ -14,7 +14,7 @@
     </button>
 
     {{-- SECTION 1: PLANNING INJECT --}}
-    @if($planningsInject->count() > 0)
+    @if($filterBagian === 'all' || $filterBagian === 'inject')
     <div class="container" style="page-break-after: always;">
         <!-- Header -->
         <div class="header">
@@ -162,7 +162,8 @@
                 }
                 @endphp
 
-                @foreach ($planningsInject as $index => $planning)
+                @if($planningsInject->count() > 0)
+                    @foreach ($planningsInject as $index => $planning)
                 @php
                 $moldId = $planning->moldshop_id ?? 'no-mold';
                 $showMoldCell = $currentMold !== $moldId;
@@ -314,6 +315,37 @@
                 @endif
                 @endif
                 @endforeach
+                @else
+                {{-- Template Kosong jika tidak ada data --}}
+                <tr class="row-target">
+                    <td>-</td>
+                    <td rowspan="3">1</td>
+                    <td rowspan="3">{{ \Carbon\Carbon::parse($tanggalFilter ?? date('Y-m-d'))->format('d-m-Y') }}</td>
+                    <td rowspan="3">-</td>
+                    <td rowspan="3">-</td>
+                    <td rowspan="3">-</td>
+                    <td rowspan="3">-</td>
+                    <td rowspan="3" style="text-align: left; padding-left: 5px;">-</td>
+                    <td rowspan="3" class="col-qty">0</td>
+                    <td class="col-empty">TARGET</td>
+                    @for($i=7; $i<=22; $i++) <td></td> @endfor
+                    @foreach([23,0,1,2,3,4,5,6] as $i) <td></td> @endforeach
+                    <td></td><td></td><td></td>
+                    <td rowspan="3">0</td>
+                </tr>
+                <tr class="row-pencapaian">
+                    <td class="col-empty">PENCAPAIAN</td>
+                    @for($i=7; $i<=22; $i++) <td></td> @endfor
+                    @foreach([23,0,1,2,3,4,5,6] as $i) <td></td> @endforeach
+                    <td>0%</td><td>0%</td><td>0%</td>
+                </tr>
+                <tr class="row-transaksi">
+                    <td class="col-empty">TRANSAKSI</td>
+                    @for($i=7; $i<=22; $i++) <td></td> @endfor
+                    @foreach([23,0,1,2,3,4,5,6] as $i) <td></td> @endforeach
+                    <td></td><td></td><td></td>
+                </tr>
+                @endif
             </tbody>
 
         </table>
@@ -323,7 +355,7 @@
     @endif
 
     {{-- SECTION 2: PLANNING ASSEMBLY --}}
-    @if($planningsAssy->count() > 0)
+    @if($filterBagian === 'all' || $filterBagian === 'assy')
     <div class="container">
         <!-- Header -->
         <div class="header">
@@ -456,6 +488,7 @@
             </thead>
 
             <tbody>
+                @if($planningsAssy->count() > 0)
                 @foreach ($planningsAssy as $index => $planning)
                 @php
                 $statusClass = '';
@@ -592,6 +625,36 @@
                 </tr>
                 @endif
                 @endforeach
+                @else
+                {{-- Template Kosong jika tidak ada data --}}
+                <tr class="row-target">
+                    <td rowspan="3">1</td>
+                    <td rowspan="3">{{ \Carbon\Carbon::parse($tanggalFilter ?? date('Y-m-d'))->format('d-m-Y') }}</td>
+                    <td rowspan="3">-</td>
+                    <td rowspan="3">-</td>
+                    <td rowspan="3">-</td>
+                    <td rowspan="3">-</td>
+                    <td rowspan="3" style="text-align: left; padding-left: 5px;">-</td>
+                    <td rowspan="3" class="col-qty">0</td>
+                    <td class="col-empty">TARGET</td>
+                    @for($i=7; $i<=22; $i++) <td></td> @endfor
+                    @foreach([23,0,1,2,3,4,5,6] as $i) <td></td> @endforeach
+                    <td></td><td></td><td></td>
+                    <td rowspan="3">0</td>
+                </tr>
+                <tr class="row-pencapaian">
+                    <td class="col-empty">PENCAPAIAN</td>
+                    @for($i=7; $i<=22; $i++) <td></td> @endfor
+                    @foreach([23,0,1,2,3,4,5,6] as $i) <td></td> @endforeach
+                    <td>0%</td><td>0%</td><td>0%</td>
+                </tr>
+                <tr class="row-transaksi">
+                    <td class="col-empty">TRANSAKSI</td>
+                    @for($i=7; $i<=22; $i++) <td></td> @endfor
+                    @foreach([23,0,1,2,3,4,5,6] as $i) <td></td> @endforeach
+                    <td></td><td></td><td></td>
+                </tr>
+                @endif
             </tbody>
 
         </table>

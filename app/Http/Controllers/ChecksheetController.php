@@ -11,6 +11,7 @@ use App\Models\Grup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Models\DowntimeEvent;
 
 class ChecksheetController extends Controller
 {
@@ -146,6 +147,11 @@ class ChecksheetController extends Controller
             }
         }
 
+        // CBM Parameters validation
+        $validationRules['suhu_mesin'] = 'nullable|numeric';
+        $validationRules['tekanan_mesin'] = 'nullable|numeric';
+        $validationRules['getaran_mesin'] = 'nullable|numeric';
+
         $request->validate($validationRules);
 
         try {
@@ -157,6 +163,9 @@ class ChecksheetController extends Controller
                 'grup_id' => $request->grup_id,
                 'amptm_standar' => $request->amptm_standar,
                 'approval_status' => 'pending',
+                'suhu_mesin' => $request->suhu_mesin,
+                'tekanan_mesin' => $request->tekanan_mesin,
+                'getaran_mesin' => $request->getaran_mesin,
             ];
 
             // Set mesin_id and part_id based on user role and section
@@ -195,6 +204,9 @@ class ChecksheetController extends Controller
             }
 
             DB::commit();
+
+            // CBM Notification Logic
+            $this->checkCBMConditions($checksheet, $request);
 
             if ($request->ajax()) {
                 return response()->json([
@@ -263,6 +275,9 @@ class ChecksheetController extends Controller
             'foto_qpoint' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'foto_limit_sampel' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'foto_amptm' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'suhu_mesin' => 'nullable|numeric',
+            'tekanan_mesin' => 'nullable|numeric',
+            'getaran_mesin' => 'nullable|numeric',
         ]);
 
         try {
@@ -276,6 +291,9 @@ class ChecksheetController extends Controller
                 'grup_id' => $request->grup_id,
                 'meja_id' => $request->meja_id,
                 'amptm_standar' => $request->amptm_standar,
+                'suhu_mesin' => $request->suhu_mesin,
+                'tekanan_mesin' => $request->tekanan_mesin,
+                'getaran_mesin' => $request->getaran_mesin,
             ]);
 
             // Handle photo uploads
@@ -309,6 +327,9 @@ class ChecksheetController extends Controller
             }
 
             DB::commit();
+
+            // CBM Notification Logic
+            $this->checkCBMConditions($checksheet, $request);
 
             if ($request->ajax()) {
                 return response()->json([
@@ -376,6 +397,37 @@ class ChecksheetController extends Controller
 
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat menghapus checksheet');
+        }
+    }
+
+    /**
+     * Check CBM Conditions and trigger maintenance call if thresholds are exceeded
+     */
+    private function checkCBMConditions(Checksheet $checksheet, Request $request)
+    {
+        $abnormalities = [];
+
+        // Thresholds (You can make this dynamic from DB in the future)
+        if ($request->suhu_mesin > 280) $abnormalities[] = "Suhu Barrel tinggi ({$request->suhu_mesin}°C)";
+        if ($request->tekanan_mesin > 150) $abnormalities[] = "Tekanan Hidrolik tinggi ({$request->tekanan_mesin} Bar)";
+        if ($request->getaran_mesin > 25) $abnormalities[] = "Getaran Motor tinggi ({$request->getaran_mesin} mm/s)";
+
+        if (count($abnormalities) > 0 && $checksheet->mesin_id) {
+            $reason = implode(", ", $abnormalities);
+            
+            // Auto generate CALL maintenance
+            DowntimeEvent::create([
+                'title' => 'CALL: MAINTENANCE CBM',
+                'description' => "Terdeteksi abnormalitas kondisi mesin dari checksheet: " . $reason,
+                'kategori' => 'CBM',
+                'mesin_id' => $checksheet->mesin_id,
+                'user_id' => $checksheet->user_id,
+                'shift' => $checksheet->shift ?? 'pagi', // Default shift if null
+                'tanggal' => date('Y-m-d'),
+                'durasi' => 0,
+                'downtime_id' => null, // Optional if it requires foreign key
+                'status' => 'pending'
+            ]);
         }
     }
 }

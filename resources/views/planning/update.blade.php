@@ -27,9 +27,7 @@
                             <div class="form-group">
                                 <label for="update_bagian">Bagian <span class="text-danger">*</span></label>
                                 <select name="bagian" id="update_bagian" class="form-control" required>
-                                    <option value="">-- Pilih Bagian --</option>
-                                    <option value="inject">Inject</option>
-                                    <option value="assy">Assembly</option>
+                                    <option value="inject" selected>Inject</option>
                                 </select>
                             </div>
                         </div>
@@ -70,7 +68,7 @@
                                         $isDisabled = in_array($statusLower, ['maintenance']);
                                         @endphp
                                         <option value="{{ $ms->id }}" {{ $isDisabled ? 'disabled' : '' }}>
-                                            {{ $ms->nama_mesin }} [{{ $statusDisplay }}]
+                                            {{ $ms->nama_mesin }} - {{ $ms->brand_mesin }} [{{ $statusDisplay }}]
                                         </option>
                                         @endforeach
                                     </select>

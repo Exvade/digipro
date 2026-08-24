@@ -168,8 +168,8 @@
     <table class="header-table">
         <tr>
             <td class="logo-cell">
-                @if($logoBase64 ?? null)
-                <img src="{!! $logoBase64 !!}" alt="Logo">
+                @if($logoPathPath ?? null)
+                <img src="{{ $logoPathPath }}" alt="Logo">
                 @endif
             </td>
             <td class="instruction-cell">
@@ -308,27 +308,27 @@
         <tbody>
             @php
             $items = ['Briefing dan tukar informasi', 'Kesiapan Produk WIP & Subpart', 'Kesiapan Packing', 'Meja proses tersedia, lampu penerangan menyala', 'Kelengkapan dokumen IK, Q-Point, dan Std Packing', 'Pengecekan 5R', 'Pemeriksaan kondisi subpart', 'Kesiapan Tag Label, Marker, dan Cutter', 'Ketersediaan limit sampel produk'];
-            @endphp
-            @foreach($items as $index => $item)
-            @php
             $pData = $persiapanData ?? ['Pagi' => [], 'Siang' => [], 'Malam' => []];
-            $pagiItem = collect($pData['Pagi'] ?? [])->firstWhere('item_name', $item);
-            $siangItem = collect($pData['Siang'] ?? [])->firstWhere('item_name', $item);
-            $malamItem = collect($pData['Malam'] ?? [])->firstWhere('item_name', $item);
+            @endphp
+            @foreach($items as $index => $itemName)
+            @php
+            $pagiItem = $pData['Pagi'][$itemName] ?? null;
+            $siangItem = $pData['Siang'][$itemName] ?? null;
+            $malamItem = $pData['Malam'][$itemName] ?? null;
             @endphp
             <tr>
                 <td class="text-center">{{ $index + 1 }}</td>
-                <td>{{ $item }}</td>
-                <td class="text-center" style="font-family: 'DejaVu Sans', sans-serif;">{!! $pagiItem && $pagiItem['operator_checked'] ? '&#10003;' : '' !!}</td>
-                <td class="text-center" style="font-family: 'DejaVu Sans', sans-serif;">{!! $pagiItem && $pagiItem['leader_checked'] ? '&#10003;' : '' !!}</td>
-                <td class="text-center" style="font-family: 'DejaVu Sans', sans-serif;">{!! $siangItem && $siangItem['operator_checked'] ? '&#10003;' : '' !!}</td>
-                <td class="text-center" style="font-family: 'DejaVu Sans', sans-serif;">{!! $siangItem && $siangItem['leader_checked'] ? '&#10003;' : '' !!}</td>
-                <td class="text-center" style="font-family: 'DejaVu Sans', sans-serif;">{!! $malamItem && $malamItem['operator_checked'] ? '&#10003;' : '' !!}</td>
-                <td class="text-center" style="font-family: 'DejaVu Sans', sans-serif;">{!! $malamItem && $malamItem['leader_checked'] ? '&#10003;' : '' !!}</td>
+                <td>{{ $itemName }}</td>
+                <td class="text-center" style="font-family: 'DejaVu Sans', sans-serif;">{!! $pagiItem && $pagiItem['oc'] ? '&#10003;' : '' !!}</td>
+                <td class="text-center" style="font-family: 'DejaVu Sans', sans-serif;">{!! $pagiItem && $pagiItem['lc'] ? '&#10003;' : '' !!}</td>
+                <td class="text-center" style="font-family: 'DejaVu Sans', sans-serif;">{!! $siangItem && $siangItem['oc'] ? '&#10003;' : '' !!}</td>
+                <td class="text-center" style="font-family: 'DejaVu Sans', sans-serif;">{!! $siangItem && $siangItem['lc'] ? '&#10003;' : '' !!}</td>
+                <td class="text-center" style="font-family: 'DejaVu Sans', sans-serif;">{!! $malamItem && $malamItem['oc'] ? '&#10003;' : '' !!}</td>
+                <td class="text-center" style="font-family: 'DejaVu Sans', sans-serif;">{!! $malamItem && $malamItem['lc'] ? '&#10003;' : '' !!}</td>
                 <td style="font-size: 5.5px;">
-                    @if($pagiItem && $pagiItem['keterangan']) P: {{ $pagiItem['keterangan'] }} @endif
-                    @if($siangItem && $siangItem['keterangan']) S: {{ $siangItem['keterangan'] }} @endif
-                    @if($malamItem && $malamItem['keterangan']) M: {{ $malamItem['keterangan'] }} @endif
+                    @if($pagiItem && $pagiItem['k']) P: {{ $pagiItem['k'] }} @endif
+                    @if($siangItem && $siangItem['k']) S: {{ $siangItem['k'] }} @endif
+                    @if($malamItem && $malamItem['k']) M: {{ $malamItem['k'] }} @endif
                 </td>
             </tr>
             @endforeach
@@ -461,9 +461,9 @@
                         $shift1Data = $ngPartTypesData['by_shift']['Shift 1'] ?? [];
                         $shift2Data = $ngPartTypesData['by_shift']['Shift 2'] ?? [];
                         $shift3Data = $ngPartTypesData['by_shift']['Shift 3'] ?? [];
-                        $chunks = $allTypes->chunk(ceil($allTypes->count() / 2));
-                        $leftColumn = $chunks->get(0) ? $chunks->get(0)->values() : collect([]);
-                        $rightColumn = $chunks->get(1) ? $chunks->get(1)->values() : collect([]);
+                        $chunks = $allTypes->count() > 0 ? $allTypes->chunk(max(1, ceil($allTypes->count() / 2))) : collect([]);
+                        $leftColumn = $chunks->count() > 0 && $chunks->get(0) ? $chunks->get(0)->values() : collect([]);
+                        $rightColumn = $chunks->count() > 1 && $chunks->get(1) ? $chunks->get(1)->values() : collect([]);
                         $maxRows = max($leftColumn->count(), $rightColumn->count());
                         @endphp
                         @for($i = 0; $i < $maxRows; $i++)
@@ -531,19 +531,19 @@
                 @endphp
                 <td style="height: 28px; text-align: center;">
                     @foreach(array_slice($s1Ops, 0, 3) as $idx => $op)
-                    @if(isset($s1Qr[$idx]) && $s1Qr[$idx]) <img src="{!! $s1Qr[$idx] !!}" class="qr-signature-pdf"> @endif
+                    @if(isset($s1Qr[$idx]) && $s1Qr[$idx]) <img src="{{ $s1Qr[$idx] }}" class="qr-signature-pdf"> @endif
                     <div style="font-size: 4.5px; font-weight: bold;">{{ $op['nama'] }}</div>
                     @endforeach
                 </td>
                 <td style="height: 28px; text-align: center;">
                     @foreach(array_slice($s2Ops, 0, 3) as $idx => $op)
-                    @if(isset($s2Qr[$idx]) && $s2Qr[$idx]) <img src="{!! $s2Qr[$idx] !!}" class="qr-signature-pdf"> @endif
+                    @if(isset($s2Qr[$idx]) && $s2Qr[$idx]) <img src="{{ $s2Qr[$idx] }}" class="qr-signature-pdf"> @endif
                     <div style="font-size: 4.5px; font-weight: bold;">{{ $op['nama'] }}</div>
                     @endforeach
                 </td>
                 <td style="height: 28px; text-align: center;">
                     @foreach(array_slice($s3Ops, 0, 3) as $idx => $op)
-                    @if(isset($s3Qr[$idx]) && $s3Qr[$idx]) <img src="{!! $s3Qr[$idx] !!}" class="qr-signature-pdf"> @endif
+                    @if(isset($s3Qr[$idx]) && $s3Qr[$idx]) <img src="{{ $s3Qr[$idx] }}" class="qr-signature-pdf"> @endif
                     <div style="font-size: 4.5px; font-weight: bold;">{{ $op['nama'] }}</div>
                     @endforeach
                 </td>
@@ -563,7 +563,7 @@
                 @foreach($leaders as $ld)
                 <td style="height: 25px; text-align: center;">
                     @if($ld['l'])
-                    @if($ld['q']) <img src="{!! $ld['q'] !!}" class="qr-signature-pdf"> @endif
+                    @if($ld['q']) <img src="{{ $ld['q'] }}" class="qr-signature-pdf"> @endif
                     <div style="font-size: 4.5px; font-weight: bold;">{{ $ld['l']->nama }}</div>
                     @else &nbsp; @endif
                 </td>

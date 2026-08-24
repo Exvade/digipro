@@ -123,7 +123,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <!-- <div class="col-md-6">
                         <div class="info-box bg-info">
                             <span class="info-box-icon"><i class="fas fa-tools"></i></span>
                             <div class="info-box-content">
@@ -149,7 +149,7 @@
                                 </span>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
 
                 <!-- Nav tabs -->
@@ -161,13 +161,13 @@
                             <span class="badge badge-primary ml-1">{{ $injectChecksheets->count() }}</span>
                         </a>
                     </li>
-                    <li class="nav-item" role="presentation">
+                    <!-- <li class="nav-item" role="presentation">
                         <a class="nav-link" id="assy-tab" data-toggle="tab" href="#assy" role="tab"
                             aria-controls="assy" aria-selected="false">
                             <i class="fas fa-tools mr-1"></i>Assy
                             <span class="badge badge-info ml-1">{{ $assyChecksheets->count() }}</span>
                         </a>
-                    </li>
+                    </li> -->
                 </ul>
 
                 <!-- Tab content -->

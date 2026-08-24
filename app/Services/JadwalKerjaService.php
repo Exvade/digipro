@@ -108,8 +108,16 @@ class JadwalKerjaService
             'bagian' => $user->bagian ?? 'Tidak ditentukan'
         ];
 
-        return compact('user', 'jadwalHariIni', 'jadwalMingguIni', 'jadwalBulanIni', 'stats', 'statusHariIni', 'jadwalHariIni') 
-            + ['statusHariIni' => $this->getStatusHariIni($jadwalHariIni)];
+        $statusHariIni = $this->getStatusHariIni($jadwalHariIni);
+
+        return [
+            'user' => $user,
+            'jadwalHariIni' => $jadwalHariIni,
+            'jadwalMingguIni' => $jadwalMingguIni,
+            'jadwalBulanIni' => $jadwalBulanIni,
+            'stats' => $stats,
+            'statusHariIni' => $statusHariIni,
+        ];
     }
 
     private function getStatusHariIni($jadwalHariIni)
@@ -167,7 +175,7 @@ class JadwalKerjaService
         $exists = JadwalKerja::where('user_id', $validated['user_id'])
             ->whereDate('tanggal', $validated['tanggal'])
             ->exists();
-            
+
         if ($exists) {
             throw new \Exception("Karyawan tersebut sudah memiliki jadwal pada tanggal " . Carbon::parse($validated['tanggal'])->format('d/m/Y') . ". Satu karyawan hanya bisa memiliki satu jadwal per hari.");
         }
@@ -183,13 +191,13 @@ class JadwalKerjaService
     public function updateJadwal($id, $validated)
     {
         $jadwal = JadwalKerja::findOrFail($id);
-        
+
         // Check if changing date/user to something that already exists elsewhere
         $exists = JadwalKerja::where('user_id', $validated['user_id'])
             ->whereDate('tanggal', $validated['tanggal'])
             ->where('id', '!=', $id)
             ->exists();
-            
+
         if ($exists) {
             throw new \Exception("Karyawan tersebut sudah memiliki jadwal lain pada tanggal " . Carbon::parse($validated['tanggal'])->format('d/m/Y') . ".");
         }
@@ -197,7 +205,7 @@ class JadwalKerjaService
         $defaultJam = JadwalKerja::getDefaultJamKerja($validated['shift']);
         $validated['jam_masuk']  = $validated['jam_masuk'] ?? $defaultJam['jam_masuk'];
         $validated['jam_keluar'] = $validated['jam_keluar'] ?? $defaultJam['jam_keluar'];
-        
+
         $jadwal->update($validated);
         return $jadwal->load('user');
     }
@@ -215,7 +223,7 @@ class JadwalKerjaService
         try {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
-            
+
             $headers = ['A1' => 'NIK', 'B1' => 'Nama', 'C1' => 'Tanggal', 'D1' => 'Shift', 'E1' => 'Status', 'F1' => 'Keterangan'];
             foreach ($headers as $cell => $val) $sheet->setCellValue($cell, $val);
 
@@ -225,13 +233,19 @@ class JadwalKerjaService
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
             ]);
 
-            $sheet->getColumnDimension('A')->setWidth(15); $sheet->getColumnDimension('B')->setWidth(25);
-            $sheet->getColumnDimension('C')->setWidth(15); $sheet->getColumnDimension('D')->setWidth(12);
-            $sheet->getColumnDimension('E')->setWidth(15); $sheet->getColumnDimension('F')->setWidth(30);
+            $sheet->getColumnDimension('A')->setWidth(15);
+            $sheet->getColumnDimension('B')->setWidth(25);
+            $sheet->getColumnDimension('C')->setWidth(15);
+            $sheet->getColumnDimension('D')->setWidth(12);
+            $sheet->getColumnDimension('E')->setWidth(15);
+            $sheet->getColumnDimension('F')->setWidth(30);
 
-            $sheet->setCellValue('A2', '1234567890'); $sheet->setCellValue('B2', 'John Doe');
-            $sheet->setCellValue('C2', date('Y-m-d')); $sheet->setCellValue('D2', 'pagi');
-            $sheet->setCellValue('E2', 'aktif'); $sheet->setCellValue('F2', 'Contoh keterangan');
+            $sheet->setCellValue('A2', '1234567890');
+            $sheet->setCellValue('B2', 'John Doe');
+            $sheet->setCellValue('C2', date('Y-m-d'));
+            $sheet->setCellValue('D2', 'pagi');
+            $sheet->setCellValue('E2', 'aktif');
+            $sheet->setCellValue('F2', 'Contoh keterangan');
 
             $writer = new Xlsx($spreadsheet);
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -250,16 +264,24 @@ class JadwalKerjaService
         try {
             $spreadsheet = IOFactory::load($file->getPathname());
             $rows = $spreadsheet->getActiveSheet()->toArray();
-            array_shift($rows); 
+            array_shift($rows);
 
-            $imported = 0; $skipped = 0; $errors = [];
+            $imported = 0;
+            $skipped = 0;
+            $errors = [];
 
             foreach ($rows as $index => $row) {
                 $rowNumber = $index + 2;
-                if (empty(array_filter($row))) { $skipped++; continue; }
+                if (empty(array_filter($row))) {
+                    $skipped++;
+                    continue;
+                }
 
                 try {
-                    $nik = $row[0]; $tanggal = $row[2]; $shift = strtolower(trim($row[3] ?? '')); $status = strtolower(trim($row[4] ?? ''));
+                    $nik = $row[0];
+                    $tanggal = $row[2];
+                    $shift = strtolower(trim($row[3] ?? ''));
+                    $status = strtolower(trim($row[4] ?? ''));
 
                     if (!$nik || !$tanggal || !$shift || !$status) throw new \Exception("Data tidak lengkap");
                     $user = User::where('nik', $nik)->first();
@@ -271,16 +293,26 @@ class JadwalKerjaService
                     $defaultJam = JadwalKerja::getDefaultJamKerja($shift);
 
                     JadwalKerja::create([
-                        'user_id' => $user->id, 'tanggal' => $tanggalParsed, 'shift' => $shift, 'status' => $status,
-                        'jam_masuk' => $defaultJam['jam_masuk'], 'jam_keluar' => $defaultJam['jam_keluar'],
-                        'keterangan' => $row[5] ?? null, 'created_by' => Auth::id(),
+                        'user_id' => $user->id,
+                        'tanggal' => $tanggalParsed,
+                        'shift' => $shift,
+                        'status' => $status,
+                        'jam_masuk' => $defaultJam['jam_masuk'],
+                        'jam_keluar' => $defaultJam['jam_keluar'],
+                        'keterangan' => $row[5] ?? null,
+                        'created_by' => Auth::id(),
                     ]);
                     $imported++;
-                } catch (\Exception $e) { $errors[] = "Baris {$rowNumber}: " . $e->getMessage(); }
+                } catch (\Exception $e) {
+                    $errors[] = "Baris {$rowNumber}: " . $e->getMessage();
+                }
             }
 
             $message = "Berhasil mengimport {$imported} jadwal. " . ($skipped > 0 ? "{$skipped} dilewati. " : "");
-            if (count($errors) > 0) { $message .= count($errors) . " gagal."; Log::warning('Import errors: ' . implode(';', $errors)); }
+            if (count($errors) > 0) {
+                $message .= count($errors) . " gagal.";
+                Log::warning('Import errors: ' . implode(';', $errors));
+            }
 
             return $imported > 0 ? back()->with('success', $message) : back()->with('error', 'Gagal direkam. ' . implode('; ', array_slice($errors, 0, 5)));
         } catch (\Exception $e) {

@@ -31,8 +31,9 @@
 
     <!-- Sidebar -->
     <div class="sidebar">
-        {{-- Hanya tampilkan isi sidebar jika BUKAN di halaman Dashboard Inject atau Dashboard Assy --}}
-        @if (!request()->routeIs('*.dashboard.inject') && !request()->routeIs('*.dashboard.assy'))
+        {{-- Tampilkan isi sidebar normal jika BUKAN di dashboard inject/assy DAN BUKAN di modul maintenance --}}
+        {{-- Jika di modul maintenance, kita hanya tampilkan menu maintenance agar fokus --}}
+        @if (!request()->routeIs(['*.dashboard.inject', '*.dashboard.assy']))
 
         <!-- Sidebar Menu -->
         <nav class="mt-2">
@@ -40,24 +41,44 @@
                 data-accordion="false">
 
                 <!-- Maintenance Section -->
-                @if ($isMaintenanceModule)
-                <li class="nav-header">MAINTENANCE</li>
-                <li class="nav-item">
-                    <a href="{{ route('mesin.index') }}" class="nav-link">
-                        <i class="nav-icon fas fa-industry"></i>
-                        <p>Data Mesin</p>
+                @php
+                    $isMaintenanceActive = request()->routeIs(['jadwal-pemeliharaan.*', 'mesin.*']);
+                @endphp
+                @if ($isMaintenanceActive || (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader']) && $user->departemen === 'Repair & Maintenance'))
+                <li class="nav-item {{ $isMaintenanceActive ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ $isMaintenanceActive ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-tools text-primary"></i>
+                        <p>
+                            PREVENTIVE
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('jadwal-pemeliharaan.index') }}" class="nav-link {{ request()->routeIs('jadwal-pemeliharaan.*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-tools"></i>
-                        <p>Jadwal Pemeliharaan</p>
-                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('jadwal-pemeliharaan.index') }}" class="nav-link {{ request()->routeIs('jadwal-pemeliharaan.index') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Jadwal Preventive</p>
+                            </a>
+                        </li>
+                        @if (in_array($user->role, ['super_admin', 'kabag', 'manager_plant']) || ($user->role === 'leader' && $user->departemen === 'Repair & Maintenance'))
+                        <li class="nav-item">
+                            <a href="{{ route('jadwal-pemeliharaan.approval') }}" class="nav-link {{ request()->routeIs('jadwal-pemeliharaan.approval') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-success"></i>
+                                <p>Approval Preventive</p>
+                                @php $pendingCount = \App\Models\JadwalPemeliharaan::where('status_aktual', 'pending')->count(); @endphp
+                                @if($pendingCount > 0)
+                                    <span class="badge badge-danger right">{{ $pendingCount }}</span>
+                                @endif
+                            </a>
+                        </li>
+                        @endif
+                    </ul>
                 </li>
                 @endif
 
                 <!-- Mold Shop Section -->
-                @if (!$isMaintenanceModule && !$isPlanningModule && !$isChecksheetModule && !$isRestrictedPloting && $user && ($user->role !== 'super_admin' && (in_array($user->role, ['kabag', 'manager_plant']) || ($user->role === 'staff' && $user->departemen === 'Moldshop'))))
+                <!-- Mold Shop Section -->
+                @if (!$isMaintenanceActive && !$isPlanningModule && !$isChecksheetModule && !$isRestrictedPloting && $user && ($user->role !== 'super_admin' && (in_array($user->role, ['kabag', 'manager_plant']) || ($user->role === 'staff' && $user->departemen === 'Moldshop'))))
                 <li class="nav-header">MOLD SHOP</li>
                 <li class="nav-item">
                     <a href="{{ route('moldshop.index') }}" class="nav-link {{ request()->routeIs('moldshop.index') ? 'active' : '' }}">
@@ -76,7 +97,8 @@
                 @endif
 
                 <!-- Master Data Section -->
-                @if (!$isMaintenanceModule && !$isPlanningModule && !$isChecksheetModule && !$isRestrictedPloting && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant']) || (in_array($user->role, ['leader', 'staff']) && $user->bagian != 'assy')))
+                @php $canShowMaster = !$isMaintenanceActive && !$isPlanningModule && !$isChecksheetModule && !$isRestrictedPloting && $user && in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'foreman', 'staff', 'leader']); @endphp
+                @if ($canShowMaster)
                 <li class="nav-header">MASTER DATA</li>
 
                 @if (in_array($user->role, ['super_admin', 'kabag', 'manager_plant']))
@@ -116,6 +138,9 @@
                         <p>Data Meja</p>
                     </a>
                 </li>
+                @endif
+                
+                @if (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman', 'staff']))
                 <li class="nav-item">
                     <a href="{{ route('documents.index') }}" class="nav-link {{ request()->routeIs('documents.index') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-file-contract"></i>
@@ -125,9 +150,8 @@
                 @endif
                 @endif
 
-
                 <!-- Produksi Section -->
-                @if (!$isMaintenanceModule && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
+                @if (!$isMaintenanceActive && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
                 @if (!$isPlanningModule && !$isChecksheetModule)
                 <li class="nav-header">PRODUKSI</li>
                 @endif
@@ -221,7 +245,7 @@
                 @endif {{-- End of Produksi Section Check --}}
 
                 <!-- Checksheet Section -->
-                @if (!$isMaintenanceModule && !$isPlanningModule && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
+                @if (!$isMaintenanceActive && !$isPlanningModule && $user && (in_array($user->role, ['super_admin', 'kabag', 'manager_plant', 'leader', 'foreman']) || ($user->role === 'staff' && $user->departemen !== 'Moldshop')))
                 <li class="nav-item {{ request()->routeIs('checksheet.*') || request()->routeIs('approval.*') || request()->routeIs('report.*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link {{ request()->routeIs('checksheet.*') || request()->routeIs('approval.*') || request()->routeIs('report.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-clipboard-list"></i>

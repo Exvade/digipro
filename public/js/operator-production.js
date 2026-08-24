@@ -223,17 +223,20 @@ $(document).ready(function() {
     function updateStats(planningId, data) {
         let card = $('.production-card[data-planning-id="' + planningId + '"]');
 
-        // Update counts
+        // Update counts (Still show day totals for general ok/ng/total labels)
         card.find('.ok-count').text(new Intl.NumberFormat().format(data.ok_count));
         card.find('.ng-count').text(new Intl.NumberFormat().format(data.ng_count));
         card.find('.total-count').text(new Intl.NumberFormat().format(data.total));
+        
+        // Update Target label (if it was shift target)
+        card.find('.planned-qty').text(new Intl.NumberFormat().format(data.shift_target));
 
-        // Calculate gap
-        let gap = Math.max(0, data.target - data.total);
+        // Calculate gap based on shift stats
+        let gap = Math.max(0, data.shift_target - data.shift_total);
         card.find('.gap-count').text(new Intl.NumberFormat().format(gap));
 
-        // Calculate percentage and efficiency
-        let percentage = data.target > 0 ? Math.min(100, Math.round((data.total / data.target) * 100)) : 0;
+        // Calculate percentage and efficiency for the shift
+        let percentage = data.shift_target > 0 ? Math.min(100, Math.round((data.shift_total / data.shift_target) * 100)) : 0;
         let efficiency = data.total > 0 ? Math.round((data.ok_count / data.total) * 100) : 100;
 
         card.find('.efficiency-count').text(efficiency + '%');
@@ -241,11 +244,10 @@ $(document).ready(function() {
         // Update progress bar
         let progressBar = card.find('.progress-bar');
         progressBar.css('width', percentage + '%');
-        progressBar.text(percentage + '%');
         progressBar.attr('aria-valuenow', percentage);
 
         // Update progress text
-        card.find('.progress-info span:last-child').text(percentage + '%');
+        card.find('.progress-info').text(percentage + '%');
 
         // Update progress bar color
         progressBar.removeClass('bg-success bg-info bg-warning');

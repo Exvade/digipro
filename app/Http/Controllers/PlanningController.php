@@ -40,7 +40,7 @@ class PlanningController extends Controller
             'jadwalKerja',
             'jam',
             'approver'
-        ]);
+        ])->where('bagian', 'inject');
 
         if ($filterTanggal) {
             $query->whereDate('tanggal', $filterTanggal);
@@ -71,6 +71,7 @@ class PlanningController extends Controller
             'jadwalKerja',
             'jam'
         ])
+            ->where('bagian', 'inject')
             ->whereDate('tanggal', $filterTanggal)
             ->latest('tanggal')
             ->paginate(20);
@@ -171,10 +172,25 @@ class PlanningController extends Controller
      */
     public function destroy($id)
     {
-        $planning = PlanningProduksi::findOrFail($id);
-        $planning->delete();
+        try {
+            $planning = PlanningProduksi::findOrFail($id);
+            
+            // Check if it's already used in production (Super Admin can bypass)
+            if (auth()->user()->role !== 'super_admin' && \App\Models\InputProduksi::where('planning_id', $planning->id)->exists()) {
+                return redirect()->route('planning.index')->with('error', 'Gagal menghapus: Planning ini sudah mulai berjalan di tahapan produksi.');
+            }
 
-        return redirect()->route('planning.index')->with('success', 'Planning produksi berhasil dihapus.');
+            // Hapus child records yang tidak auto-cascade
+            \App\Models\PlanningProduksiJam::where('planning_id', $planning->id)->delete();
+            \App\Models\Ploting::where('planning_id', $planning->id)->delete();
+            \App\Models\ProduksiPerJam::where('planning_id', $planning->id)->delete();
+            
+            $planning->delete();
+
+            return redirect()->route('planning.index')->with('success', 'Planning produksi berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->route('planning.index')->with('error', 'Gagal menghapus planning: ' . $e->getMessage());
+        }
     }
 
     /**

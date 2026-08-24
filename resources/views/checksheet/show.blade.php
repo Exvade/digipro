@@ -114,6 +114,64 @@
     </div>
 </div>
 
+<hr class="my-4">
+<h5 class="font-weight-bold text-primary mb-3">
+    <i class="fas fa-cogs mr-2"></i>Parameter Kondisi Mesin (CBM)
+</h5>
+<div class="row">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label class="font-weight-bold"><i class="fas fa-thermometer-half text-danger mr-1"></i>Suhu Barrel/Heater</label>
+            <p class="form-control-plaintext">
+                @if($checksheet->suhu_mesin)
+                    {{ $checksheet->suhu_mesin }} °C
+                    @if($checksheet->suhu_mesin > 280)
+                        <span class="badge badge-danger ml-2">Abnormal</span>
+                    @else
+                        <span class="badge badge-success ml-2">Normal</span>
+                    @endif
+                @else
+                    -
+                @endif
+            </p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label class="font-weight-bold"><i class="fas fa-tachometer-alt text-primary mr-1"></i>Tekanan Hidrolik</label>
+            <p class="form-control-plaintext">
+                @if($checksheet->tekanan_mesin)
+                    {{ $checksheet->tekanan_mesin }} Bar
+                    @if($checksheet->tekanan_mesin > 150)
+                        <span class="badge badge-danger ml-2">Abnormal</span>
+                    @else
+                        <span class="badge badge-success ml-2">Normal</span>
+                    @endif
+                @else
+                    -
+                @endif
+            </p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label class="font-weight-bold"><i class="fas fa-wave-square text-warning mr-1"></i>Getaran Motor</label>
+            <p class="form-control-plaintext">
+                @if($checksheet->getaran_mesin)
+                    {{ $checksheet->getaran_mesin }} mm/s
+                    @if($checksheet->getaran_mesin > 25)
+                        <span class="badge badge-danger ml-2">Abnormal</span>
+                    @else
+                        <span class="badge badge-success ml-2">Normal</span>
+                    @endif
+                @else
+                    -
+                @endif
+            </p>
+        </div>
+    </div>
+</div>
+
 @if($checksheet->photos->count() > 0)
 <hr class="my-4">
 <div class="section-photos">

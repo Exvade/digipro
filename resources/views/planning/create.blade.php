@@ -26,9 +26,7 @@
                             <div class="form-group">
                                 <label for="bagian">Bagian <span class="text-danger">*</span></label>
                                 <select name="bagian" id="bagian" class="form-control" required>
-                                    <option value="">-- Pilih Bagian --</option>
-                                    <option value="inject">Inject</option>
-                                    <option value="assy">Assembly</option>
+                                    <option value="inject" selected>Inject</option>
                                 </select>
                                 <small class="form-text text-muted">Pilih bagian produksi yang akan dibuat planning</small>
                             </div>
@@ -75,7 +73,7 @@
                                         $isDisabled = in_array($statusLower, ['maintenance']);
                                         @endphp
                                         <option value="{{ $ms->id }}" {{ $isDisabled ? 'disabled' : '' }}>
-                                            {{ $ms->nama_mesin }} [{{ $statusDisplay }}]
+                                            {{ $ms->nama_mesin }} - {{ $ms->brand_mesin }} [{{ $statusDisplay }}]
                                         </option>
                                         @endforeach
                                     </select>
@@ -123,7 +121,8 @@
                             <div class="form-row">
                                 <div class="form-group col-md-4">
                                     <label for="tanggal">Tanggal</label>
-                                    <input type="date" name="tanggal" id="tanggal" class="form-control" required>
+                                    <input type="date" name="tanggal" id="tanggal" class="form-control" required
+                                        min="{{ date('Y-m-d') }}">
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="lot_produksi">Lot Produksi</label>

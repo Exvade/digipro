@@ -52,7 +52,7 @@
                                 <label for="report_type_selector" class="form-label">Jenis Laporan</label>
                                 <select class="form-control" id="report_type_selector" name="report_type">
                                     <option value="general" {{ $reportType === 'general' ? 'selected' : '' }}>Semua Laporan</option>
-                                    <option value="assy" {{ $reportType === 'assy' ? 'selected' : '' }}>Laporan Assy</option>
+                                    <!-- <option value="assy" {{ $reportType === 'assy' ? 'selected' : '' }}>Laporan Assy</option> -->
                                     <option value="inject" {{ $reportType === 'inject' ? 'selected' : '' }}>Laporan Inject</option>
                                 </select>
                             </div>
@@ -91,11 +91,11 @@
                                 <i class="fas fa-cog"></i> Inject
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a class="nav-link {{ $reportType === 'assy' ? 'active' : '' }}" id="assy-tab-report" href="#" data-bagian="assy">
                                 <i class="fas fa-tools"></i> Assy
                             </a>
-                        </li>
+                        </li> -->
                     </ul>
                 </div>
             </div>

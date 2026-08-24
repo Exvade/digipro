@@ -48,11 +48,11 @@
                                 <i class="fas fa-cog"></i> Inject
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a class="nav-link {{ request('bagian') == 'assy' ? 'active' : '' }}" id="assy-tab-oee" href="#" data-bagian="assy">
                                 <i class="fas fa-tools"></i> Assy
                             </a>
-                        </li>
+                        </li> -->
                     </ul>
                 </div>
             </div>
@@ -337,7 +337,7 @@
                                         @endphp
                                         <tr>
                                             <td>
-                                                <span class="badge badge-pill" style="background-color: <?php echo $bgColor; ?>; width: 10px; height: 10px; display: inline-block; margin-right: 5px;"></span>
+                                                <span class="badge badge-pill" style="background-color: {{ $bgColor }}; width: 10px; height: 10px; display: inline-block; margin-right: 5px;"></span>
                                                 {{ $label }}
                                             </td>
                                             <td class="text-right font-weight-bold">{{ number_format($chartData['ngCategories'][$index]) }}</td>
@@ -569,7 +569,7 @@
                             <option value="">All Machines</option>
                             @foreach($mesins ?? [] as $mesin)
                             <option value="{{ $mesin->id }}" {{ request('mesin_id') == $mesin->id ? 'selected' : '' }}>
-                                {{ $mesin->nama_mesin }}
+                                {{ $mesin->nama_mesin }} - {{ $mesin->brand_mesin }}
                             </option>
                             @endforeach
                         </select>
@@ -631,6 +631,7 @@
     data-period="{{ $period ?? 'month' }}"
     data-start-date="{{ $startDate ?? '' }}"
     data-end-date="{{ $endDate ?? '' }}"
+    data-real-time="true"
     style="display: none;">
 </div>
 

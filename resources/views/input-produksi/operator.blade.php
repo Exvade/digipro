@@ -116,11 +116,26 @@ if ($hour >= 7 && $hour < 15) {
         }
         }
 
-        $total = $ok + $ng;
-        $gap = max(0, $planning->qty_planning_produksi - $total);
-        $percentage = $planning->qty_planning_produksi > 0
-        ? min(100, round(($total / $planning->qty_planning_produksi) * 100, 1))
+        $targetShift = 0;
+        if ($operatorShift === 'pagi') $targetShift = $planning->target_shift_pagi;
+        elseif ($operatorShift === 'siang') $targetShift = $planning->target_shift_siang;
+        elseif ($operatorShift === 'malam') $targetShift = $planning->target_shift_malam;
+
+        // Use shift target if defined, otherwise fallback to total day target
+        $displayTarget = $targetShift > 0 ? $targetShift : $planning->qty_planning_produksi;
+        
+        // Count production specifically for this shift
+        $shiftTotal = \App\Models\ProduksiPerJam::where('planning_id', $planning->id)
+            ->where('shift', $operatorShift)
+            ->sum(\DB::raw('ok_count + ng_part'));
+
+        $gap = max(0, $displayTarget - $shiftTotal);
+        
+        $percentage = $displayTarget > 0
+        ? min(100, round(($shiftTotal / $displayTarget) * 100, 1))
         : 0;
+        
+        $total = $ok + $ng; // This is day total for efficiency calculation
         $efficiency = $total > 0 ? round(($ok / $total) * 100, 1) : 100;
         $isCompleted = $gap <= 0;
         $progressBarClass=$percentage>= 100 ? 'bg-success' : ($percentage >= 70 ? 'bg-info' : 'bg-warning');
@@ -329,8 +344,8 @@ if ($hour >= 7 && $hour < 15) {
                         <div class="text-right">
                             <div class="target-badge d-inline-flex align-items-center px-4 py-2">
                                 <div class="mr-3">
-                                    <small class="d-block text-uppercase text-muted font-weight-bold" style="font-size: 0.6rem; letter-spacing: 1px; line-height: 1;">Target</small>
-                                    <span class="h4 mb-0 font-weight-bold text-primary">{{ number_format($planning->qty_planning_produksi) }}</span>
+                                    <small class="d-block text-uppercase text-muted font-weight-bold" style="font-size: 0.6rem; letter-spacing: 1px; line-height: 1;">Target (Shift)</small>
+                                    <span class="h4 mb-0 font-weight-bold text-primary">{{ number_format($displayTarget) }}</span>
                                 </div>
                                 <div class="target-icon text-primary">
                                     <i class="fas fa-bullseye fa-lg"></i>
@@ -461,8 +476,8 @@ if ($hour >= 7 && $hour < 15) {
                                     <div class="stat-box p-3 mb-3 stat-box-container stat-box-blue">
                                         <div class="mr-3 text-primary"><i class="fas fa-bullseye fa-lg"></i></div>
                                         <div>
-                                            <small class="text-muted text-uppercase font-weight-bold d-block" style="font-size: 0.6rem; letter-spacing: 1px;">Target</small>
-                                            <div class="h4 mb-0 font-weight-bold text-dark planned-qty">{{ number_format($planning->qty_planning_produksi) }}</div>
+                                            <small class="text-muted text-uppercase font-weight-bold d-block" style="font-size: 0.6rem; letter-spacing: 1px;">Target (Shift)</small>
+                                            <div class="h4 mb-0 font-weight-bold text-dark planned-qty">{{ number_format($displayTarget) }}</div>
                                         </div>
                                     </div>
                                     <div class="stat-box p-3 mb-3 stat-box-container stat-box-green">
@@ -496,7 +511,7 @@ if ($hour >= 7 && $hour < 15) {
                     {{-- BOTTOM PROGRESS BAR --}}
                     <div class="mt-4 pt-3 border-top border-secondary">
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <span class="text-muted small text-uppercase font-weight-bold">Production Progress</span>
+                            <span class="text-muted small text-uppercase font-weight-bold">Shift Progress</span>
                             <span class="text-primary h5 mb-0 font-weight-bold progress-info">{{ $percentage }}%</span>
                         </div>
                         <div class="progress" style="height: 12px; border-radius: 10px; background: #333; border: 1px solid #444;">

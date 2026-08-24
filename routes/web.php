@@ -89,9 +89,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/', [PlanningController::class, 'store'])->name('store');
         Route::put('/{planning}', [PlanningController::class, 'update'])->name('update');
         Route::delete('/{planning}', [PlanningController::class, 'destroy'])->name('destroy');
-        Route::get('/{id}', [PlanningController::class, 'show'])->name('show');
-        Route::get('/{id}/qrcode/{type}', [PlanningController::class, 'secureQrCode'])->name('qrcode.secure');
-
         // Approval
         Route::get('/approval/page', [\App\Http\Controllers\PlanningApprovalController::class, 'approvalPage'])->name('approval.page');
         Route::post('/approval', [\App\Http\Controllers\PlanningApprovalController::class, 'approval'])->name('approval');
@@ -100,6 +97,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/cetak', [\App\Http\Controllers\PlanningReportController::class, 'cetak'])->name('cetak');
         Route::get('/cetak/tanggal', [\App\Http\Controllers\PlanningReportController::class, 'cetakByTanggal'])->name('cetak.tanggal');
         Route::get('/cetak/range', [\App\Http\Controllers\PlanningReportController::class, 'cetakByRange'])->name('cetak.range');
+
+        // Core CRUD Show & QRCode
+        Route::get('/{id}', [PlanningController::class, 'show'])->name('show');
+        Route::get('/{id}/qrcode/{type}', [PlanningController::class, 'secureQrCode'])->name('qrcode.secure');
 
         // Excel Import/Export
         Route::get('/download-template', [\App\Http\Controllers\PlanningExcelController::class, 'downloadTemplate'])->name('download-template');
@@ -334,11 +335,15 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
-    // Jadwal Pemeliharaan - Dapat diakses oleh operator juga untuk update actual
-    Route::middleware('role:super_admin,kabag,manager_plant,staff,leader,operator')->group(function () {
+    // Jadwal Pemeliharaan - Dapat diakses oleh operator juga untuk update actual (Kecuali Operator Produksi)
+    Route::middleware(['role:super_admin,kabag,manager_plant,staff,leader,operator', 'maintenance_access'])->group(function () {
         Route::get('/jadwal-pemeliharaan', [JadwalPemeliharaanController::class, 'index'])->name('jadwal-pemeliharaan.index');
+        Route::get('/jadwal-pemeliharaan/approval', [JadwalPemeliharaanController::class, 'approval'])->name('jadwal-pemeliharaan.approval');
+        Route::get('/jadwal-pemeliharaan/export-pdf', [JadwalPemeliharaanController::class, 'exportPdf'])->name('jadwal-pemeliharaan.export-pdf');
         Route::get('/jadwal-pemeliharaan/print', [JadwalPemeliharaanController::class, 'print'])->name('jadwal-pemeliharaan.print');
         Route::post('/jadwal-pemeliharaan/update-cell', [JadwalPemeliharaanController::class, 'updateCell'])->name('jadwal-pemeliharaan.update-cell');
+        Route::post('/jadwal-pemeliharaan/approve/{id}', [JadwalPemeliharaanController::class, 'approve'])->name('jadwal-pemeliharaan.approve');
+        Route::post('/jadwal-pemeliharaan/reject/{id}', [JadwalPemeliharaanController::class, 'reject'])->name('jadwal-pemeliharaan.reject');
     });
 
 
@@ -363,8 +368,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/user/{user}/show-modal', [UserController::class, 'showModal'])->name('user.showModal');
     });
 
-    // Documents Management (Super Admin, Kabag, Manager Plant, Leader, Foreman)
-    Route::middleware('role:super_admin,kabag,manager_plant,leader,foreman')->prefix('documents')->name('documents.')->group(function () {
+    // Documents Management (Super Admin, Kabag, Manager Plant, Leader, Foreman, Staff)
+    Route::middleware('role:super_admin,kabag,manager_plant,leader,foreman,staff')->prefix('documents')->name('documents.')->group(function () {
         Route::get('/', [\App\Http\Controllers\DocumentController::class, 'index'])->name('index');
 
         // Mesin Documents

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<title>ERD - Sistem DIGIPRO</title>
+<style>
+  body{margin:0;padding:20px;background:#fff;font-family:Arial,sans-serif;}
+  h1{text-align:center;font-size:22px;margin-bottom:4px;}
+  .sub{text-align:center;font-size:13px;color:#555;margin-bottom:10px;}
+  .wrap{overflow:auto;border:1px solid #ccc;background:#fff;}
+  .legend-box{display:flex;gap:18px;justify-content:center;margin:10px 0;font-size:12px;flex-wrap:wrap;}
+  .legend-box div{display:flex;align-items:center;gap:5px;}
+  .legend-box svg{flex-shrink:0;}
+</style>
+</head>
+<body>
+<h1>ERD - Sistem DIGIPRO</h1>
+<p class="sub">Digital Production &amp; Maintenance System</p>
+<div class="legend-box">
+  <div><svg width="30" height="18"><rect x="1" y="1" width="28" height="16" fill="#B8D4E8" stroke="#333" stroke-width="1.2"/></svg> = Entitas</div>
+  <div><svg width="28" height="20"><polygon points="14,1 27,10 14,19 1,10" fill="#FCE9A0" stroke="#333" stroke-width="1.2"/></svg> = Relasi</div>
+  <div><svg width="30" height="18"><ellipse cx="15" cy="9" rx="14" ry="8" fill="#fff" stroke="#333" stroke-width="1"/></svg> = Atribut</div>
+  <div><svg width="30" height="14"><line x1="0" y1="7" x2="30" y2="7" stroke="#333" stroke-width="1"/></svg> = Penghubung</div>
+  <div><span style="text-decoration:underline;font-weight:bold;">id</span> = Primary Key</div>
+</div>
+<div class="wrap">
+<svg id="erd" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+<script>
+const SVG_NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('erd');
+
+function el(tag,a){const e=document.createElementNS(SVG_NS,tag);for(let k in a)e.setAttribute(k,a[k]);return e;}
+function addTo(p,tag,a){const e=el(tag,a);p.appendChild(e);return e;}
+
+/* ── ENTITY DEFINITIONS ── */
+const entities={
+  users:{name:'Users',x:1700,y:350,attrs:[
+    {n:'id',pk:1},{n:'username'},{n:'nama'},{n:'email'},{n:'nik'},{n:'role'},{n:'bagian'},{n:'grup_id',fk:1},{n:'departemen'},{n:'password'}
+  ]},
+  grups:{name:'Grups',x:700,y:280,attrs:[
+    {n:'id',pk:1},{n:'nama_grup'}
+  ]},
+  jadwal_kerja:{name:'Jadwal Kerja',x:350,y:700,attrs:[
+    {n:'id',pk:1},{n:'user_id',fk:1},{n:'created_by',fk:1},{n:'tanggal'},{n:'shift'},{n:'jam_masuk'},{n:'jam_keluar'},{n:'bagian'},{n:'status'}
+  ]},
+  mesin:{name:'Mesin',x:2500,y:900,attrs:[
+    {n:'id',pk:1},{n:'nama_mesin'},{n:'brand_mesin'},{n:'tonase_mesin'},{n:'status'},{n:'maintenance_count'},{n:'offline_count'},{n:'keterangan'}
+  ]},
+  mesin_doc:{name:'Mesin\nDocuments',x:3500,y:650,attrs:[
+    {n:'id',pk:1},{n:'mesin_id',fk:1},{n:'type'},{n:'url'},{n:'filename'},{n:'enabled'}
+  ]},
+  parts:{name:'Parts',x:2700,y:300,attrs:[
+    {n:'id',pk:1},{n:'no_parts'},{n:'no_barang'},{n:'nama_part'},{n:'type'},{n:'quantity'},{n:'bruto'}
+  ]},
+  moldshop:{name:'Moldshop',x:3500,y:300,attrs:[
+    {n:'id',pk:1},{n:'no_mold'},{n:'nama_mold'},{n:'type'},{n:'customer'}
+  ]},
+  checksheets:{name:'Checksheets',x:800,y:1150,attrs:[
+    {n:'id',pk:1},{n:'mesin_id',fk:1},{n:'part_id',fk:1},{n:'user_id',fk:1},{n:'approved_by',fk:1},{n:'shift'},{n:'approval_status'},{n:'amptm_standar'},{n:'temperature'},{n:'pressure'},{n:'vibration'}
+  ]},
+  cs_photos:{name:'Checksheet\nPhotos',x:250,y:1700,attrs:[
+    {n:'id',pk:1},{n:'checksheet_id',fk:1},{n:'file_path'},{n:'type'},{n:'description'}
+  ]},
+  planning:{name:'Planning\nProduksi',x:1800,y:1550,attrs:[
+    {n:'id',pk:1},{n:'moldshop_id',fk:1},{n:'mesin_id',fk:1},{n:'part_id',fk:1},{n:'tanggal'},{n:'lot_produksi'},{n:'qty_planning'},{n:'bagian'}
+  ]},
+  ploting:{name:'Ploting\nProduksi',x:800,y:2050,attrs:[
+    {n:'id',pk:1},{n:'planning_id',fk:1},{n:'grup_id',fk:1},{n:'user_id',fk:1},{n:'status'},{n:'start_time'},{n:'end_time'},{n:'run_time'}
+  ]},
+  input_prod:{name:'Input\nProduksi',x:1800,y:2250,attrs:[
+    {n:'id',pk:1},{n:'planning_id',fk:1},{n:'ploting_id',fk:1},{n:'user_id',fk:1},{n:'ok_count'},{n:'ng_count'},{n:'status'},{n:'submitted_at'}
+  ]},
+  prod_jam:{name:'Produksi\nPer Jam',x:2800,y:2250,attrs:[
+    {n:'id',pk:1},{n:'planning_id',fk:1},{n:'input_produksi_id',fk:1},{n:'ploting_id',fk:1},{n:'shift'},{n:'jam'},{n:'target'},{n:'ok_count'},{n:'ng_part'}
+  ]},
+  persiapan:{name:'Persiapan\nChecks',x:300,y:2500,attrs:[
+    {n:'id',pk:1},{n:'ploting_id',fk:1},{n:'item_name'},{n:'operator_checked'},{n:'leader_checked'},{n:'keterangan'}
+  ]},
+  ng_types:{name:'NG Part\nTypes',x:2800,y:2850,attrs:[
+    {n:'id',pk:1},{n:'name'},{n:'code'},{n:'is_active'},{n:'sort_order'}
+  ]},
+  input_ng:{name:'Input Produksi\nNG Parts',x:1800,y:2850,attrs:[
+    {n:'id',pk:1},{n:'input_produksi_id',fk:1},{n:'ng_part_type_id',fk:1},{n:'quantity'},{n:'category'}
+  ]},
+  downtime:{name:'Downtime\nEvents',x:3500,y:1200,attrs:[
+    {n:'id',pk:1},{n:'mesin_id',fk:1},{n:'user_id',fk:1},{n:'resolved_by',fk:1},{n:'tanggal'},{n:'downtime_type'},{n:'duration_minutes'},{n:'status'}
+  ]},
+  jadwal_maint:{name:'Jadwal\nPemeliharaan',x:3500,y:1750,attrs:[
+    {n:'id',pk:1},{n:'mesin_id',fk:1},{n:'approved_by',fk:1},{n:'tahun'},{n:'bulan'},{n:'minggu'},{n:'plan_tipe'},{n:'approval_status'}
+  ]}
+};
+
+/* ── RELATIONSHIPS ── */
+const rels=[
+  {a:'grups',b:'users',name:'Memiliki',ca:'1',cb:'N'},
+  {a:'users',b:'jadwal_kerja',name:'Membuat',ca:'1',cb:'N'},
+  {a:'users',b:'checksheets',name:'Mengisi',ca:'1',cb:'N'},
+  {a:'users',b:'downtime',name:'Melaporkan',ca:'1',cb:'N'},
+  {a:'mesin',b:'mesin_doc',name:'Memiliki',ca:'1',cb:'N'},
+  {a:'mesin',b:'checksheets',name:'Dicek',ca:'1',cb:'N'},
+  {a:'mesin',b:'downtime',name:'Mengalami',ca:'1',cb:'N'},
+  {a:'mesin',b:'jadwal_maint',name:'Dijadwalkan',ca:'1',cb:'N'},
+  {a:'mesin',b:'planning',name:'Digunakan',ca:'1',cb:'N'},
+  {a:'parts',b:'checksheets',name:'Dicek',ca:'1',cb:'N'},
+  {a:'parts',b:'planning',name:'Diproduksi',ca:'1',cb:'N'},
+  {a:'moldshop',b:'planning',name:'Digunakan',ca:'1',cb:'N'},
+  {a:'checksheets',b:'cs_photos',name:'Memiliki',ca:'1',cb:'N'},
+  {a:'planning',b:'ploting',name:'Memiliki',ca:'1',cb:'N'},
+  {a:'planning',b:'input_prod',name:'Memiliki',ca:'1',cb:'N'},
+  {a:'planning',b:'prod_jam',name:'Memiliki',ca:'1',cb:'N'},
+  {a:'ploting',b:'persiapan',name:'Memiliki',ca:'1',cb:'N'},
+  {a:'input_prod',b:'input_ng',name:'Memiliki',ca:'1',cb:'N'},
+  {a:'ng_types',b:'input_ng',name:'Digunakan',ca:'1',cb:'N'},
+  {a:'input_prod',b:'prod_jam',name:'Memiliki',ca:'1',cb:'N'},
+];
+
+/* ── DRAW FUNCTIONS ── */
+const RW=90,RH=22; // entity rect half-w, half-h
+const AR=155; // attribute radius
+
+function drawEntity(e){
+  const g=el('g',{});
+  // rect
+  const hw=RW,hh=RH;
+  const lines=e.name.split('\n');
+  const totalH=lines.length>1?hh*2:hh*2;
+  addTo(g,'rect',{x:e.x-hw,y:e.y-hh-(lines.length>1?8:0),width:hw*2,height:totalH+(lines.length>1?16:0),fill:'#B8D4E8',stroke:'#333','stroke-width':1.5,rx:0});
+  lines.forEach((ln,i)=>{
+    const ty=e.y+(i-(lines.length-1)/2)*16+5;
+    addTo(g,'text',{x:e.x,y:ty,'text-anchor':'middle','font-family':'Arial','font-size':13,'font-weight':'bold'}).textContent=ln;
+  });
+  svg.appendChild(g);
+}
+
+function drawAttrs(e){
+  const n=e.attrs.length;
+  const startAngle=-Math.PI/2;
+  e.attrs.forEach((a,i)=>{
+    const angle=startAngle+(2*Math.PI*i/n);
+    const ax=e.x+AR*Math.cos(angle);
+    const ay=e.y+AR*Math.sin(angle);
+    // line from entity to attr
+    addTo(svg,'line',{x1:e.x,y1:e.y,x2:ax,y2:ay,stroke:'#333','stroke-width':1});
+    // ellipse
+    const rxv=Math.max(a.n.length*4+12,38);
+    addTo(svg,'ellipse',{cx:ax,cy:ay,rx:rxv,ry:14,fill:'#fff',stroke:'#333','stroke-width':1});
+    // text
+    const t=addTo(svg,'text',{x:ax,y:ay+4,'text-anchor':'middle','font-family':'Arial','font-size':10.5});
+    t.textContent=a.n;
+    if(a.pk){t.setAttribute('text-decoration','underline');t.setAttribute('font-weight','bold');}
+  });
+}
+
+function drawRel(r){
+  const ea=entities[r.a],eb=entities[r.b];
+  const mx=(ea.x+eb.x)/2, my=(ea.y+eb.y)/2;
+  const ds=40; // diamond size
+  // lines
+  addTo(svg,'line',{x1:ea.x,y1:ea.y,x2:mx,y2:my,stroke:'#333','stroke-width':1.2});
+  addTo(svg,'line',{x1:mx,y1:my,x2:eb.x,y2:eb.y,stroke:'#333','stroke-width':1.2});
+  // diamond
+  const pts=`${mx},${my-ds/2} ${mx+ds},${my} ${mx},${my+ds/2} ${mx-ds},${my}`;
+  addTo(svg,'polygon',{points:pts,fill:'#FCE9A0',stroke:'#333','stroke-width':1.3});
+  // label
+  const lines=r.name.split('\n');
+  lines.forEach((ln,i)=>{
+    addTo(svg,'text',{x:mx,y:my+4+(i*12)-(lines.length-1)*6,'text-anchor':'middle','font-family':'Arial','font-size':9.5}).textContent=ln;
+  });
+  // cardinality
+  const dx=eb.x-ea.x,dy=eb.y-ea.y;
+  const dist=Math.sqrt(dx*dx+dy*dy);
+  if(dist>0){
+    const ux=dx/dist,uy=dy/dist;
+    const off=55;
+    // near a
+    const cax=ea.x+ux*off,cay=ea.y+uy*off;
+    addTo(svg,'text',{x:cax+uy*12,y:cay-ux*12+4,'text-anchor':'middle','font-family':'Arial','font-size':13,'font-weight':'bold'}).textContent=r.ca;
+    // near b
+    const cbx=eb.x-ux*off,cby=eb.y-uy*off;
+    addTo(svg,'text',{x:cbx+uy*12,y:cby-ux*12+4,'text-anchor':'middle','font-family':'Arial','font-size':13,'font-weight':'bold'}).textContent=r.cb;
+  }
+}
+
+/* ── RENDER ── */
+// 1. Draw all relationship lines first (behind)
+rels.forEach(r=>drawRel(r));
+// 2. Draw attributes
+Object.values(entities).forEach(e=>drawAttrs(e));
+// 3. Draw entities on top
+Object.values(entities).forEach(e=>drawEntity(e));
+
+// Auto-size SVG
+let maxX=0,maxY=0;
+Object.values(entities).forEach(e=>{
+  if(e.x+AR+80>maxX)maxX=e.x+AR+80;
+  if(e.y+AR+40>maxY)maxY=e.y+AR+40;
+});
+svg.setAttribute('width',maxX+60);
+svg.setAttribute('height',maxY+60);
+svg.setAttribute('viewBox',`0 0 ${maxX+60} ${maxY+60}`);
+</script>
+</body>
+</html>

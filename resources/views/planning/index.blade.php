@@ -95,19 +95,10 @@
         <div class="card shadow-sm">
             <div class="card-body p-2">
                 <ul class="nav nav-pills nav-fill bagian-tabs" id="bagianTabs" role="tablist">
+                    <!-- Sembunyikan All dan Assy -->
                     <li class="nav-item">
-                        <a class="nav-link active" id="all-tab" href="#" data-bagian="all">
-                            <i class="fas fa-list"></i> All
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="inject-tab" href="#" data-bagian="inject">
+                        <a class="nav-link active" id="inject-tab" href="#" data-bagian="inject">
                             <i class="fas fa-cog"></i> Inject
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="assy-tab" href="#" data-bagian="assy">
-                            <i class="fas fa-tools"></i> Assy
                         </a>
                     </li>
                 </ul>
@@ -134,7 +125,7 @@
                                 <th>No Part</th>
                                 <th>Nama Part</th>
                                 <th>Bagian</th>
-                                <th>Mesin/Meja</th>
+                                <th>Mesin</th>
                                 <th style="width:150px;">Qty Planning</th>
                                 <th style="width:120px;">Status Approval</th>
                                 <th style="width:200px;">Aksi</th>
@@ -373,9 +364,7 @@
                     <div class="form-group">
                         <label for="bagianFilter">Pilih Bagian Planning:</label>
                         <select class="form-control" id="bagianFilter" name="bagian">
-                            <option value="all">📋 Semua (Inject + Assy)</option>
                             <option value="inject">⚙️ Inject Saja</option>
-                            <option value="assy">🔧 Assy Saja</option>
                         </select>
                     </div>
 
@@ -467,11 +456,16 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/planning.css') }}">
+<!-- SweetAlert2 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <!-- CSRF Token -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @endpush
 
 @push('scripts')
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <!-- Planning Data (JSON) -->
 <script type="application/json" id="planning-data">
     {
@@ -485,5 +479,5 @@
 </script>
 
 <!-- Planning Scripts -->
-<script src="{{ asset('js/planning.js') }}"></script>
+<script src="{{ asset('js/planning.js') }}?v={{ filemtime(public_path('js/planning.js')) }}"></script>
 @endpush

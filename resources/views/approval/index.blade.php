@@ -105,11 +105,11 @@
                             <i class="fas fa-cog"></i> Inject
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link" id="assy-tab-approval-cs" href="#" data-bagian="assy">
                             <i class="fas fa-tools"></i> Assy
                         </a>
-                    </li>
+                    </li> -->
                 </ul>
             </div>
         </div>

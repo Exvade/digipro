@@ -4,7 +4,7 @@
  */
 
 // Global variables
-let oeeChart, componentChart, machineChart, ngChart;
+let oeeChart, componentChart, machineChart, ngChart, oeeDataTable;
 
 // Initialize dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeTableSearch();
     initializeFilters();
     initializeDataTables();
+    initializeRealTimeUpdates();
 });
 
 /**
@@ -807,28 +808,38 @@ function handleChartResize() {
 window.addEventListener('resize', handleChartResize);
 
 /**
- * Initialize real-time updates (if needed)
+ * Initialize real-time updates
  */
 function initializeRealTimeUpdates() {
-    // Check if real-time updates are enabled
-    const realTimeEnabled = document.body.getAttribute('data-real-time');
+    // Check if real-time updates are enabled (on body or specific element)
+    const realTimeEnabled = document.body.getAttribute('data-real-time') === 'true' || 
+                           (document.getElementById('oee-dashboard-data') && 
+                            document.getElementById('oee-dashboard-data').getAttribute('data-real-time') === 'true');
     
-    if (realTimeEnabled === 'true') {
+    if (realTimeEnabled) {
+        console.log('Real-time updates enabled for OEE dashboard');
         // Update data every 30 seconds
         setInterval(() => {
-            fetch('/api/oee/current')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        updateKPIValues(data);
-                        // Update charts with new data
-                        updateCharts(data);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching real-time data:', error);
-                });
+            updateDashboardRealtime();
         }, 30000);
+    }
+}
+
+/**
+ * Update the entire dashboard for real-time
+ */
+async function updateDashboardRealtime() {
+    try {
+        const data = await fetchOeeDataForPeriod(window.currentPeriod);
+        if (data.success) {
+            updateChartsWithNewData(data);
+            updateKPIValues(data);
+            if (data.oeeData) {
+                updateOeeTable(data.oeeData);
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching real-time data:', error);
     }
 }
 
@@ -1121,7 +1132,7 @@ initializeRealTimeUpdates();
  */
 function initializeDataTables() {
     if (typeof $ !== 'undefined' && $.fn.dataTable) {
-        const table = $('#oeeTable').DataTable({
+        oeeDataTable = $('#oeeTable').DataTable({
             responsive: true,
             pageLength: 10,
             lengthChange: true,
@@ -1155,6 +1166,65 @@ function initializeDataTables() {
             }
         });
     }
+}
+
+/**
+ * Update OEE Table with new data
+ */
+function updateOeeTable(oeeRecords) {
+    if (!oeeDataTable) return;
+
+    // Save current pagination state
+    const currentInfo = oeeDataTable.page.info();
+    const currentPage = currentInfo.page;
+
+    // Clear and add new rows
+    oeeDataTable.clear();
+
+    oeeRecords.forEach(oee => {
+        const dateStr = oee.tanggal ? new Date(oee.tanggal).toLocaleDateString('id-ID').replace(/\//g, '-') : 'N/A';
+        const bagian = oee.planning && oee.planning.bagian ? oee.planning.bagian : 'inject';
+        
+        const machineCol = bagian === 'assy' 
+            ? (oee.planning && oee.planning.meja ? oee.planning.meja.nama_meja : 'N/A')
+            : `<div class="mb-1">${oee.mesin ? oee.mesin.nama_mesin : 'N/A'}</div>` + 
+              (oee.mesin && oee.mesin.status ? `<span class="badge badge-${getStatusColor(oee.mesin.status)}" style="font-size: 0.65rem; padding: 2px 6px;">${oee.mesin.status.toUpperCase()}</span>` : '');
+
+        oeeDataTable.row.add([
+            dateStr,
+            `<span class="badge badge-${bagian === 'assy' ? 'info' : 'primary'}">${bagian.toUpperCase()}</span>`,
+            machineCol,
+            oee.planning && oee.planning.part ? oee.planning.part.no_parts : 'N/A',
+            `<span class="badge badge-secondary">${formatNumber(oee.actual_output)}</span>`,
+            `<span class="badge badge-success">${formatNumber(oee.good_output)}</span>`,
+            `<span class="badge badge-danger">${formatNumber(oee.ng_output)}</span>`,
+            `<span class="badge badge-${oee.availability_color || 'secondary'}">${formatNumber(oee.availability_rate, 1)}%</span>`,
+            `<span class="badge badge-${oee.performance_color || 'secondary'}">${formatNumber(oee.performance_rate, 1)}%</span>`,
+            `<span class="badge badge-${oee.quality_color || 'secondary'}">${formatNumber(oee.quality_rate, 1)}%</span>`,
+            `<span class="badge badge-${oee.oee_color || 'primary'} font-weight-bold">${formatNumber(oee.oee_rate, 1)}%</span>`,
+            `<button class="btn btn-sm btn-info btn-view-detail" data-id="${oee.id}" title="Detail" data-toggle="tooltip"><i class="fas fa-eye"></i></button>`
+        ]);
+    });
+
+    // Redraw and restore page
+    oeeDataTable.draw(false);
+    if (currentPage < oeeDataTable.page.info().pages) {
+        oeeDataTable.page(currentPage).draw(false);
+    }
+}
+
+function getStatusColor(status) {
+    switch (status) {
+        case 'running': return 'success';
+        case 'maintenance': return 'danger';
+        case 'stop': return 'warning';
+        case 'offline': return 'dark';
+        default: return 'secondary';
+    }
+}
+
+function formatNumber(num, decimals = 0) {
+    return parseFloat(num || 0).toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
 
 // Export functions to global scope for onclick handlers

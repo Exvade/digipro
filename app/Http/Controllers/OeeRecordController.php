@@ -191,7 +191,7 @@ class OeeRecordController extends Controller
             ]
         );
 
-        // Handle AJAX requests for period changes
+        // Handle AJAX requests for period changes & realtime updates
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
@@ -205,6 +205,7 @@ class OeeRecordController extends Controller
                 'totalOutputOK' => $totalOutputOK,
                 'totalOutputNG' => $totalOutputNG,
                 'chartData' => $chartData,
+                'oeeData' => $oeeData,
                 'period' => $period,
                 'startDate' => $startDate,
                 'endDate' => $endDate

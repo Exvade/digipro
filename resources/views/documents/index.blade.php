@@ -16,7 +16,7 @@
         <div class="row mb-2">
             <div class="col-sm-6">
                 <h1 class="m-0">
-                    Dokumen Mesin & Meja
+                    Dokumen Mesin 
                 </h1>
             </div>
         </div>
@@ -41,7 +41,7 @@
         <div class="card card-outline card-primary">
             <div class="card-header">
                 <h3 class="card-title">
-                    Daftar Dokumen Mesin & Meja
+                    Daftar Dokumen Mesin 
                 </h3>
             </div>
             <div class="card-body">
@@ -53,11 +53,11 @@
                             <i class="fas fa-cogs mr-1"></i> Per Mesin ({{ $mesins->count() }})
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link" data-toggle="tab" href="#tab-meja" role="tab">
                             <i class="fas fa-table mr-1"></i> Per Meja ({{ $mejas->count() }})
                         </a>
-                    </li>
+                    </li> -->
                 </ul>
 
                 @php

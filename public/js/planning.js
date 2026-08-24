@@ -130,7 +130,7 @@
         $(document).on('click', '.deleteForm button', function(e) {
             e.preventDefault();
             const f = $(this).closest('form');
-            Swal.fire({ title: 'Yakin hapus?', text: 'Data tidak bisa dikembalikan!', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus' }).then((r) => { if (r.isConfirmed) f.submit(); });
+            Swal.fire({ title: 'Yakin hapus?', text: 'Data tidak bisa dikembalikan!', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus' }).then((r) => { if (r.isConfirmed) f[0].submit(); });
         });
 
         // Approval Buttons
@@ -211,7 +211,7 @@
         sw.addEventListener('change', () => sw.checked ? en() : di());
     }
 
-    window.submitApproval = function() {
+    window.submitApproval = function(batchIds = null) {
         const isReject = $('#modalReject').hasClass('show');
         const planningId = isReject ? $('#reject_planning_id').val() : $('#approval_planning_id').val();
         const action = isReject ? 'reject' : $('#approval_action').val();
@@ -221,35 +221,98 @@
             return Swal.fire({ icon: 'error', title: 'Error', text: 'Alasan penolakan wajib diisi!' });
         }
 
-        $('#submitApprovalBtn, #btnConfirmReject').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>...');
+        const data = { action: action, rejection_reason: reason };
+        if (batchIds) {
+            data.planning_ids = batchIds;
+        } else {
+            data.planning_id = planningId;
+        }
+
+        const btn = isReject ? $('#btnConfirmReject') : $('#submitApprovalBtn');
+        const originalHtml = btn.html();
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>...');
         
         $.ajax({ 
             url: '/planning/approval', 
             method: 'POST', 
-            data: { 
-                planning_id: planningId, 
-                action: action, 
-                rejection_reason: reason 
-            }, 
+            data: data, 
             success: (r) => { 
                 if (r.success) {
-                    Swal.fire({ icon: 'success', title: 'Berhasil', text: r.message, timer: 1500 }).then(() => location.reload()); 
+                    Swal.fire({ icon: 'success', title: 'Berhasil', text: r.message, timer: 1500 });
+                    
+                    // Remove processed rows from table
+                    const idsToRemove = batchIds || [planningId];
+                    idsToRemove.forEach(id => {
+                        $(`#row-${id}`).fadeOut(400, function() { 
+                            $(this).remove();
+                            updateBulkActionUI();
+                            // If table is empty, show alert
+                            if ($('#approvalTable tbody tr').length === 0) {
+                                location.reload(); // Just reload if empty to show the "no data" alert
+                            }
+                        });
+                    });
+
+                    $('#modalApproval').modal('hide');
+                    $('#modalReject').modal('hide');
                 } else { 
                     Swal.fire({ icon: 'error', text: r.message }); 
-                    $('#submitApprovalBtn').prop('disabled', false).html('<i class="fas fa-check"></i> Konfirmasi Approve');
-                    $('#btnConfirmReject').prop('disabled', false).html('<i class="fas fa-times"></i> Konfirmasi Reject');
                 } 
+                btn.prop('disabled', false).html(originalHtml);
             },
             error: (x) => { 
                 Swal.fire({ icon: 'error', text: x.responseJSON?.message || 'Gagal.' }); 
-                $('#submitApprovalBtn').prop('disabled', false).html('<i class="fas fa-check"></i> Konfirmasi Approve');
-                $('#btnConfirmReject').prop('disabled', false).html('<i class="fas fa-times"></i> Konfirmasi Reject');
+                btn.prop('disabled', false).html(originalHtml);
             }
         });
     };
 
     $(document).on('click', '#submitApprovalBtn, #btnConfirmReject', function() {
         window.submitApproval();
+    });
+
+    // Batch Approval Logic
+    $(document).on('change', '#checkAll', function() {
+        $('.planning-checkbox').prop('checked', $(this).prop('checked'));
+        updateBulkActionUI();
+    });
+
+    $(document).on('change', '.planning-checkbox', function() {
+        if ($('.planning-checkbox:checked').length === $('.planning-checkbox').length) {
+            $('#checkAll').prop('checked', true);
+        } else {
+            $('#checkAll').prop('checked', false);
+        }
+        updateBulkActionUI();
+    });
+
+    function updateBulkActionUI() {
+        const checkedCount = $('.planning-checkbox:checked').length;
+        if (checkedCount > 0) {
+            $('#selectedCount').text(checkedCount);
+            $('#bulkActionGroup').fadeIn();
+        } else {
+            $('#bulkActionGroup').fadeOut();
+            $('#checkAll').prop('checked', false);
+        }
+    }
+
+    $(document).on('click', '#btnBulkApprove', function() {
+        const selectedIds = $('.planning-checkbox:checked').map(function() { return $(this).val(); }).get();
+        if (selectedIds.length === 0) return;
+
+        Swal.fire({
+            title: 'Approve Masal?',
+            text: `Anda akan menyetujui ${selectedIds.length} planning sekaligus.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            confirmButtonText: 'Ya, Approve Semua!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.submitApproval(selectedIds);
+            }
+        });
     });
 
     window.submitCetak = function() {

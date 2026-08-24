@@ -35,8 +35,8 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="shift_display">Shift</label>
-                    <input type="text" class="form-control" id="shift_display" 
-                        readonly placeholder="Otomatis dari Jadwal Kerja" 
+                    <input type="text" class="form-control" id="shift_display"
+                        readonly placeholder="Otomatis dari Jadwal Kerja"
                         style="background-color: #e9ecef;">
                     <small class="form-text text-muted">
                         <i class="fas fa-info-circle mr-1"></i>Shift otomatis dari jadwal kerja user
@@ -218,6 +218,33 @@
             </div>
         </div>
 
+        <!-- CBM Parameters Section -->
+        <hr>
+        <h6 class="font-weight-bold">Parameter Kondisi Mesin (Condition-Based Maintenance)</h6>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="form-group">
+                    <label for="suhu_mesin"><i class="fas fa-thermometer-half text-danger mr-1"></i>Suhu Barrel/Heater (°C)</label>
+                    <input type="number" step="0.01" class="form-control" id="suhu_mesin" name="suhu_mesin" placeholder="Contoh: 245.5">
+                    <small class="text-muted">Ambang batas normal: < 280°C</small>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="form-group">
+                    <label for="tekanan_mesin"><i class="fas fa-tachometer-alt text-primary mr-1"></i>Tekanan Hidrolik (Bar)</label>
+                    <input type="number" step="0.01" class="form-control" id="tekanan_mesin" name="tekanan_mesin" placeholder="Contoh: 125.0">
+                    <small class="text-muted">Ambang batas normal: < 150 Bar</small>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="form-group">
+                    <label for="getaran_mesin"><i class="fas fa-wave-square text-warning mr-1"></i>Getaran Motor (mm/s)</label>
+                    <input type="number" step="0.01" class="form-control" id="getaran_mesin" name="getaran_mesin" placeholder="Contoh: 15.2">
+                    <small class="text-muted">Ambang batas normal: < 25 mm/s</small>
+                </div>
+            </div>
+        </div>
+
         <!-- AMTPM Section -->
         <hr>
         <h6 class="font-weight-bold">Standar AMTPM</h6>
@@ -276,7 +303,7 @@
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
         <button type="submit" class="btn btn-primary">
-            Simpan 
+            Simpan
         </button>
     </div>
 </form>
@@ -299,12 +326,13 @@
                     <strong>Petunjuk:</strong> Berikut adalah contoh dokumen Standar AMTPM yang dapat digunakan sebagai referensi.
                 </div>
                 <div class="pdf-container" style="height: 500px;">
-                    <iframe src="{{ asset('images/barang/1AMTPM.pdf') }}" 
-                            width="100%" 
-                            height="100%" 
-                            style="border: 1px solid #ddd; border-radius: 5px;">
-                        <p>Browser Anda tidak mendukung tampilan PDF. 
-                        <a href="{{ asset('images/barang/1AMTPM.pdf') }}" target="_blank">Klik di sini untuk mengunduh</a></p>
+                    <iframe src="{{ asset('images/barang/1AMTPM.pdf') }}"
+                        width="100%"
+                        height="100%"
+                        style="border: 1px solid #ddd; border-radius: 5px;">
+                        <p>Browser Anda tidak mendukung tampilan PDF.
+                            <a href="{{ asset('images/barang/1AMTPM.pdf') }}" target="_blank">Klik di sini untuk mengunduh</a>
+                        </p>
                     </iframe>
                 </div>
             </div>

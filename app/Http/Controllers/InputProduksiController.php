@@ -175,7 +175,7 @@ class InputProduksiController extends Controller
                 if ($planning) {
                     // Ambil data produksi_per_jam yang memiliki OK/NG > 0, urutkan berdasarkan waktu update terakhir
                     // Ini akan menunjukkan waktu input terakhir yang sesuai dengan distribusi di PDF
-                    $lastProduksiPerJam = \App\Models\ProduksiPerJam::where('planning_id', $planning->id)
+                    $lastProduksiPerJam = ProduksiPerJam::where('planning_id', $planning->id)
                         ->where(function ($q) {
                             $q->where('ok_count', '>', 0)
                                 ->orWhere('ng_part', '>', 0);
@@ -408,7 +408,7 @@ class InputProduksiController extends Controller
     /**
      * Simpan atau update produksi per jam untuk jam aktif saat ini
      */
-    private function saveProduksiPerJamRealtime($planningId, $plotingId, $inputProduksiId, $currentShift, $currentJam, $isOk = true)
+    private function saveProduksiPerJamRealtime(int $planningId, int $plotingId, int $inputProduksiId, string $currentShift, string $currentJam, bool $isOk = true)
     {
         try {
             // Cari data produksi per jam untuk jam aktif ini
@@ -466,7 +466,7 @@ class InputProduksiController extends Controller
      * Note: Ini adalah estimasi berdasarkan waktu input, karena input_produksi tidak menyimpan shift
      * Untuk akurasi lebih baik, bisa ditambahkan kolom shift di input_produksi
      */
-    private function getTotalInputPerShift($planningId, $shift)
+    private function getTotalInputPerShift(int $planningId, string $shift)
     {
         // Untuk sementara, kita akan menggunakan pendekatan:
         // Jika shift aktif adalah pagi, maka kita batasi berdasarkan target_shift_pagi
@@ -489,54 +489,20 @@ class InputProduksiController extends Controller
      * Karena ok_count dan ng_count adalah kumulatif per record, kita perlu menjumlahkan
      * total dari semua ploting untuk planning ini yang updated dalam shift tersebut.
      */
-    private function getTotalInputByShift($planningId, $shift)
+    /**
+     * Hitung total input per shift menggunakan tabel produksi_per_jam (lebih akurat)
+     */
+    private function getTotalInputByShift(int $planningId, string $shift)
     {
-        $today = Carbon::today();
-        $tomorrow = Carbon::tomorrow();
-
-        $query = InputProduksi::whereHas('ploting', function ($q) use ($planningId) {
-            $q->where('planning_id', $planningId);
-        });
-
-        // Filter berdasarkan waktu updated_at untuk menentukan shift
-        if ($shift === 'pagi') {
-            // Shift pagi: 07:00 - 15:00
-            // Jumlahkan total dari semua ploting yang updated dalam shift pagi
-            $totalInput = $query->whereDate('updated_at', $today)
-                ->whereTime('updated_at', '>=', '07:00:00')
-                ->whereTime('updated_at', '<', '15:00:00')
-                ->sum(DB::raw('ok_count + ng_count'));
-            return $totalInput ?? 0;
-        } elseif ($shift === 'siang') {
-            // Shift siang: 15:00 - 23:00
-            $totalInput = $query->whereDate('updated_at', $today)
-                ->whereTime('updated_at', '>=', '15:00:00')
-                ->whereTime('updated_at', '<', '23:00:00')
-                ->sum(DB::raw('ok_count + ng_count'));
-            return $totalInput ?? 0;
-        } elseif ($shift === 'malam') {
-            // Shift malam: 23:00 - 07:00 (melintasi hari)
-            $totalInput = $query->where(function ($q) use ($today, $tomorrow) {
-                $q->where(function ($subQ) use ($today) {
-                    // Hari ini 23:00 - 23:59:59
-                    $subQ->whereDate('updated_at', $today)
-                        ->whereTime('updated_at', '>=', '23:00:00');
-                })->orWhere(function ($subQ) use ($tomorrow) {
-                    // Besok 00:00:00 - 07:00:00
-                    $subQ->whereDate('updated_at', $tomorrow)
-                        ->whereTime('updated_at', '<', '07:00:00');
-                });
-            })->sum(DB::raw('ok_count + ng_count'));
-            return $totalInput ?? 0;
-        }
-
-        return 0;
+        return \App\Models\ProduksiPerJam::where('planning_id', $planningId)
+            ->where('shift', $shift)
+            ->sum(DB::raw('ok_count + ng_part'));
     }
 
     /**
      * Cek apakah target shift sudah tercapai untuk ploting tertentu
      */
-    private function checkShiftTargetReached($ploting, $planning, $currentShift)
+    private function checkShiftTargetReached(?Ploting $ploting, ?PlanningProduksi $planning, string $currentShift)
     {
         if (!$ploting || !$planning) {
             return false;
@@ -570,7 +536,7 @@ class InputProduksiController extends Controller
     /**
      * Validasi apakah masih bisa input berdasarkan target shift
      */
-    private function validateShiftTarget($planning, $currentShift)
+    private function validateShiftTarget(PlanningProduksi $planning, string $currentShift)
     {
         $targetShift = 0;
 
@@ -658,7 +624,7 @@ class InputProduksiController extends Controller
         ];
     }
 
-    private function cekShiftAktif($userId, $ploting)
+    private function cekShiftAktif(int $userId, ?Ploting $ploting)
     {
         $jadwal = JadwalKerja::where('user_id', $userId)
             ->whereDate('tanggal', Carbon::today())
@@ -689,7 +655,7 @@ class InputProduksiController extends Controller
     }
 
     // ===================== REVISI addOk dengan Auto Submit =====================
-    public function addOk($planningId)
+    public function addOk(int $planningId)
     {
         $user = Auth::user();
         Log::info('addOk called', [
@@ -832,11 +798,11 @@ class InputProduksiController extends Controller
                     'submitted_at' => now()
                 ]);
 
-                // Update semua ploting untuk planning ini menjadi completed
+                // Update semua ploting untuk planning ini menjadi done
                 Ploting::where('planning_id', $planningId)
                     ->where('status', 'on_progress')
                     ->update([
-                        'status' => 'completed',
+                        'status' => 'done',
                         'end_time' => now()
                     ]);
 
@@ -859,6 +825,14 @@ class InputProduksiController extends Controller
                 'status' => $input->status
             ]);
 
+            // Ambil target shift untuk dikirim kembali ke UI
+            $targetShift = 0;
+            if ($currentShift === 'pagi') $targetShift = $planning->target_shift_pagi;
+            elseif ($currentShift === 'siang') $targetShift = $planning->target_shift_siang;
+            elseif ($currentShift === 'malam') $targetShift = $planning->target_shift_malam;
+
+            $totalInputShift = $this->getTotalInputByShift($planningId, $currentShift);
+
             return response()->json([
                 'success' => true,
                 'message' => $message,
@@ -867,8 +841,10 @@ class InputProduksiController extends Controller
                     'ng_count' => (int) $ngTotal,
                     'total' => (int) $totalProduced,
                     'target' => (int) $planning->qty_planning_produksi,
+                    'shift_target' => (int) ($targetShift > 0 ? $targetShift : $planning->qty_planning_produksi),
+                    'shift_total' => (int) $totalInputShift,
                     'status' => $input->status,
-                    'is_completed' => $totalProduced >= $planning->qty_planning_produksi
+                    'is_completed' => ($totalProduced >= $planning->qty_planning_produksi) || ($targetShift > 0 && $totalInputShift >= $targetShift)
                 ]
             ]);
         } catch (\Exception $e) {
@@ -1056,11 +1032,11 @@ class InputProduksiController extends Controller
                     'submitted_at' => now()
                 ]);
 
-                // Update semua ploting untuk planning ini menjadi completed
+                // Update semua ploting untuk planning ini menjadi done
                 Ploting::where('planning_id', $planningId)
                     ->where('status', 'on_progress')
                     ->update([
-                        'status' => 'completed',
+                        'status' => 'done',
                         'end_time' => now()
                     ]);
 
@@ -1077,6 +1053,14 @@ class InputProduksiController extends Controller
 
             DB::commit();
 
+            // Ambil target shift untuk dikirim kembali ke UI
+            $targetShift = 0;
+            if ($currentShift === 'pagi') $targetShift = $planning->target_shift_pagi;
+            elseif ($currentShift === 'siang') $targetShift = $planning->target_shift_siang;
+            elseif ($currentShift === 'malam') $targetShift = $planning->target_shift_malam;
+
+            $totalInputShift = $this->getTotalInputByShift($planningId, $currentShift);
+
             return response()->json([
                 'success' => true,
                 'message' => $message,
@@ -1085,8 +1069,10 @@ class InputProduksiController extends Controller
                     'ng_count' => (int) $ngTotal,
                     'total' => (int) $totalProduced,
                     'target' => (int) $planning->qty_planning_produksi,
+                    'shift_target' => (int) ($targetShift > 0 ? $targetShift : $planning->qty_planning_produksi),
+                    'shift_total' => (int) $totalInputShift,
                     'status' => $input->status,
-                    'is_completed' => $totalProduced >= $planning->qty_planning_produksi
+                    'is_completed' => ($totalProduced >= $planning->qty_planning_produksi) || ($targetShift > 0 && $totalInputShift >= $targetShift)
                 ]
             ]);
         } catch (\Exception $e) {
@@ -1212,7 +1198,7 @@ class InputProduksiController extends Controller
             $currentShift = null;
             if (!in_array($user->role, ['super_admin', 'kabag'])) {
                 $jadwal = JadwalKerja::where('user_id', $user->id)
-                    ->whereDate('tanggal', \Carbon\Carbon::today())
+                    ->whereDate('tanggal', Carbon::today())
                     ->where('status', 'aktif')
                     ->first();
 
@@ -1370,8 +1356,9 @@ class InputProduksiController extends Controller
 
     /**
      * Get data untuk approval leader (Leader, Foreman, Kabag & Super Admin)
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function getApprovalData(Request $request)
+    public function getApprovalData(Request $request): \Illuminate\Http\JsonResponse
     {
         $user = Auth::user();
 
@@ -1442,7 +1429,7 @@ class InputProduksiController extends Controller
                 $shift = null;
                 if ($ploting && $ploting->operator) {
                     $tanggalInput = $item->created_at ? $item->created_at->format('Y-m-d') : date('Y-m-d');
-                    $jadwal = \App\Models\JadwalKerja::where('user_id', $ploting->operator->id)
+                    $jadwal = JadwalKerja::where('user_id', $ploting->operator->id)
                         ->whereDate('tanggal', $tanggalInput)
                         ->where('status', 'aktif')
                         ->first();
@@ -1579,7 +1566,7 @@ class InputProduksiController extends Controller
                     $shift = null;
                     if ($ploting && $ploting->operator) {
                         $tanggalInput = $item->created_at ? $item->created_at->format('Y-m-d') : date('Y-m-d');
-                        $jadwal = \App\Models\JadwalKerja::where('user_id', $ploting->operator->id)
+                        $jadwal = JadwalKerja::where('user_id', $ploting->operator->id)
                             ->whereDate('tanggal', $tanggalInput)
                             ->where('status', 'aktif')
                             ->first();
@@ -1714,7 +1701,7 @@ class InputProduksiController extends Controller
                     $shift = null;
                     if ($ploting && $ploting->operator) {
                         $tanggalInput = $item->created_at ? $item->created_at->format('Y-m-d') : date('Y-m-d');
-                        $jadwal = \App\Models\JadwalKerja::where('user_id', $ploting->operator->id)
+                        $jadwal = JadwalKerja::where('user_id', $ploting->operator->id)
                             ->whereDate('tanggal', $tanggalInput)
                             ->where('status', 'aktif')
                             ->first();
@@ -2042,7 +2029,7 @@ class InputProduksiController extends Controller
             $shift = null;
             if ($ploting && $ploting->operator) {
                 $tanggalInput = $input->created_at ? $input->created_at->format('Y-m-d') : date('Y-m-d');
-                $jadwal = \App\Models\JadwalKerja::where('user_id', $ploting->operator->id)
+                $jadwal = JadwalKerja::where('user_id', $ploting->operator->id)
                     ->whereDate('tanggal', $tanggalInput)
                     ->where('status', 'aktif')
                     ->first();

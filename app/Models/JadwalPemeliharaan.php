@@ -11,11 +11,17 @@ class JadwalPemeliharaan extends Model
     
     protected $table = 'jadwal_pemeliharaans';
     protected $fillable = [
-        'mesin_id', 'tahun', 'bulan', 'minggu', 'plan_tipe', 'aktual_tanggal', 'keterangan'
+        'mesin_id', 'tahun', 'bulan', 'minggu', 'plan_tipe', 'aktual_tanggal', 'keterangan',
+        'bukti', 'status_aktual', 'approved_by', 'approved_at'
     ];
 
     public function mesin()
     {
         return $this->belongsTo(Mesin::class, 'mesin_id');
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 }

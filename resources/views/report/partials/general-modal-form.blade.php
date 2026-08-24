@@ -62,7 +62,7 @@
                                 <select class="form-control" id="mesin_id" name="mesin_id">
                                     <option value="">Semua Mesin</option>
                                     @foreach($mesins ?? [] as $mesin)
-                                    <option value="{{ $mesin->id }}">{{ $mesin->nama_mesin }}</option>
+                                    <option value="{{ $mesin->id }}">{{ $mesin->nama_mesin }} - {{ $mesin->brand_mesin }}</option>
                                     @endforeach
                                 </select>
                             </div>

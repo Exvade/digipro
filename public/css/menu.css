@@ -215,6 +215,12 @@ body {
 .master-btn i {
     color: #0ea5e9;
 }
+.documents-btn i {
+    color: #14b8a6;
+}
+.maintenance-btn i {
+    color: #ea580c;
+}
 
 /* Dashboard & Control Accents */
 .dashboard-assy-btn {
@@ -782,6 +788,26 @@ body.dark-mode .report-btn {
     color: #fef3c7;
 }
 
+body.dark-mode .maintenance-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(234, 88, 12, 0.2) 0%,
+        rgba(253, 186, 116, 0.2) 100%
+    ) !important;
+    border-color: rgba(234, 88, 12, 0.3) !important;
+    color: #fed7aa;
+}
+
+body.dark-mode .maintenance-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(234, 88, 12, 0.3) 0%,
+        rgba(253, 186, 116, 0.3) 100%
+    ) !important;
+    box-shadow: 0 8px 20px rgba(234, 88, 12, 0.3);
+    color: #ffedd5;
+}
+
 body.dark-mode .report-btn:hover {
     background: linear-gradient(
         135deg,
@@ -811,6 +837,26 @@ body.dark-mode .logout-btn:hover {
     border-color: rgba(252, 165, 165, 0.4) !important;
     box-shadow: 0 8px 20px rgba(252, 165, 165, 0.3);
     color: #fee2e2;
+}
+
+body.dark-mode .documents-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(20, 184, 166, 0.2) 0%,
+        rgba(45, 212, 191, 0.2) 100%
+    );
+    border-color: rgba(20, 184, 166, 0.3) !important;
+    color: #99f6e4;
+}
+
+body.dark-mode .documents-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(20, 184, 166, 0.3) 0%,
+        rgba(45, 212, 191, 0.3) 100%
+    );
+    box-shadow: 0 8px 20px rgba(20, 184, 166, 0.3);
+    color: #ccfbf1;
 }
 
 /* Footer */

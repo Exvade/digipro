@@ -7,7 +7,7 @@ $isAdmin = $user && in_array($userRole, ['super_admin', 'kabag', 'manager_plant'
 
 // Izin Spesifik
 $canEditPlan = $isAdmin || ($user && $userRole === 'staff');
-$canEditActual = $isAdmin || ($user && in_array($userRole, ['operator', 'staff']));
+$canEditActual = $isAdmin || ($user && $userRole === 'staff');
 @endphp
 
 @push('css')
@@ -26,6 +26,13 @@ $canEditActual = $isAdmin || ($user && in_array($userRole, ['operator', 'staff']
         /* Pastikan thead lebih tinggi dari tbody sticky */
         .table-pm thead th { z-index: 40 !important; }
         .table-pm tbody td.sticky-col { z-index: 25 !important; }
+
+        /* Status Colors */
+        .status-cell { min-height: 25px; transition: all 0.2s; }
+        .status-approved { background-color: #d4edda !important; color: #155724 !important; }
+        .status-rejected { background-color: #f8d7da !important; color: #721c24 !important; }
+        .status-pending { background-color: #fff3cd !important; color: #856404 !important; }
+        .status-none { background-color: transparent; }
     </style>
 @endpush
 
@@ -37,7 +44,7 @@ $canEditActual = $isAdmin || ($user && in_array($userRole, ['operator', 'staff']
     
     <!-- UI WEB: KONTROL FILTER DAN CETAK -->
     <div class="d-flex justify-content-between align-items-center mb-4 mt-4 d-print-none">
-        <h1 class="h3 mb-0 text-white-shadow"><i class="fas fa-calendar-check text-primary"></i> Jadwal Pemeliharaan</h1>
+        <h1 class="h3 mb-0 text-white-shadow"><i class="fas fa-calendar-check text-primary"></i> Jadwal Preventive</h1>
         
         <div class="d-flex align-items-center">
             <form method="GET" action="{{ route('jadwal-pemeliharaan.index') }}" class="d-flex align-items-center gap-3">
@@ -53,8 +60,8 @@ $canEditActual = $isAdmin || ($user && in_array($userRole, ['operator', 'staff']
                 <button type="button" 
                     data-url="{{ route('jadwal-pemeliharaan.print', ['tahun' => $tahun]) }}"
                     onclick="printReport(this.getAttribute('data-url'))" 
-                    class="btn btn-danger fw-bold shadow-sm ms-3">
-                    <i class="fas fa-print me-2"></i> Cetak Laporan
+                    class="btn btn-danger fw-bold shadow-sm ms-3 text-uppercase">
+                    <i class="fas fa-print me-2"></i> Export PDF (Print)
                 </button>
             </form>
         </div>
@@ -158,6 +165,11 @@ $canEditActual = $isAdmin || ($user && in_array($userRole, ['operator', 'staff']
                                     $p = $jadwal ? $jadwal->plan_tipe : '';
                                     $a = $jadwal ? $jadwal->aktual_tanggal : '';
                                     $k = $jadwal ? $jadwal->keterangan : '';
+                                    $jId = $jadwal ? $jadwal->id : '';
+                                    $bukti = $jadwal ? $jadwal->bukti : '';
+                                    $status = $jadwal ? $jadwal->status_aktual : '';
+                                    $approvedBy = $jadwal && $jadwal->approved_by ? ($jadwal->approver->nama ?? 'Unknown') : '';
+                                    $approvedAt = $jadwal && $jadwal->approved_at ? Carbon\Carbon::parse($jadwal->approved_at)->format('d/m/Y H:i') : '';
                                 @endphp
                                 <td class="p-0 border-dark text-center edit-trigger"
                                     data-mesin-id="{{ $mId }}"
@@ -167,8 +179,27 @@ $canEditActual = $isAdmin || ($user && in_array($userRole, ['operator', 'staff']
                                     data-type="actual"
                                     data-plan="{{ $p }}"
                                     data-actual="{{ $a }}"
-                                    data-keterangan="{{ $k }}">
-                                    <span class="fw-bold" style="font-size: 0.5rem;">{{ $a }}</span>
+                                    data-keterangan="{{ $k }}"
+                                    data-id="{{ $jId }}"
+                                    data-bukti="{{ $bukti }}"
+                                    data-status="{{ $status }}"
+                                    data-approved-by="{{ $approvedBy }}"
+                                    data-approved-at="{{ $approvedAt }}">
+                                    
+                                    @php
+                                        $statusClass = '';
+                                        if($status === 'approved') $statusClass = 'status-approved';
+                                        elseif($status === 'rejected') $statusClass = 'status-rejected';
+                                        elseif($status === 'pending') $statusClass = 'status-pending';
+                                        else $statusClass = 'status-none';
+                                    @endphp
+                                    
+                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center status-cell {{ $statusClass }}">
+                                        <span class="fw-bold" style="font-size: 0.5rem;">
+                                            {{ $a }}
+                                            @if($status === 'approved') <i class="fas fa-check-double ms-1"></i> @endif
+                                        </span>
+                                    </div>
                                 </td>
                                 @endfor
                             @endfor
@@ -187,7 +218,11 @@ $canEditActual = $isAdmin || ($user && in_array($userRole, ['operator', 'staff']
 
 @push('scripts')
 <script>
+    window.userRole = "{{ strtolower(auth()->user()->role) }}";
+    window.userDept = "{{ auth()->user()->departemen }}";
     window.urlUpdateJadwal = "{{ route('jadwal-pemeliharaan.update-cell') }}";
+    window.urlApprove = "{{ url('jadwal-pemeliharaan/approve') }}";
+    window.urlReject = "{{ url('jadwal-pemeliharaan/reject') }}";
     
     // Fungsi untuk mencetak file PDF di latar belakang secara aman
     function printReport(url) {
