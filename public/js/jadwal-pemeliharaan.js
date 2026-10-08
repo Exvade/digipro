@@ -96,6 +96,110 @@ $(document).ready(function () {
         $modal.modal("show");
     }
 
+    // 2. Initialize KPI Counters Animation & Interactive Table Filtering
+    initKpiCounters();
+    initKpiFilter();
+
+    function initKpiCounters() {
+        $('.kpi-counter').each(function () {
+            const $this = $(this);
+            const target = parseInt($this.data('target'), 10) || 0;
+            if (target === 0) {
+                $this.text('0');
+                return;
+            }
+
+            const duration = 800;
+            const start = 0;
+            const startTime = performance.now();
+
+            function updateCounter(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                // easeOutQuad easing function
+                const ease = 1 - (1 - progress) * (1 - progress);
+                const currentVal = Math.floor(start + (target - start) * ease);
+
+                $this.text(currentVal);
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    $this.text(target);
+                }
+            }
+
+            requestAnimationFrame(updateCounter);
+        });
+    }
+
+    function initKpiFilter() {
+        $('.kpi-card').on('click', function () {
+            const $card = $(this);
+            const filterType = $card.data('filter');
+
+            // Toggle active card styling
+            $('.kpi-card').removeClass('active border-indigo-500 ring-2 ring-indigo-500/20');
+            $('.kpi-card .kpi-active-indicator').addClass('hidden');
+
+            $card.addClass('active border-indigo-500 ring-2 ring-indigo-500/20');
+            $card.find('.kpi-active-indicator').removeClass('hidden');
+
+            applyKpiFilter(filterType);
+        });
+
+        $('#kpiFilterResetBtn').on('click', function () {
+            $('.kpi-card[data-filter="all"]').trigger('click');
+        });
+    }
+
+    function applyKpiFilter(type) {
+        const $rows = $('tr.machine-row');
+        const uniqueMachines = new Set();
+
+        $rows.each(function () {
+            const $row = $(this);
+            const machineId = $row.data('machine-id');
+            const hasPlan = $row.data('has-plan') === 1 || $row.data('has-plan') === '1';
+            const hasApproved = $row.data('has-approved') === 1 || $row.data('has-approved') === '1';
+            const hasActual = $row.data('has-actual') === 1 || $row.data('has-actual') === '1';
+
+            let isVisible = false;
+            if (type === 'all') {
+                isVisible = true;
+            } else if (type === 'plan') {
+                isVisible = hasPlan;
+            } else if (type === 'approved') {
+                isVisible = hasApproved;
+            } else if (type === 'actual') {
+                isVisible = hasActual;
+            }
+
+            if (isVisible) {
+                $row.show();
+                uniqueMachines.add(machineId);
+            } else {
+                $row.hide();
+            }
+        });
+
+        const matchCount = uniqueMachines.size;
+
+        // Update notification banner
+        if (type === 'all') {
+            $('#kpiFilterBadge').addClass('hidden');
+        } else {
+            const labels = {
+                plan: 'Target Plan (Memiliki Jadwal)',
+                approved: 'Realisasi Approved (Disetujui)',
+                actual: 'Input Aktual (Memiliki Realisasi)'
+            };
+            $('#kpiFilterLabel').text(labels[type] || type);
+            $('#kpiFilterCount').text(matchCount);
+            $('#kpiFilterBadge').removeClass('hidden');
+        }
+    }
+
     window.saveJadwal = function () {
         const $form = $("#formUpdateJadwal");
         const formData = new FormData($form[0]);
@@ -110,7 +214,7 @@ $(document).ready(function () {
             contentType: false,
             success: function (res) {
                 if (res.status === "success") {
-                    location.reload(); // Reload for simplicity with many changes
+                    location.reload();
                 } else {
                     alert(res.message);
                 }

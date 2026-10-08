@@ -1,13 +1,17 @@
 /**
- * Admin Documents Page JavaScript
- * Handles file input labels and form validation
+ * Admin Documents Page JavaScript - Modernized for DIGIPRO Tailwind & DataTables
  */
 
 $(document).ready(function() {
     // Update custom file input label when file is selected
-    $('.custom-file-input').on('change', function() {
+    $(document).on('change', '.custom-file-input', function() {
         var fileName = $(this).val().split('\\').pop();
-        $(this).siblings('.custom-file-label').addClass('selected').html(fileName || 'Pilih file...');
+        var $label = $(this).siblings('.custom-file-label');
+        if (fileName) {
+            $label.addClass('text-slate-800 dark:text-slate-200 font-semibold').html('<i class="fas fa-file-check text-emerald-500 mr-1.5"></i>' + fileName);
+        } else {
+            $label.removeClass('text-slate-800 dark:text-slate-200 font-semibold').html('Pilih file...');
+        }
     });
 
     // Disable form submission for maintenance/inactive machines
@@ -17,63 +21,225 @@ $(document).ready(function() {
         
         if (isDisabled) {
             e.preventDefault();
-            // Check if SweetAlert is available
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Upload Dibatalkan',
-                    text: 'Mesin dengan status Maintenance atau Tidak Aktif tidak dapat mengupload dokumen.',
-                    confirmButtonText: 'OK'
+                    text: 'Mesin dengan status Breakdown / Stand By / Off tidak dapat mengupload dokumen. Upload hanya diizinkan saat status RUNNING.',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'rounded-xl font-bold text-xs px-4 py-2.5'
+                    }
                 });
             } else {
-                alert('Mesin dengan status Maintenance atau Tidak Aktif tidak dapat mengupload dokumen.');
+                alert('Upload hanya diizinkan saat mesin berstatus RUNNING.');
             }
             return false;
         }
     });
 
-    // Show tooltip for disabled status
-    $('.machine-disabled').each(function() {
-        var status = $(this).find('.status-badge').text().trim().toLowerCase();
-        if (status === 'maintenance' || status === 'tidak aktif' || status === 'offline') {
-            $(this).attr('title', 'Mesin ini tidak dapat mengupload dokumen karena status ' + status);
-        }
-    });
-
-    // Konfigurasi DataTable
+    // Konfigurasi DataTable Modern
     var dataTableConfig = {
-        "language": {
-            "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json"
+        language: {
+            "emptyTable": "Tidak ada data dokumen yang tersedia",
+            "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            "infoEmpty": "Menampilkan 0 data",
+            "infoFiltered": "(disaring dari _MAX_ total data)",
+            "lengthMenu": "Tampilkan _MENU_ data",
+            "loadingRecords": "Memuat data...",
+            "processing": "Sedang memproses...",
+            "search": "Cari:",
+            "searchPlaceholder": "Cari nama mesin/meja...",
+            "zeroRecords": "Tidak ditemukan data yang sesuai",
+            "paginate": {
+                "first": '<i class="fas fa-angle-double-left text-xs"></i>',
+                "last": '<i class="fas fa-angle-double-right text-xs"></i>',
+                "next": '<i class="fas fa-angle-right text-xs"></i>',
+                "previous": '<i class="fas fa-angle-left text-xs"></i>'
+            }
         },
-        "paging": true, // Aktifkan pagination
-        "pageLength": 10, // Tampilkan 10 data per halaman
-        "lengthChange": false, // Sembunyikan dropdown "Show entries"
-        "info": true, // Tampilkan info counter
-        "ordering": false, // Nonaktifkan semua sorting
-        "searching": true, // Aktifkan search box
-        "responsive": true,
-        "autoWidth": false,
-        "dom": '<"row"<"col-sm-12"f>>' + // Search box di atas
-               '<"row"<"col-sm-12"tr>>' + // Table
-               '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>', // Info + Pagination di bawah
-        "drawCallback": function() {
-            // Re-initialize custom file input after table redraw
-            $('.custom-file-input').on('change', function() {
+        paging: true,
+        pagingType: 'full_numbers',
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+        lengthChange: true,
+        info: true,
+        ordering: false,
+        searching: true,
+        responsive: false,
+        autoWidth: false,
+        dom: "<'flex flex-col sm:flex-row items-center justify-between gap-3 mb-4'<'w-full sm:w-auto'l><'w-full sm:w-auto'f>>" +
+             "<'overflow-x-auto custom-scrollbar'tr>" +
+             "<'flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-3 border-t border-slate-100 dark:border-slate-800'<'text-xs font-medium text-slate-500 dark:text-slate-400'i><'flex items-center gap-1 overflow-x-auto max-w-full custom-scrollbar'p>>",
+        drawCallback: function() {
+            // Re-bind file inputs after page change
+            $('.custom-file-input').off('change').on('change', function() {
                 var fileName = $(this).val().split('\\').pop();
-                $(this).next('.custom-file-label').html(fileName);
+                var $label = $(this).siblings('.custom-file-label');
+                if (fileName) {
+                    $label.addClass('text-slate-800 dark:text-slate-200 font-semibold').html('<i class="fas fa-file-check text-emerald-500 mr-1.5"></i>' + fileName);
+                } else {
+                    $label.removeClass('text-slate-800 dark:text-slate-200 font-semibold').html('Pilih file...');
+                }
             });
         }
     };
 
     // Initialize DataTable untuk Mesin
-    var mesinTable = $('#mesin-table').DataTable(dataTableConfig);
+    var mesinDt = null;
+    if ($('#mesin-table').length) {
+        if ($.fn.dataTable.isDataTable('#mesin-table')) {
+            $('#mesin-table').DataTable().destroy();
+        }
+        mesinDt = $('#mesin-table').DataTable(dataTableConfig);
+    }
 
     // Initialize DataTable untuk Meja
-    var mejaTable = $('#meja-table').DataTable(dataTableConfig);
+    var mejaDt = null;
+    if ($('#meja-table').length) {
+        if ($.fn.dataTable.isDataTable('#meja-table')) {
+            $('#meja-table').DataTable().destroy();
+        }
+        mejaDt = $('#meja-table').DataTable(dataTableConfig);
+    }
+
+    // ==========================================================================
+    // KPI Cards: Counter Animation & Interactive Table Filtering
+    // ==========================================================================
+    initKpiCounters();
+    initKpiCardFilters();
+
+    function initKpiCounters() {
+        $('.kpi-counter').each(function () {
+            var $this = $(this);
+            var target = parseInt($this.data('target'), 10) || 0;
+            if (target === 0) {
+                $this.text('0');
+                return;
+            }
+
+            var duration = 750;
+            var start = 0;
+            var startTime = performance.now();
+
+            function updateCounter(currentTime) {
+                var elapsed = currentTime - startTime;
+                var progress = Math.min(elapsed / duration, 1);
+                var ease = 1 - (1 - progress) * (1 - progress); // easeOutQuad
+                var currentVal = Math.floor(start + (target - start) * ease);
+
+                $this.text(currentVal.toLocaleString());
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    $this.text(target.toLocaleString());
+                }
+            }
+
+            requestAnimationFrame(updateCounter);
+        });
+    }
+
+    function initKpiCardFilters() {
+        var activeCustomFilter = null;
+
+        function setCustomFilter(fn) {
+            clearCustomFilter();
+            activeCustomFilter = fn;
+            $.fn.dataTable.ext.search.push(activeCustomFilter);
+        }
+
+        function clearCustomFilter() {
+            if (activeCustomFilter) {
+                var idx = $.fn.dataTable.ext.search.indexOf(activeCustomFilter);
+                if (idx !== -1) {
+                    $.fn.dataTable.ext.search.splice(idx, 1);
+                }
+                activeCustomFilter = null;
+            }
+        }
+
+        $('.kpi-card').on('click', function() {
+            var $card = $(this);
+            var filter = $card.data('filter');
+            var isAlreadyActive = $card.hasClass('active');
+
+            // Reset active state across all cards
+            $('.kpi-card').removeClass('active ring-2 ring-indigo-500/20');
+            $('.kpi-card .kpi-active-indicator').addClass('hidden');
+
+            if (isAlreadyActive && filter !== 'all-mesin') {
+                // If clicking active filter card again, reset back to all machines
+                $('.kpi-card[data-filter="all-mesin"]').addClass('active ring-2 ring-indigo-500/20');
+                $('.kpi-card[data-filter="all-mesin"] .kpi-active-indicator').removeClass('hidden');
+                clearCustomFilter();
+                $('a[href="#tab-mesin"]').tab('show');
+                if (mesinDt) mesinDt.draw();
+                return;
+            }
+
+            // Set current card active
+            $card.addClass('active ring-2 ring-indigo-500/20');
+            $card.find('.kpi-active-indicator').removeClass('hidden');
+
+            if (filter === 'all-mesin') {
+                $('a[href="#tab-mesin"]').tab('show');
+                clearCustomFilter();
+                if (mesinDt) mesinDt.draw();
+            } else if (filter === 'running') {
+                $('a[href="#tab-mesin"]').tab('show');
+                if (mesinDt) {
+                    setCustomFilter(function(settings, data, dataIndex) {
+                        if (settings.nTable.id !== 'mesin-table') return true;
+                        var row = mesinDt.row(dataIndex).node();
+                        return $(row).attr('data-status') === 'running';
+                    });
+                    mesinDt.draw();
+                }
+            } else if (filter === 'standby-breakdown') {
+                $('a[href="#tab-mesin"]').tab('show');
+                if (mesinDt) {
+                    setCustomFilter(function(settings, data, dataIndex) {
+                        if (settings.nTable.id !== 'mesin-table') return true;
+                        var row = mesinDt.row(dataIndex).node();
+                        return $(row).attr('data-status') !== 'running';
+                    });
+                    mesinDt.draw();
+                }
+            } else if (filter === 'all-meja') {
+                $('a[href="#tab-meja"]').tab('show');
+                clearCustomFilter();
+                if (mejaDt) mejaDt.draw();
+            }
+        });
+
+        // Tab switch listeners to sync active KPI card
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+            var target = $(e.target).attr('href');
+            if (target === '#tab-meja') {
+                if (!$('.kpi-card[data-filter="all-meja"]').hasClass('active')) {
+                    $('.kpi-card').removeClass('active ring-2 ring-indigo-500/20');
+                    $('.kpi-card .kpi-active-indicator').addClass('hidden');
+                    $('.kpi-card[data-filter="all-meja"]').addClass('active ring-2 ring-indigo-500/20');
+                    $('.kpi-card[data-filter="all-meja"] .kpi-active-indicator').removeClass('hidden');
+                }
+            } else if (target === '#tab-mesin') {
+                if ($('.kpi-card[data-filter="all-meja"]').hasClass('active')) {
+                    $('.kpi-card').removeClass('active ring-2 ring-indigo-500/20');
+                    $('.kpi-card .kpi-active-indicator').addClass('hidden');
+                    $('.kpi-card[data-filter="all-mesin"]').addClass('active ring-2 ring-indigo-500/20');
+                    $('.kpi-card[data-filter="all-mesin"] .kpi-active-indicator').removeClass('hidden');
+                    clearCustomFilter();
+                    if (mesinDt) mesinDt.draw();
+                }
+            }
+        });
+    }
 
     // Handle tab switch to redraw tables
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust().responsive.recalc();
+    $('a[data-toggle="tab"], button[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
     });
 
     // Handle document view button click
@@ -99,7 +265,7 @@ $(document).ready(function() {
         }
         
         // Set modal content
-        $('#documentViewerModal .modal-title').html('<i class="fas fa-file-pdf mr-2"></i>' + docName);
+        $('#documentViewerModal .modal-title-text').text(docName);
         $('#documentViewerModal iframe').attr('src', docUrl);
         $('#documentViewerModal .btn-download-doc').attr('href', docUrl).attr('download', docName);
         

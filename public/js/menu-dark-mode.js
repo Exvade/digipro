@@ -1,115 +1,81 @@
 // =========================================
-// Dark Mode Toggle for Menu Page
+// Dark Mode Toggle for Menu Page (Tailwind & Standard Compatible)
 // =========================================
 (function() {
     'use strict';
 
-    // Wait for DOM to be ready
-    $(document).ready(function() {
-        initDarkModeToggle();
-    });
+    function isDarkActive() {
+        return localStorage.getItem('darkMode') === 'enabled';
+    }
 
-    function initDarkModeToggle() {
-        const $darkModeToggle = $('#darkModeToggle');
-        const $body = $('body');
+    function applyTheme(isDark) {
+        const html = document.documentElement;
+        const body = document.body;
+        const toggle = document.getElementById('darkModeToggle');
 
-        // Check if toggle exists
-        if ($darkModeToggle.length === 0) {
-            console.warn('Dark mode toggle not found');
-            return;
-        }
-
-        // Check for saved dark mode preference (unified key)
-        const isDarkMode = localStorage.getItem('darkMode') === 'enabled';
-
-        // Apply saved preference on page load
-        if (isDarkMode) {
-            enableDarkMode();
-        }
-
-        // Toggle dark mode on switch change
-        $darkModeToggle.on('change', function() {
-            if ($(this).is(':checked')) {
-                enableDarkMode();
-            } else {
-                disableDarkMode();
+        if (isDark) {
+            html.classList.add('dark', 'dark-mode');
+            if (body) {
+                body.classList.add('dark-mode');
+                body.classList.remove('light-mode');
             }
-        });
-
-        // Enable dark mode function
-        function enableDarkMode() {
-            $body.addClass('dark-mode');
-            $darkModeToggle.prop('checked', true);
+            if (toggle) toggle.checked = true;
             localStorage.setItem('darkMode', 'enabled');
-            
-            // Optional: Add smooth transition effect
-            $body.css('transition', 'background-color 0.3s ease, color 0.3s ease');
-            
-            // Log for debugging
-            console.log('Dark mode enabled');
-        }
-
-        // Disable dark mode function
-        function disableDarkMode() {
-            $body.removeClass('dark-mode');
-            $darkModeToggle.prop('checked', false);
+        } else {
+            html.classList.remove('dark', 'dark-mode');
+            if (body) {
+                body.classList.remove('dark-mode');
+                body.classList.add('light-mode');
+            }
+            if (toggle) toggle.checked = false;
             localStorage.setItem('darkMode', 'disabled');
-            
-            // Optional: Add smooth transition effect
-            $body.css('transition', 'background-color 0.3s ease, color 0.3s ease');
-            
-            // Log for debugging
-            console.log('Dark mode disabled');
-        }
-
-        // Optional: Add keyboard shortcut (Ctrl/Cmd + D)
-        $(document).on('keydown', function(e) {
-            // Check if Ctrl (Windows/Linux) or Cmd (Mac) + D is pressed
-            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
-                e.preventDefault();
-                $darkModeToggle.prop('checked', !$darkModeToggle.prop('checked')).trigger('change');
-            }
-        });
-
-        // Optional: Detect system preference
-        if (window.matchMedia) {
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-            
-            // Only apply system preference if user hasn't set a preference yet
-            if (localStorage.getItem('darkMode') === null) {
-                if (systemPrefersDark.matches) {
-                    enableDarkMode();
-                }
-            }
-
-            // Listen for system preference changes
-            systemPrefersDark.addEventListener('change', function(e) {
-                // Only auto-switch if user hasn't manually set preference
-                if (localStorage.getItem('darkMode') === null) {
-                    if (e.matches) {
-                        enableDarkMode();
-                    } else {
-                        disableDarkMode();
-                    }
-                }
-            });
         }
     }
 
-    // Optional: Expose functions globally if needed
-    window.menuDarkMode = {
-        enable: function() {
-            $('#darkModeToggle').prop('checked', true).trigger('change');
-        },
-        disable: function() {
-            $('#darkModeToggle').prop('checked', false).trigger('change');
-        },
-        toggle: function() {
-            $('#darkModeToggle').prop('checked', !$('#darkModeToggle').prop('checked')).trigger('change');
-        },
-        isEnabled: function() {
-            return localStorage.getItem('darkMode') === 'enabled';
-        }
-    };
+    // Run as early as possible
+    applyTheme(isDarkActive());
 
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggle = document.getElementById('darkModeToggle');
+        const toggleLabel = document.querySelector('.toggle-switch');
+        const toggleBtn = document.getElementById('menuThemeToggleBtn');
+
+        // Apply state again once DOM is ready
+        applyTheme(isDarkActive());
+
+        if (toggle) {
+            toggle.addEventListener('change', function() {
+                applyTheme(this.checked);
+            });
+        }
+
+        // Direct click fallback on toggle switch label
+        if (toggleLabel && toggle) {
+            toggleLabel.addEventListener('click', function(e) {
+                // If the target wasn't the checkbox directly, toggle it
+                if (e.target !== toggle) {
+                    e.preventDefault();
+                    const nextState = !isDarkActive();
+                    applyTheme(nextState);
+                }
+            });
+        }
+
+        // Button toggle fallback
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                applyTheme(!isDarkActive());
+            });
+        }
+
+        // Keyboard shortcut: Ctrl+D or Cmd+D
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+                e.preventDefault();
+                applyTheme(!isDarkActive());
+            }
+        });
+    });
 })();
+

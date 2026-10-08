@@ -10,6 +10,18 @@ $(document).ready(function() {
         "order": [[1, "desc"]]
     });
 
+    // Set active tab based on URL filter parameter
+    const currentUrlParams = new URLSearchParams(window.location.search);
+    const filterParam = currentUrlParams.get('filter') || 'all';
+    $('#bagianTabsApprovalChecksheet .nav-link').removeClass('active');
+    if (filterParam === 'inject') {
+        $('#inject-tab-approval-cs').addClass('active');
+    } else if (filterParam === 'assy') {
+        $('#assy-tab-approval-cs').addClass('active');
+    } else {
+        $('#all-tab-approval-cs').addClass('active');
+    }
+
     // =========================================
     // Tab Filter Bagian (All, Inject, Assy) - Approval Checksheet Page
     // =========================================

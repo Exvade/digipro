@@ -18,54 +18,44 @@ $(document).ready(function() {
     const isMobile = window.innerWidth < 768;
     const isTablet = window.innerWidth >= 768 && window.innerWidth < 992;
     
-    // Configure DataTables based on screen size
+    // Configure DataTables
     const dataTableConfig = {
-        responsive: {
-            details: {
-                type: 'none', // Menghapus button expand/collapse
-                display: $.fn.dataTable.Responsive.display.modal({
-                    header: function(row) {
-                        var data = row.data();
-                        return 'Detail: ' + data[2]; // Nama User
-                    }
-                }),
-                renderer: $.fn.dataTable.Responsive.renderer.tableAll({
-                    tableClass: 'table table-sm table-bordered'
-                })
+        responsive: false, // Horizontal scrolling on mobile inside table-responsive container
+        autoWidth: false,
+        pageLength: isMobile ? 10 : 10,
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Semua"]],
+        order: [[0, 'asc']],
+        language: {
+            "emptyTable": "Tidak ada data user yang tersedia",
+            "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ user",
+            "infoEmpty": "Menampilkan 0 user",
+            "infoFiltered": "(disaring dari _MAX_ total user)",
+            "lengthMenu": "Tampilkan _MENU_ user",
+            "loadingRecords": "Memuat data...",
+            "processing": "Sedang memproses...",
+            "search": "Cari:",
+            "searchPlaceholder": "Cari user, NIK, nama...",
+            "zeroRecords": "Tidak ditemukan user yang sesuai",
+            "paginate": {
+                "first": '<i class="fas fa-angle-double-left text-xs"></i>',
+                "last": '<i class="fas fa-angle-double-right text-xs"></i>',
+                "next": '<i class="fas fa-angle-right text-xs"></i>',
+                "previous": '<i class="fas fa-angle-left text-xs"></i>'
             }
         },
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
-        },
-        pageLength: isMobile ? 5 : (isTablet ? 10 : 10),
-        lengthMenu: isMobile ? [[5, 10, 25], [5, 10, 25]] : [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Semua"]],
-        order: [[0, 'asc']],
+        dom: "<'flex flex-col sm:flex-row items-center justify-between gap-3 mb-4'<'w-full sm:w-auto'l><'w-full sm:w-auto'f>>" +
+             "<'overflow-x-auto custom-scrollbar'tr>" +
+             "<'flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-3 border-t border-slate-100 dark:border-slate-800'<'text-xs font-medium text-slate-500 dark:text-slate-400'i><'flex items-center gap-1'p>>",
         columnDefs: [
             {
                 targets: -1, // Aksi column
                 orderable: false,
                 searchable: false,
-                responsivePriority: 1,
                 className: 'text-center'
             },
             {
                 targets: [0], // No column
-                responsivePriority: 2,
                 className: 'text-center'
-            },
-            {
-                targets: [2], // Nama User column
-                responsivePriority: 3
-            },
-            {
-                targets: [3], // Email column
-                responsivePriority: 4,
-                visible: !isMobile
-            },
-            {
-                targets: [5, 6], // Bagian and Grup columns
-                responsivePriority: 5,
-                visible: !isMobile && !isTablet
             }
         ],
         initComplete: function() {
@@ -73,18 +63,6 @@ $(document).ready(function() {
             $('[data-toggle="tooltip"]').tooltip();
         }
     };
-    
-    // Configure DOM based on screen size
-    if (!isMobile) {
-        dataTableConfig.dom = '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-                             '<"row"<"col-sm-12"tr>>' +
-                             '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>';
-    } else {
-        // Simplified DOM for mobile
-        dataTableConfig.dom = '<"row"<"col-12"f>>' +
-                             '<"row"<"col-12"tr>>' +
-                             '<"row"<"col-12"i><"col-12"p>>';
-    }
     
     // Initialize DataTable
     const userTable = $('#userTable').DataTable(dataTableConfig);
@@ -94,9 +72,95 @@ $(document).ready(function() {
     $(window).on('resize', function() {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(function() {
-            userTable.columns.adjust().responsive.recalc();
+            userTable.columns.adjust();
         }, 250);
     });
+
+    // ==========================================================================
+    // KPI Cards: Counter Animation & Interactive Table Filtering
+    // ==========================================================================
+    initKpiCounters();
+    initKpiCardFilters(userTable);
+
+    function initKpiCounters() {
+        $('.kpi-counter').each(function () {
+            var $this = $(this);
+            var isDecimal = $this.data('decimal') === true || $this.data('decimal') === 'true';
+            var target = parseFloat($this.data('target')) || 0;
+            if (target === 0) {
+                $this.text(isDecimal ? '0.00' : '0');
+                return;
+            }
+
+            var duration = 750;
+            var start = 0;
+            var startTime = performance.now();
+
+            function updateCounter(currentTime) {
+                var elapsed = currentTime - startTime;
+                var progress = Math.min(elapsed / duration, 1);
+                var ease = 1 - (1 - progress) * (1 - progress); // easeOutQuad
+                var currentVal = start + (target - start) * ease;
+
+                if (isDecimal) {
+                    $this.text(currentVal.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                } else {
+                    $this.text(Math.floor(currentVal).toLocaleString());
+                }
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    if (isDecimal) {
+                        $this.text(target.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                    } else {
+                        $this.text(target.toLocaleString());
+                    }
+                }
+            }
+
+            requestAnimationFrame(updateCounter);
+        });
+    }
+
+    function initKpiCardFilters(table) {
+        $('.kpi-card').on('click', function() {
+            var $card = $(this);
+            var filter = $card.data('filter');
+            var isAlreadyActive = $card.hasClass('active');
+
+            // Reset active states
+            $('.kpi-card').removeClass('active ring-2 ring-indigo-500/20 ring-emerald-500/20 ring-amber-500/20 ring-sky-500/20');
+            $('.kpi-card .kpi-active-indicator').addClass('hidden');
+
+            if (isAlreadyActive && filter !== 'all') {
+                // Deselect: return to default 'all'
+                $('.kpi-card[data-filter="all"]').addClass('active ring-2 ring-indigo-500/20');
+                $('.kpi-card[data-filter="all"] .kpi-active-indicator').removeClass('hidden');
+                table.column(7).search('').order([[0, 'asc']]).draw();
+                return;
+            }
+
+            var ringClass = 'ring-2 ring-indigo-500/20';
+            if (filter === 'with-group') ringClass = 'ring-2 ring-emerald-500/20';
+            else if (filter === 'no-group') ringClass = 'ring-2 ring-amber-500/20';
+            else if (filter === 'groups') ringClass = 'ring-2 ring-sky-500/20';
+
+            $card.addClass('active ' + ringClass);
+            $card.find('.kpi-active-indicator').removeClass('hidden');
+
+            if (filter === 'all') {
+                table.column(7).search('').order([[0, 'asc']]).draw();
+            } else if (filter === 'with-group') {
+                table.column(7).search('with-group').order([[0, 'asc']]).draw();
+            } else if (filter === 'no-group') {
+                table.column(7).search('no-group').order([[0, 'asc']]).draw();
+            } else if (filter === 'groups') {
+                // Filter to users with group and sort by group name
+                table.column(7).search('with-group').order([[7, 'asc']]).draw();
+            }
+        });
+    }
 });
 
 // =========================================
@@ -165,6 +229,9 @@ function openCreateModal() {
             
             // Initialize form elements after loading
             initializeFormElements();
+            if (typeof initUserCreateForm === 'function') {
+                initUserCreateForm();
+            }
         },
         error: function(xhr, status, error) {
             console.error('Error loading form:', error);
@@ -454,7 +521,7 @@ function initUserCreateForm() {
     console.log('Initializing user create form...');
     
     // Form submission handler
-    form.on('submit', handleFormSubmission);
+    form.off('submit').on('submit', handleFormSubmission);
     
     // Clear validation errors when input changes
     form.find('input, select').on('input change', clearValidationErrors);

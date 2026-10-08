@@ -23,22 +23,30 @@ $(document).ready(function () {
     // DataTable Initialization
     // =========================================
     // Initialize DataTable untuk jadwal kerja table (index page)
-    if ($('#jadwalKerjaTable').length > 0) {
+    if ($('#jadwalKerjaTable').length > 0 && $('#jadwalKerjaTable tbody tr td[colspan]').length === 0) {
         // Destroy existing DataTable instance if it exists
         if ($.fn.dataTable.isDataTable('#jadwalKerjaTable')) {
             $('#jadwalKerjaTable').DataTable().destroy();
         }
         
-        // Initialize DataTable
+        // Initialize DataTable with clean dom (no empty controls row)
         $('#jadwalKerjaTable').DataTable({
+            "dom": 'rt',
             "paging": false,
             "lengthChange": false,
-            "searching": true,
+            "searching": false,
             "ordering": true,
             "info": false,
             "autoWidth": false,
             "destroy": true,
             "order": [],
+            "columnDefs": [
+                {
+                    "targets": [0, -1], // No & Aksi
+                    "orderable": false,
+                    "searchable": false
+                }
+            ],
             "language": {
                 "emptyTable": "Tidak ada jadwal kerja",
                 "zeroRecords": "Tidak ada data yang sesuai dengan filter"

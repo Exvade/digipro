@@ -21,6 +21,16 @@ const checklistItems = [
     'Ketersediaan limit sampel produk'
 ];
 
+function renderEmptyTableState(colspan, iconClass, title) {
+    return `<tr><td colspan="${colspan}" class="text-center py-6 border-0">
+        <div class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-400 flex items-center justify-center mx-auto mb-2 text-sm">
+            <i class="fas ${iconClass}"></i>
+        </div>
+        <div class="text-xs font-bold text-slate-600 dark:text-slate-300">${title}</div>
+        <div class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Tidak ada data untuk periode ini</div>
+    </td></tr>`;
+}
+
 // Data grouped by shift
 let pendingByShift = {
     shift_1: [],
@@ -92,9 +102,7 @@ $(document).ready(function() {
                     ...dataTableConfig,
                     drawCallback: function(settings) {
                         if (this.api().data().length === 0) {
-                        const emptyRow = '<tr><td colspan="14" class="text-center text-muted py-4">' +
-                            '<i class="fas fa-clock fa-3x mb-3 d-block"></i>' +
-                            '<h5>Tidak ada data pending untuk shift ini</h5></td></tr>';
+                            const emptyRow = renderEmptyTableState(14, 'fa-clock', 'Tidak ada data pending untuk shift ini');
                             $('#pendingTableShift1 tbody').html(emptyRow);
                         }
                     }
@@ -106,9 +114,7 @@ $(document).ready(function() {
                     ...dataTableConfig,
                     drawCallback: function(settings) {
                         if (this.api().data().length === 0) {
-                        const emptyRow = '<tr><td colspan="14" class="text-center text-muted py-4">' +
-                            '<i class="fas fa-clock fa-3x mb-3 d-block"></i>' +
-                            '<h5>Tidak ada data pending untuk shift ini</h5></td></tr>';
+                            const emptyRow = renderEmptyTableState(14, 'fa-clock', 'Tidak ada data pending untuk shift ini');
                             $('#pendingTableShift2 tbody').html(emptyRow);
                         }
                     }
@@ -120,9 +126,7 @@ $(document).ready(function() {
                     ...dataTableConfig,
                     drawCallback: function(settings) {
                         if (this.api().data().length === 0) {
-                        const emptyRow = '<tr><td colspan="14" class="text-center text-muted py-4">' +
-                            '<i class="fas fa-clock fa-3x mb-3 d-block"></i>' +
-                            '<h5>Tidak ada data pending untuk shift ini</h5></td></tr>';
+                            const emptyRow = renderEmptyTableState(14, 'fa-clock', 'Tidak ada data pending untuk shift ini');
                             $('#pendingTableShift3 tbody').html(emptyRow);
                         }
                     }
@@ -136,9 +140,7 @@ $(document).ready(function() {
                     ...dataTableConfig,
                     drawCallback: function(settings) {
                         if (this.api().data().length === 0) {
-                            const emptyRow = '<tr><td colspan="16" class="text-center text-muted py-4">' +
-                                '<i class="fas fa-check-circle fa-3x mb-3 d-block"></i>' +
-                                '<h5>Tidak ada data approved untuk shift ini</h5></td></tr>';
+                            const emptyRow = renderEmptyTableState(16, 'fa-check-circle', 'Tidak ada data approved untuk shift ini');
                             $('#approvedTableShift1 tbody').html(emptyRow);
                         }
                     }
@@ -150,9 +152,7 @@ $(document).ready(function() {
                     ...dataTableConfig,
                     drawCallback: function(settings) {
                         if (this.api().data().length === 0) {
-                            const emptyRow = '<tr><td colspan="16" class="text-center text-muted py-4">' +
-                                '<i class="fas fa-check-circle fa-3x mb-3 d-block"></i>' +
-                                '<h5>Tidak ada data approved untuk shift ini</h5></td></tr>';
+                            const emptyRow = renderEmptyTableState(16, 'fa-check-circle', 'Tidak ada data approved untuk shift ini');
                             $('#approvedTableShift2 tbody').html(emptyRow);
                         }
                     }
@@ -164,9 +164,7 @@ $(document).ready(function() {
                     ...dataTableConfig,
                     drawCallback: function(settings) {
                         if (this.api().data().length === 0) {
-                            const emptyRow = '<tr><td colspan="16" class="text-center text-muted py-4">' +
-                                '<i class="fas fa-check-circle fa-3x mb-3 d-block"></i>' +
-                                '<h5>Tidak ada data approved untuk shift ini</h5></td></tr>';
+                            const emptyRow = renderEmptyTableState(16, 'fa-check-circle', 'Tidak ada data approved untuk shift ini');
                             $('#approvedTableShift3 tbody').html(emptyRow);
                         }
                     }
@@ -178,9 +176,7 @@ $(document).ready(function() {
                 ...dataTableConfig,
                 drawCallback: function(settings) {
                     if (this.api().data().length === 0) {
-                        const emptyRow = '<tr><td colspan="15" class="text-center text-muted py-4">' +
-                            '<i class="fas fa-times-circle fa-3x mb-3 d-block"></i>' +
-                            '<h5>Tidak ada data rejected</h5></td></tr>';
+                        const emptyRow = renderEmptyTableState(15, 'fa-times-circle', 'Tidak ada data rejected');
                         $('#rejectedTable tbody').html(emptyRow);
                     }
                 }
@@ -306,9 +302,7 @@ function loadAllData() {
                                 ...dataTableConfig,
                                 drawCallback: function(settings) {
                                     if (this.api().data().length === 0) {
-                        const emptyRow = '<tr><td colspan="14" class="text-center text-muted py-4">' +
-                            '<i class="fas fa-clock fa-3x mb-3 d-block"></i>' +
-                            '<h5>Tidak ada data pending untuk shift ini</h5></td></tr>';
+                                        const emptyRow = renderEmptyTableState(14, 'fa-clock', 'Tidak ada data pending untuk shift ini');
                                         $('#pendingTableShift1 tbody').html(emptyRow);
                                     }
                                 }
@@ -320,9 +314,7 @@ function loadAllData() {
                                 ...dataTableConfig,
                                 drawCallback: function(settings) {
                                     if (this.api().data().length === 0) {
-                        const emptyRow = '<tr><td colspan="14" class="text-center text-muted py-4">' +
-                            '<i class="fas fa-clock fa-3x mb-3 d-block"></i>' +
-                            '<h5>Tidak ada data pending untuk shift ini</h5></td></tr>';
+                                        const emptyRow = renderEmptyTableState(14, 'fa-clock', 'Tidak ada data pending untuk shift ini');
                                         $('#pendingTableShift2 tbody').html(emptyRow);
                                     }
                                 }
@@ -334,9 +326,7 @@ function loadAllData() {
                                 ...dataTableConfig,
                                 drawCallback: function(settings) {
                                     if (this.api().data().length === 0) {
-                        const emptyRow = '<tr><td colspan="14" class="text-center text-muted py-4">' +
-                            '<i class="fas fa-clock fa-3x mb-3 d-block"></i>' +
-                            '<h5>Tidak ada data pending untuk shift ini</h5></td></tr>';
+                                        const emptyRow = renderEmptyTableState(14, 'fa-clock', 'Tidak ada data pending untuk shift ini');
                                         $('#pendingTableShift3 tbody').html(emptyRow);
                                     }
                                 }
@@ -350,9 +340,7 @@ function loadAllData() {
                                 ...dataTableConfig,
                                 drawCallback: function(settings) {
                                     if (this.api().data().length === 0) {
-                                        const emptyRow = '<tr><td colspan="16" class="text-center text-muted py-4">' +
-                                            '<i class="fas fa-check-circle fa-3x mb-3 d-block"></i>' +
-                                            '<h5>Tidak ada data approved untuk shift ini</h5></td></tr>';
+                                        const emptyRow = renderEmptyTableState(16, 'fa-check-circle', 'Tidak ada data approved untuk shift ini');
                                         $('#approvedTableShift1 tbody').html(emptyRow);
                                     }
                                 }
@@ -364,9 +352,7 @@ function loadAllData() {
                                 ...dataTableConfig,
                                 drawCallback: function(settings) {
                                     if (this.api().data().length === 0) {
-                                        const emptyRow = '<tr><td colspan="16" class="text-center text-muted py-4">' +
-                                            '<i class="fas fa-check-circle fa-3x mb-3 d-block"></i>' +
-                                            '<h5>Tidak ada data approved untuk shift ini</h5></td></tr>';
+                                        const emptyRow = renderEmptyTableState(16, 'fa-check-circle', 'Tidak ada data approved untuk shift ini');
                                         $('#approvedTableShift2 tbody').html(emptyRow);
                                     }
                                 }
@@ -378,9 +364,7 @@ function loadAllData() {
                                 ...dataTableConfig,
                                 drawCallback: function(settings) {
                                     if (this.api().data().length === 0) {
-                                        const emptyRow = '<tr><td colspan="16" class="text-center text-muted py-4">' +
-                                            '<i class="fas fa-check-circle fa-3x mb-3 d-block"></i>' +
-                                            '<h5>Tidak ada data approved untuk shift ini</h5></td></tr>';
+                                        const emptyRow = renderEmptyTableState(16, 'fa-check-circle', 'Tidak ada data approved untuk shift ini');
                                         $('#approvedTableShift3 tbody').html(emptyRow);
                                     }
                                 }
@@ -392,9 +376,7 @@ function loadAllData() {
                             ...dataTableConfig,
                             drawCallback: function(settings) {
                                 if (this.api().data().length === 0) {
-                                    const emptyRow = '<tr><td colspan="15" class="text-center text-muted py-4">' +
-                                        '<i class="fas fa-times-circle fa-3x mb-3 d-block"></i>' +
-                                        '<h5>Tidak ada data rejected</h5></td></tr>';
+                                    const emptyRow = renderEmptyTableState(15, 'fa-times-circle', 'Tidak ada data rejected');
                                     $('#rejectedTable tbody').html(emptyRow);
                                 }
                             }
@@ -503,14 +485,20 @@ function updateCounts() {
     $('#rejectedCount').text(visibleRejectedData.length);
     
     // Update pending shift counts
-    $('#pendingShift1Count').text(pendingByShift.shift_1.length);
-    $('#pendingShift2Count').text(pendingByShift.shift_2.length);
-    $('#pendingShift3Count').text(pendingByShift.shift_3.length);
+    const p1 = pendingByShift.shift_1.length;
+    const p2 = pendingByShift.shift_2.length;
+    const p3 = pendingByShift.shift_3.length;
+    $('#pendingShift1Count, #filterPendingShift1Count').text(p1);
+    $('#pendingShift2Count, #filterPendingShift2Count').text(p2);
+    $('#pendingShift3Count, #filterPendingShift3Count').text(p3);
     
     // Update approved shift counts
-    $('#approvedShift1Count').text(approvedByShift.shift_1.length);
-    $('#approvedShift2Count').text(approvedByShift.shift_2.length);
-    $('#approvedShift3Count').text(approvedByShift.shift_3.length);
+    const a1 = approvedByShift.shift_1.length;
+    const a2 = approvedByShift.shift_2.length;
+    const a3 = approvedByShift.shift_3.length;
+    $('#approvedShift1Count, #filterApprovedShift1Count').text(a1);
+    $('#approvedShift2Count, #filterApprovedShift2Count').text(a2);
+    $('#approvedShift3Count, #filterApprovedShift3Count').text(a3);
 }
 
 function renderPendingTable() {
@@ -606,9 +594,7 @@ function renderPendingTableByShift(shiftKey, tableId) {
             drawCallback: function(settings) {
                 // Show empty state if no data
                 if (this.api().data().length === 0) {
-                    const emptyRow = '<tr><td colspan="14" class="text-center text-muted py-4">' +
-                        '<i class="fas fa-clock fa-3x mb-3 d-block"></i>' +
-                        '<h5>Tidak ada data pending untuk shift ini</h5></td></tr>';
+                    const emptyRow = renderEmptyTableState(14, 'fa-clock', 'Tidak ada data pending untuk shift ini');
                     $('#' + tableId + ' tbody').html(emptyRow);
                 }
             }
@@ -710,9 +696,7 @@ function renderApprovedTableByShift(shiftKey, tableId) {
             drawCallback: function(settings) {
                 // Show empty state if no data
                 if (this.api().data().length === 0) {
-                    const emptyRow = '<tr><td colspan="16" class="text-center text-muted py-4">' +
-                        '<i class="fas fa-check-circle fa-3x mb-3 d-block"></i>' +
-                        '<h5>Tidak ada data approved untuk shift ini</h5></td></tr>';
+                    const emptyRow = renderEmptyTableState(16, 'fa-check-circle', 'Tidak ada data approved untuk shift ini');
                     $('#' + tableId + ' tbody').html(emptyRow);
                 }
             }
@@ -794,9 +778,7 @@ function renderRejectedTable() {
             drawCallback: function(settings) {
                 // Show empty state if no data
                 if (this.api().data().length === 0) {
-                                    const emptyRow = '<tr><td colspan="15" class="text-center text-muted py-4">' +
-                                        '<i class="fas fa-times-circle fa-3x mb-3 d-block"></i>' +
-                                        '<h5>Tidak ada data rejected</h5></td></tr>';
+                    const emptyRow = renderEmptyTableState(15, 'fa-times-circle', 'Tidak ada data rejected');
                     $('#rejectedTable tbody').html(emptyRow);
                 }
             }

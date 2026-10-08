@@ -1,49 +1,43 @@
 @extends('input-produksi.app')
 
-@section('content')
-<div class="container-fluid py-2 px-3">
-    {{-- Modern Page Header --}}
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="premium-header p-4 d-flex justify-content-between align-items-center"
-                style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
-                <div class="d-flex align-items-center">
-                    <div class="header-icon-box mr-4 d-flex align-items-center justify-content-center"
-                        style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 18px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
-                        <i class="fas fa-clipboard-list text-primary fa-2x"></i>
-                    </div>
-                    <div>
-                        <h1 class="h3 mb-1 font-weight-bold text-white" style="letter-spacing: -0.5px;">Input Hasil Produksi</h1>
-                        <p class="mb-0 text-white-50" style="font-size: 0.95rem;">
-                            @if (in_array(Auth::user()->role, ['super_admin', 'kabag', 'foreman', 'leader']))
-                            @php
-                            $roleDisplay = [
-                            'super_admin' => 'Super Admin',
-                            'kabag' => 'Kabag',
-                            'foreman' => 'Foreman',
-                            'leader' => 'Leader'
-                            ];
-                            @endphp
-                            <span class="badge badge-primary px-3 py-2" style="border-radius: 8px; font-weight: 500;">
-                                <i class="fas fa-user-shield mr-2"></i>Monitoring Aspect: {{ $roleDisplay[Auth::user()->role] ?? Auth::user()->role }}
-                            </span>
-                            @else
-                            <span class="d-flex align-items-center">
-                                <span class="pulse-indicator mr-2"></span>
-                                Operator Console &bull; Real-time Input
-                            </span>
-                            @endif
-                        </p>
-                    </div>
-                </div>
-                <div class="header-meta d-none d-md-block text-right">
-                    <div class="text-white font-weight-bold h5 mb-0" id="current-time-display">--:--:--</div>
-                    <div class="text-white-50 small text-uppercase" style="letter-spacing: 2px;">{{ date('d F Y') }}</div>
-                </div>
-            </div>
+@section('title', 'Input Hasil Produksi - Digital Production System')
+
+@section('content-header')
+<div class="flex items-center justify-between gap-4 py-1">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center text-lg shadow-md shadow-indigo-500/20 flex-shrink-0">
+            <i class="fas fa-clipboard-list"></i>
+        </div>
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <h1 class="text-xl font-black text-slate-900 dark:text-white tracking-tight leading-none mb-0">
+                Input Hasil Produksi
+            </h1>
+            @if (in_array(Auth::user()->role, ['super_admin', 'kabag', 'foreman', 'leader']))
+            @php
+            $roleDisplay = [
+                'super_admin' => 'Super Admin',
+                'kabag' => 'Kabag',
+                'foreman' => 'Foreman',
+                'leader' => 'Leader'
+            ];
+            @endphp
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/80 inline-flex items-center gap-1.5">
+                <i class="fas fa-user-shield text-[10px]"></i>
+                <span>{{ $roleDisplay[Auth::user()->role] ?? Auth::user()->role }}</span>
+            </span>
+            @else
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/70 text-emerald-600 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/80 inline-flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Operator</span>
+            </span>
+            @endif
         </div>
     </div>
+</div>
+@endsection
 
+@section('content')
+<div class="space-y-5">
     @if (in_array(Auth::user()->role, ['super_admin', 'kabag', 'foreman', 'leader']))
     @include('input-produksi.admin')
     @else
@@ -53,7 +47,7 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/input-produksi.css') }}">
+<link rel="stylesheet" href="{{ asset('css/input-produksi.css') }}?v={{ filemtime(public_path('css/input-produksi.css')) }}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 @if (in_array(Auth::user()->role, ['super_admin', 'kabag', 'foreman', 'leader']))
 {{-- DataTables CSS --}}
@@ -61,7 +55,7 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css">
 {{-- Approval Leader CSS --}}
-<link rel="stylesheet" href="{{ asset('css/approval-leader.css') }}">
+<link rel="stylesheet" href="{{ asset('css/approval-leader.css') }}?v={{ filemtime(public_path('css/approval-leader.css')) }}">
 @endif
 @endpush
 
@@ -92,21 +86,9 @@
 </script>
 
 {{-- Use Approval Leader JS for better UI --}}
-<script src="{{ asset('js/approval-leader.js') }}"></script>
+<script src="{{ asset('js/approval-leader.js') }}?v={{ filemtime(public_path('js/approval-leader.js')) }}"></script>
 @else
-<script src="{{ asset('js/input-produksi.js') }}"></script>
+<script src="{{ asset('js/input-produksi.js') }}?v={{ filemtime(public_path('js/input-produksi.js')) }}"></script>
 @endif
 
-<script>
-    function updateDashboardTime() {
-        const now = new Date();
-        const timeString = now.getHours().toString().padStart(2, '0') + ':' +
-            now.getMinutes().toString().padStart(2, '0') + ':' +
-            now.getSeconds().toString().padStart(2, '0');
-        const timeDisplay = document.getElementById('current-time-display');
-        if (timeDisplay) timeDisplay.textContent = timeString;
-    }
-    setInterval(updateDashboardTime, 1000);
-    updateDashboardTime();
-</script>
 @endpush

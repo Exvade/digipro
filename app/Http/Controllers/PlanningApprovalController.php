@@ -25,11 +25,13 @@ class PlanningApprovalController extends Controller
         $user = Auth::user();
         $allowedDepartemen = ['PPIC', 'Production Planning Inventory Control'];
 
-        if ($user->role !== 'super_admin' && ($user->role !== 'kabag' || !in_array($user->departemen, $allowedDepartemen))) {
+        if ($user->role !== 'super_admin' && $user->role !== 'manager_plant' && ($user->role !== 'kabag' || !in_array($user->departemen, $allowedDepartemen))) {
             abort(403, 'Anda tidak memiliki akses untuk halaman ini.');
         }
 
-        $filterTanggal = $request->get('tanggal', Carbon::tomorrow()->format('Y-m-d'));
+        $filterTanggal = $request->filled('tanggal') && $request->get('tanggal') !== 'all'
+            ? $request->get('tanggal')
+            : null;
 
         $plannings = PlanningProduksi::with(['moldshop', 'mesin', 'part', 'jadwalKerja', 'jam'])
             ->where('bagian', 'inject')
@@ -55,7 +57,7 @@ class PlanningApprovalController extends Controller
 
         $user = Auth::user();
         $allowedDepartemen = ['PPIC', 'Production Planning Inventory Control'];
-        if ($user->role !== 'super_admin' && ($user->role !== 'kabag' || !in_array($user->departemen, $allowedDepartemen))) {
+        if ($user->role !== 'super_admin' && $user->role !== 'manager_plant' && ($user->role !== 'kabag' || !in_array($user->departemen, $allowedDepartemen))) {
             return response()->json(['success' => false, 'message' => 'Akses ditolak.'], 403);
         }
 

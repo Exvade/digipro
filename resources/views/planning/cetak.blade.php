@@ -8,6 +8,14 @@
     <link rel="stylesheet" href="{{ asset('css/planning-cetak.css') }}">
 </head>
 
+@php
+    $logoPath = public_path('images/logomwthijau.png');
+    $logoSrc = asset('images/logomwthijau.png');
+    if (file_exists($logoPath)) {
+        $logoSrc = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+    }
+@endphp
+
 <body>
     <button class="print-btn no-print" onclick="window.print()">
         <i class="fas fa-print"></i> Cetak
@@ -18,8 +26,8 @@
     <div class="container" style="page-break-after: always;">
         <!-- Header -->
         <div class="header">
-            <div class="header-left">
-                <strong>PT.MADA WIKRI TUNGGAL</strong>
+            <div class="header-left" style="text-align: center; vertical-align: middle; padding: 2px 4px;">
+                <img src="{{ $logoSrc }}" alt="PT. MADA WIKRI TUNGGAL" style="max-height: 38px; width: auto; max-width: 100%; object-fit: contain; display: block; margin: 0 auto;">
             </div>
 
             <div class="header-center">
@@ -39,41 +47,41 @@
                         </td>
                         <td class="signature-space">
                             @php
-                            // Cari planning INJECT yang sudah di-approve dan memiliki approval_qr_code (Ariyanto)
-                            $planningApproved = null;
-                            foreach ($planningsInject as $planning) {
-                            if (isset($planning->status_approval)
-                            && $planning->status_approval === 'approved'
-                            && isset($planning->approval_qr_code)
-                            && !empty(trim($planning->approval_qr_code))
-                            && $planning->approval_qr_code !== null) {
-                            $planningApproved = $planning;
-                            break;
-                            }
-                            }
+                                // Cari planning INJECT yang sudah di-approve dan memiliki approval_qr_code (Ariyanto)
+                                $planningApproved = null;
+                                foreach ($planningsInject as $planning) {
+                                    if (isset($planning->status_approval)
+                                        && $planning->status_approval === 'approved'
+                                        && isset($planning->approval_qr_code)
+                                        && !empty(trim($planning->approval_qr_code))
+                                        && $planning->approval_qr_code !== null) {
+                                        $planningApproved = $planning;
+                                        break;
+                                    }
+                                }
                             @endphp
                             @if($planningApproved && !empty(trim($planningApproved->approval_qr_code)))
-                            <img src="{{ route('planning.qrcode.secure', ['id' => $planningApproved->id, 'type' => 'approval']) }}"
-                                alt="QR Code Approval Ariyanto"
-                                style="width: 35px; height: 35px; display: block; margin: 0 auto;"
-                                onerror="console.error('QR Code Approval gagal dimuat untuk planning ID: {{ $planningApproved->id }}'); this.style.display='none';">
+                                <img src="{{ route('planning.qrcode.secure', ['id' => $planningApproved->id, 'type' => 'approval']) }}"
+                                    alt="QR Code Approval Ariyanto"
+                                    style="width: 35px; height: 35px; display: block; margin: 0 auto;"
+                                    onerror="console.error('QR Code Approval gagal dimuat untuk planning ID: {{ $planningApproved->id }}'); this.style.display='none';">
                             @endif
                         </td>
                         <td class="signature-space">
                             @php
-                            // Cari planning INJECT yang memiliki signature_qr_code (Diar)
-                            $planningWithSignature = $planningsInject->filter(function($planning) {
-                            return !empty($planning->signature_qr_code);
-                            })->first();
+                                // Cari planning INJECT yang memiliki signature_qr_code (Diar)
+                                $planningWithSignature = $planningsInject->filter(function($planning) {
+                                    return !empty($planning->signature_qr_code);
+                                })->first();
                             @endphp
                             @if($planningWithSignature && !empty($planningWithSignature->signature_qr_code))
-                            <img src="{{ route('planning.qrcode.secure', ['id' => $planningWithSignature->id, 'type' => 'signature']) }}"
-                                alt="QR Code Tanda Tangan Pak Diar"
-                                style="width: 35px; height: 35px; display: block; margin: 0 auto;">
+                                <img src="{{ route('planning.qrcode.secure', ['id' => $planningWithSignature->id, 'type' => 'signature']) }}"
+                                    alt="QR Code Tanda Tangan Pak Diar"
+                                    style="width: 35px; height: 35px; display: block; margin: 0 auto;">
                             @else
-                            <img src="{{ route('secure.signature') }}"
-                                alt="Tanda Tangan Pak Diar"
-                                style="width: 35px; height: 35px; display: block; margin: 0 auto;">
+                                <img src="{{ route('secure.signature') }}"
+                                    alt="Tanda Tangan Pak Diar"
+                                    style="width: 35px; height: 35px; display: block; margin: 0 auto;">
                             @endif
                         </td>
                     </tr>
@@ -359,8 +367,8 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="header-left">
-                <strong>PT.MADA WIKRI TUNGGAL</strong>
+            <div class="header-left" style="text-align: center; vertical-align: middle; padding: 2px 4px;">
+                <img src="{{ $logoSrc }}" alt="PT. MADA WIKRI TUNGGAL" style="max-height: 38px; width: auto; max-width: 100%; object-fit: contain; display: block; margin: 0 auto;">
             </div>
 
             <div class="header-center">

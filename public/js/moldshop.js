@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
     // =========================
-    // 0. Success Message Handler
+    // 0. Session Message Handler
     // =========================
     const successMessageDiv = $('#success-message');
     const successMessage = successMessageDiv.data('message');
@@ -16,37 +16,83 @@ $(document).ready(function() {
         });
     }
 
+    const errorMessageDiv = $('#error-message');
+    const errorMessage = errorMessageDiv.data('message');
+    
+    if (errorMessage) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal',
+            text: errorMessage,
+            confirmButtonText: 'Tutup'
+        });
+    }
+
     // =========================
     // 1. Inisialisasi DataTables
     // =========================
+    const commonLanguageConfig = {
+        emptyTable: "Tidak ada data mold yang tersedia",
+        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+        infoEmpty: "Menampilkan 0 data",
+        infoFiltered: "(disaring dari _MAX_ total data)",
+        lengthMenu: "Tampilkan _MENU_ data",
+        loadingRecords: "Memuat data...",
+        processing: "Sedang memproses...",
+        search: "Cari:",
+        searchPlaceholder: "Cari data mold...",
+        zeroRecords: "Tidak ditemukan data yang sesuai",
+        paginate: {
+            first: '<i class="fas fa-angle-double-left"></i>',
+            last: '<i class="fas fa-angle-double-right"></i>',
+            next: '<i class="fas fa-chevron-right"></i>',
+            previous: '<i class="fas fa-chevron-left"></i>'
+        }
+    };
+
     if ($('#moldTable').length > 0 && !$.fn.DataTable.isDataTable('#moldTable')) {
-        $('#moldTable').DataTable({
-            responsive: true,
+        const moldTable = $('#moldTable').DataTable({
+            responsive: false, // Clean horizontal touch scroll inside .table-responsive
             autoWidth: false,
             pageLength: 10,
             lengthMenu: [
                 [10, 25, 50, 100, -1],
                 [10, 25, 50, 100, "Semua"]
             ],
-            language: {
-                url: "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json"
-            },
+            dom: '<"row mb-3 align-items-center"<"col-12 col-md-6 mb-2 mb-md-0"l><"col-12 col-md-6 d-flex justify-content-start justify-content-md-end"f>>' +
+                 '<"table-responsive"t>' +
+                 '<"row mt-3 align-items-center"<"col-12 col-md-5 text-center text-md-left mb-2 mb-md-0"i><"col-12 col-md-7 d-flex justify-content-center justify-content-md-end"p>>',
+            language: commonLanguageConfig,
             columnDefs: [{
                 orderable: false,
                 targets: [0, -1] // Disable sort on first and last columns
             }]
         });
+
+        // Handle resize adjustment
+        let resizeTimer;
+        $(window).on('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                moldTable.columns.adjust();
+            }, 250);
+        });
     }
 
     if ($('#historyTable').length > 0 && !$.fn.DataTable.isDataTable('#historyTable')) {
+        const historyLanguageConfig = Object.assign({}, commonLanguageConfig, {
+            searchPlaceholder: "Cari riwayat mold..."
+        });
+
         $('#historyTable').DataTable({
-            responsive: true,
+            responsive: false,
             autoWidth: false,
             pageLength: 10,
             order: [[6, 'desc']], // Order by total shoot by default
-            language: {
-                url: "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json"
-            }
+            dom: '<"row mb-3 align-items-center"<"col-12 col-md-6 mb-2 mb-md-0"l><"col-12 col-md-6 d-flex justify-content-start justify-content-md-end"f>>' +
+                 '<"table-responsive"t>' +
+                 '<"row mt-3 align-items-center"<"col-12 col-md-5 text-center text-md-left mb-2 mb-md-0"i><"col-12 col-md-7 d-flex justify-content-center justify-content-md-end"p>>',
+            language: historyLanguageConfig
         });
     }
 

@@ -37,8 +37,30 @@
         init();
         initDarkMode();
         
+        // Custom File Input Label Change
+        $('#excel_file').on('change', function(e) {
+            if (e.target.files.length > 0) {
+                $('.custom-file-label[for="excel_file"]').text(e.target.files[0].name);
+            } else {
+                $('.custom-file-label[for="excel_file"]').text('Pilih file...');
+            }
+        });
+        
         // DataTables
-        const dTableConfig = { "paging": false, "lengthChange": false, "searching": true, "ordering": true, "info": false, "autoWidth": false };
+        const dTableConfig = { 
+            "paging": false, 
+            "lengthChange": false, 
+            "searching": true, 
+            "ordering": true, 
+            "info": false, 
+            "autoWidth": false,
+            "language": {
+                "emptyTable": "Belum ada data planning produksi untuk tanggal ini",
+                "zeroRecords": "Tidak ada data yang sesuai dengan pencarian",
+                "search": "Cari:",
+                "infoEmpty": "Tidak ada data"
+            }
+        };
         
         let planningTable = $('#planningTable').length ? $('#planningTable').DataTable(dTableConfig) : null;
         let historyTable = $('#historyTable').length ? $('#historyTable').DataTable(dTableConfig) : null;
@@ -47,9 +69,10 @@
         // Tab Filters
         const filterFn = (table, bagian) => {
             if (!table) return;
+            const targetCol = (table.table().node().id === 'approvalTable') ? 4 : 3;
             if (bagian === 'all') table.search('').columns().search('').draw();
-            else if (bagian === 'inject') table.column(3).search('Inject', true, false).draw();
-            else if (bagian === 'assy') table.column(3).search('Assembly', true, false).draw();
+            else if (bagian === 'inject') table.column(targetCol).search('Inject', true, false).draw();
+            else if (bagian === 'assy') table.column(targetCol).search('Assembly', true, false).draw();
         };
 
         $('.bagian-tabs .nav-link').on('click', function(e) {
@@ -142,8 +165,6 @@
             $('#approval-qty').text(b.data('qty'));
             $('#approval_action').val('approve');
             $('#approveContent').show(); $('#rejectContent').hide();
-            $('#approvalModalHeader').attr('class', 'modal-header bg-success text-white');
-            $('#submitApprovalBtn').attr('class', 'btn btn-success').html('<i class="fas fa-check"></i> Setujui').show();
             $('#modalApproval').modal('show');
         });
 

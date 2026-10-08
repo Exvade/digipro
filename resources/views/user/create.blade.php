@@ -1,104 +1,115 @@
 <!-- Form Create User -->
-<div class="alert alert-success mb-3">
-    <i class="fas fa-check-circle mr-2"></i>
-    Form create user berhasil dimuat!
-</div>
-
-<form id="addForm" class="user-create-form" action="{{ route('user.store') }}" method="POST">
+<form id="addForm" class="user-create-form space-y-5" action="{{ route('user.store') }}" method="POST">
     @csrf
-    <div class="row">
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <!-- NIK -->
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="nik" class="form-label">
-                    NIK <span class="text-danger">*</span>
-                </label>
+        <div class="form-group space-y-1.5 mb-0">
+            <label for="nik" class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                NIK <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                    <i class="fas fa-id-badge text-xs"></i>
+                </span>
                 <input type="text" name="nik" id="nik"
                        value="{{ old('nik') }}"
-                       class="form-control @error('nik') is-invalid @enderror"
-                       placeholder="Masukkan NIK" required>
-                @error('nik')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                       class="form-control w-full pl-9 pr-3 py-2 text-xs font-mono font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all @error('nik') is-invalid @enderror"
+                       placeholder="Contoh: 12345" required>
+            </div>
+            <div class="invalid-feedback text-rose-500 text-[11px] mt-1 font-medium">
+                @error('nik') {{ $message }} @enderror
             </div>
         </div>
 
         <!-- Username -->
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="username" class="form-label">
-                    Username <span class="text-danger">*</span>
-                </label>
+        <div class="form-group space-y-1.5 mb-0">
+            <label for="username" class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Username <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                    <i class="fas fa-user text-xs"></i>
+                </span>
                 <input type="text" name="username" id="username"
                        value="{{ old('username') }}"
-                       class="form-control @error('username') is-invalid @enderror"
+                       class="form-control w-full pl-9 pr-3 py-2 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all @error('username') is-invalid @enderror"
                        placeholder="Masukkan username" required>
-                @error('username')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+            </div>
+            <div class="invalid-feedback text-rose-500 text-[11px] mt-1 font-medium">
+                @error('username') {{ $message }} @enderror
+            </div>
+        </div>
+
+        <!-- Nama Lengkap -->
+        <div class="form-group space-y-1.5 mb-0">
+            <label for="nama" class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Nama Lengkap <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                    <i class="fas fa-signature text-xs"></i>
+                </span>
+                <input type="text" name="nama" id="nama"
+                       value="{{ old('nama') }}"
+                       class="form-control w-full pl-9 pr-3 py-2 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all @error('nama') is-invalid @enderror"
+                       placeholder="Masukkan nama lengkap" required>
+            </div>
+            <div class="invalid-feedback text-rose-500 text-[11px] mt-1 font-medium">
+                @error('nama') {{ $message }} @enderror
             </div>
         </div>
 
         <!-- Departemen -->
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="departemen" class="form-label">
-                    Departemen <span class="text-danger">*</span>
-                </label>
+        <div class="form-group space-y-1.5 mb-0">
+            <label for="departemen" class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Departemen <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                    <i class="fas fa-building text-xs"></i>
+                </span>
                 <input type="text" name="departemen" id="departemen"
                        value="{{ old('departemen') }}"
-                       class="form-control @error('departemen') is-invalid @enderror"
-                       placeholder="Masukkan departemen" required>
-                @error('departemen')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-                <small class="form-text text-muted">
-                    <i class="fas fa-info-circle me-1"></i> Pilih departemen kerja user
-                </small>
+                       class="form-control w-full pl-9 pr-3 py-2 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all @error('departemen') is-invalid @enderror"
+                       placeholder="Contoh: Produksi, IT, Quality" required>
             </div>
-        </div>
-
-        <!-- Nama -->
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="nama" class="form-label">
-                    Nama Lengkap <span class="text-danger">*</span>
-                </label>
-                <input type="text" name="nama" id="nama"
-                       value="{{ old('nama') }}"
-                       class="form-control @error('nama') is-invalid @enderror"
-                       placeholder="Masukkan nama lengkap" required>
-                @error('nama')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+            <div class="invalid-feedback text-rose-500 text-[11px] mt-1 font-medium">
+                @error('departemen') {{ $message }} @enderror
             </div>
         </div>
 
         <!-- Email -->
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="email" class="form-label">
-                    Email <span class="text-danger">*</span>
-                </label>
+        <div class="form-group space-y-1.5 mb-0 sm:col-span-2">
+            <label for="email" class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Alamat Email <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                    <i class="fas fa-envelope text-xs"></i>
+                </span>
                 <input type="email" name="email" id="email"
                        value="{{ old('email') }}"
-                       class="form-control @error('email') is-invalid @enderror"
-                       placeholder="Masukkan email" required>
-                @error('email')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                       class="form-control w-full pl-9 pr-3 py-2 text-xs font-mono font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all @error('email') is-invalid @enderror"
+                       placeholder="user@example.com" required>
+            </div>
+            <div class="invalid-feedback text-rose-500 text-[11px] mt-1 font-medium">
+                @error('email') {{ $message }} @enderror
             </div>
         </div>
 
         <!-- Role -->
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="role" class="form-label">
-                    Role <span class="text-danger">*</span>
-                </label>
+        <div class="form-group space-y-1.5 mb-0">
+            <label for="role" class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Peran (Role) <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                    <i class="fas fa-shield-alt text-xs"></i>
+                </span>
                 <select name="role" id="role"
-                        class="form-control @error('role') is-invalid @enderror" required>
-                    <option value="">Pilih role</option>
+                        class="form-control w-full pl-9 pr-8 py-2 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all @error('role') is-invalid @enderror" required>
+                    <option value="">-- Pilih Peran --</option>
                     <option value="super_admin" {{ old('role') == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
                     <option value="leader" {{ old('role') == 'leader' ? 'selected' : '' }}>Leader</option>
                     <option value="operator" {{ old('role') == 'operator' ? 'selected' : '' }}>Operator</option>
@@ -107,82 +118,125 @@
                     <option value="staff" {{ old('role') == 'staff' ? 'selected' : '' }}>Staff</option>
                     <option value="manager_plant" {{ old('role') == 'manager_plant' ? 'selected' : '' }}>Manager Plant</option>
                 </select>
-                @error('role')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+            </div>
+            <div class="invalid-feedback text-rose-500 text-[11px] mt-1 font-medium">
+                @error('role') {{ $message }} @enderror
             </div>
         </div>
 
         <!-- Bagian -->
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="bagian" class="form-label">Bagian</label>
+        <div class="form-group space-y-1.5 mb-0">
+            <label for="bagian" class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Bagian Produksi <span class="text-[10px] font-normal text-slate-400">(Opsional)</span>
+            </label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                    <i class="fas fa-industry text-xs"></i>
+                </span>
                 <select name="bagian" id="bagian"
-                        class="form-control @error('bagian') is-invalid @enderror">
-                    <option value="" selected>Pilih bagian (opsional)</option>
+                        class="form-control w-full pl-9 pr-8 py-2 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all @error('bagian') is-invalid @enderror">
+                    <option value="" selected>-- Tanpa Bagian --</option>
                     <option value="inject" {{ old('bagian') == 'inject' ? 'selected' : '' }}>Inject</option>
                     <option value="assy" {{ old('bagian') == 'assy' ? 'selected' : '' }}>Assy</option>
                 </select>
-                @error('bagian')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+            </div>
+            <div class="invalid-feedback text-rose-500 text-[11px] mt-1 font-medium">
+                @error('bagian') {{ $message }} @enderror
             </div>
         </div>
 
         <!-- Grup -->
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="grup_id" class="form-label">Grup</label>
+        <div class="form-group space-y-1.5 mb-0 sm:col-span-2">
+            <label for="grup_id" class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Grup Kerja / Regu <span class="text-[10px] font-normal text-slate-400">(Opsional)</span>
+            </label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                    <i class="fas fa-layer-group text-xs"></i>
+                </span>
                 <select name="grup_id" id="grup_id"
-                        class="form-control @error('grup_id') is-invalid @enderror">
-                    <option value="" selected>Pilih grup (opsional)</option>
+                        class="form-control w-full pl-9 pr-8 py-2 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all @error('grup_id') is-invalid @enderror">
+                    <option value="" selected>-- Pilih Grup Kerja --</option>
                     @foreach ($grups as $grup)
                         <option value="{{ $grup->id }}" data-bagian="{{ $grup->bagian }}"
                             {{ old('grup_id') == $grup->id ? 'selected' : '' }}>
-                            {{ $grup->nama_grup }}
+                            {{ $grup->nama_grup }} @if($grup->bagian) ({{ strtoupper($grup->bagian) }}) @endif
                         </option>
                     @endforeach
                 </select>
-                <small class="form-text text-muted">
-                    <i class="fas fa-info-circle me-1"></i> Pilih grup kerja user
-                </small>
-                @error('grup_id')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+            </div>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1 mb-0">
+                <i class="fas fa-info-circle mr-1 text-indigo-400"></i>Opsi grup disesuaikan secara otomatis jika memilih Bagian Produksi.
+            </p>
+            <div class="invalid-feedback text-rose-500 text-[11px] mt-1 font-medium">
+                @error('grup_id') {{ $message }} @enderror
             </div>
         </div>
 
         <!-- Password -->
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="password" class="form-label">
-                    Password <span class="text-danger">*</span>
-                </label>
+        <div class="form-group space-y-1.5 mb-0">
+            <label for="password" class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Kata Sandi <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                    <i class="fas fa-lock text-xs"></i>
+                </span>
                 <input type="password" name="password" id="password"
-                       class="form-control @error('password') is-invalid @enderror"
-                       placeholder="Masukkan password" required>
-                @error('password')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                       class="form-control w-full pl-9 pr-10 py-2 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all @error('password') is-invalid @enderror"
+                       placeholder="Minimal 8 karakter" required>
+                <button type="button" class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" onclick="togglePasswordVisibility('password', this)">
+                    <i class="fas fa-eye text-xs"></i>
+                </button>
+            </div>
+            <div class="invalid-feedback text-rose-500 text-[11px] mt-1 font-medium">
+                @error('password') {{ $message }} @enderror
             </div>
         </div>
 
         <!-- Konfirmasi Password -->
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="password_confirmation" class="form-label">
-                    Konfirmasi Password <span class="text-danger">*</span>
-                </label>
+        <div class="form-group space-y-1.5 mb-0">
+            <label for="password_confirmation" class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Konfirmasi Kata Sandi <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                    <i class="fas fa-shield-halved text-xs"></i>
+                </span>
                 <input type="password" name="password_confirmation" id="password_confirmation"
-                       class="form-control"
-                       placeholder="Konfirmasi password" required>
-                <div class="invalid-feedback"></div>
+                       class="form-control w-full pl-9 pr-10 py-2 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                       placeholder="Ulangi kata sandi" required>
+                <button type="button" class="password-toggle absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" onclick="togglePasswordVisibility('password_confirmation', this)">
+                    <i class="fas fa-eye text-xs"></i>
+                </button>
             </div>
+            <div class="invalid-feedback text-rose-500 text-[11px] mt-1 font-medium"></div>
         </div>
     </div>
 
-    <div class="d-flex justify-content-end mt-3">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-        <button type="submit" class="btn btn-primary ml-2">Simpan</button>
+    <div class="pt-4 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-end gap-2.5">
+        <button type="button" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-all cursor-pointer" data-dismiss="modal">
+            Batal
+        </button>
+        <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 shadow-md shadow-indigo-600/25 transition-all cursor-pointer">
+            <i class="fas fa-save text-xs"></i>
+            <span>Simpan Pengguna</span>
+        </button>
     </div>
 </form>
+
+<script>
+    function togglePasswordVisibility(fieldId, btn) {
+        const input = document.getElementById(fieldId);
+        const icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+</script>

@@ -1,55 +1,443 @@
 /**
- * Jadwal Pemeliharaan Custom Styles (Official Company Format)
- * Perbaikan Bug Dark Mode & Print
+ * Jadwal Pemeliharaan Modern Tailwind & Matrix Styles
+ * Fully optimized for both Light Mode & Dark Mode
  */
 
-/* Kontainer utama tabel */
+/* =========================================
+   CUSTOM SCROLLBAR (Ultra-Smooth)
+   ========================================= */
+.table-responsive-pm::-webkit-scrollbar {
+    height: 10px;
+    width: 8px;
+}
+
+.table-responsive-pm::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 8px;
+}
+
+:is(body.dark-mode, html.dark) .table-responsive-pm::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+.table-responsive-pm::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 8px;
+    border: 2px solid #f1f5f9;
+}
+
+:is(body.dark-mode, html.dark) .table-responsive-pm::-webkit-scrollbar-thumb {
+    background: #475569;
+    border: 2px solid #0f172a;
+}
+
+.table-responsive-pm::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+:is(body.dark-mode, html.dark) .table-responsive-pm::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* =========================================
+   CONTAINER & TABLE MATRIX
+   ========================================= */
 .table-responsive-pm {
     display: block;
     width: 100%;
     overflow-x: auto;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    max-height: 85vh; /* Tinggi lebih lega */
+    max-height: calc(100vh - 280px);
+    min-height: 400px;
+    position: relative;
 }
 
-/* Header Tabel */
-.table-pm thead th {
-    position: sticky;
-    top: 0;
-    z-index: 30; /* Lebih tinggi dari sticky-col */
-    border: 1px solid #000 !important;
+.table-pm {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    table-layout: fixed !important;
+    width: max-content;
 }
 
-/* Kolom Mesin Tetap (Sticky Left) */
-.sticky-col {
-    position: sticky;
-    z-index: 25;
-    border-right: 2px solid #000 !important;
-}
-
-/* Baris khusus PLAN (Putih di Terang, Gelap di Dark Mode) */
-.row-plan {
-    background-color: inherit;
-}
-
-/* Baris khusus ACTUAL */
-.row-actual {
-    background-color: rgba(255, 255, 0, 0.1); /* Kuning tipis untuk web */
-}
-
-/* Hover Effect */
-td.edit-trigger:hover {
-    background-color: rgba(0, 123, 255, 0.4) !important;
-    cursor: pointer;
-}
-
-/* High Visibility for Dark Mode */
-.dark-mode .table-pm {
-    color: #fff !important;
+.table-pm th,
+.table-pm td {
+    box-sizing: border-box !important;
 }
 
 /* =========================================
-   PRINT STYLES - PENYEMPURNAAN FINAL
+   TABLE HEADERS (STICKY TOP)
+   ========================================= */
+.table-pm thead th {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    vertical-align: middle;
+    box-sizing: border-box !important;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+}
+
+:is(body.dark-mode, html.dark) .table-pm thead th {
+    border-top-color: #334155;
+    border-bottom-color: #334155;
+    border-right-color: #334155;
+}
+
+/* Row 2 Header Sticky Offset (Roman Weeks) */
+.table-pm thead tr:nth-child(2) th {
+    top: 34px;
+    z-index: 29;
+}
+
+/* Corner Intersection: Top Header + Left Sticky Columns */
+.table-pm thead th.sticky-col {
+    z-index: 50 !important;
+}
+
+/* =========================================
+   STICKY LEFT COLUMNS (Frozen Columns)
+   ========================================= */
+.table-pm .sticky-col {
+    position: sticky;
+    z-index: 20;
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border-right: 1px solid #e2e8f0 !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+:is(body.dark-mode, html.dark) .table-pm .sticky-col {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border-right-color: #334155 !important;
+    border-bottom-color: #1e293b !important;
+}
+
+/* Sticky Header Backgrounds */
+.table-pm thead th.sticky-col {
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+}
+
+:is(body.dark-mode, html.dark) .table-pm thead th.sticky-col {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+}
+
+/* The Last Frozen Column (Target) gets a prominent drop-shadow & divider */
+.table-pm .sticky-col-last {
+    border-right: 2px solid #cbd5e1 !important;
+    box-shadow: 4px 0 10px -2px rgba(0, 0, 0, 0.08) !important;
+}
+
+:is(body.dark-mode, html.dark) .table-pm .sticky-col-last {
+    border-right: 2px solid #475569 !important;
+    box-shadow: 4px 0 12px -2px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* =========================================
+   MONTH DIVIDERS & STYLING
+   ========================================= */
+.month-header {
+    background-color: #f1f5f9 !important;
+    color: #334155 !important;
+    border-right: 2px solid #cbd5e1 !important;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.5rem 0.25rem;
+}
+
+:is(body.dark-mode, html.dark) .month-header {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+    border-right: 2px solid #475569 !important;
+}
+
+.month-end-col {
+    border-right: 2px solid #cbd5e1 !important;
+}
+
+:is(body.dark-mode, html.dark) .month-end-col {
+    border-right: 2px solid #475569 !important;
+}
+
+.week-header {
+    background-color: #f8fafc !important;
+    color: #64748b !important;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    padding: 0.35rem 0;
+    border-bottom: 2px solid #e2e8f0 !important;
+}
+
+:is(body.dark-mode, html.dark) .week-header {
+    background-color: #0f172a !important;
+    color: #94a3b8 !important;
+    border-bottom-color: #334155 !important;
+}
+
+/* =========================================
+   ROW PAIRINGS & MACHINE SEPARATORS
+   ========================================= */
+.row-plan {
+    background-color: #ffffff;
+}
+
+:is(body.dark-mode, html.dark) .row-plan {
+    background-color: #0b1120;
+}
+
+.row-actual {
+    background-color: #fcfdfd;
+    border-bottom: 2px solid #cbd5e1 !important;
+}
+
+:is(body.dark-mode, html.dark) .row-actual {
+    background-color: #0f172a;
+    border-bottom: 2px solid #334155 !important;
+}
+
+.row-plan td,
+.row-actual td {
+    height: 32px;
+}
+
+/* Machine group bottom border */
+.table-pm tr.row-actual td {
+    border-bottom: 2px solid #cbd5e1 !important;
+}
+
+:is(body.dark-mode, html.dark) .table-pm tr.row-actual td {
+    border-bottom: 2px solid #334155 !important;
+}
+
+/* =========================================
+   CELLS & HOVER INTERACTIONS
+   ========================================= */
+.table-pm td {
+    border-right: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    text-align: center;
+    padding: 0;
+    overflow: hidden;
+}
+
+:is(body.dark-mode, html.dark) .table-pm td {
+    border-right-color: #1e293b;
+    border-bottom-color: #1e293b;
+}
+
+/* Hover on editable cell */
+td.edit-trigger {
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+td.edit-trigger:hover {
+    background-color: rgba(99, 102, 241, 0.12) !important;
+    box-shadow: inset 0 0 0 1.5px #6366f1 !important;
+}
+
+/* =========================================
+   PLAN BOX BADGES (Distinct Colors S/M/O)
+   ========================================= */
+.box-plan {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 22px;
+    border-radius: 6px;
+    font-size: 0.6875rem;
+    font-weight: 900;
+    line-height: 1;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    letter-spacing: 0.02em;
+}
+
+/* S = Small Maintenance (Emerald) */
+.box-plan-s {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+}
+
+/* M = Medium Maintenance (Blue) */
+.box-plan-m {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+}
+
+/* O = Overhaul (Amber) */
+.box-plan-o {
+    background-color: #ea580c !important;
+    color: #ffffff !important;
+}
+
+/* Other / Date input */
+.box-plan-other {
+    background-color: #4f46e5 !important;
+    color: #ffffff !important;
+    padding: 2px 6px;
+    font-size: 0.625rem;
+}
+
+/* =========================================
+   ACTUAL STATUS CELLS
+   ========================================= */
+.status-cell {
+    width: 100%;
+    height: 100%;
+    min-height: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.625rem;
+    font-weight: 800;
+    line-height: 1.1;
+    transition: all 0.2s ease;
+    padding: 1px;
+}
+
+.status-approved {
+    background-color: #ecfdf5 !important;
+    color: #047857 !important;
+}
+
+:is(body.dark-mode, html.dark) .status-approved {
+    background-color: rgba(6, 78, 59, 0.45) !important;
+    color: #6ee7b7 !important;
+}
+
+.status-pending {
+    background-color: #fffbeb !important;
+    color: #b45309 !important;
+}
+
+:is(body.dark-mode, html.dark) .status-pending {
+    background-color: rgba(120, 53, 15, 0.45) !important;
+    color: #fcd34d !important;
+}
+
+.status-rejected {
+    background-color: #fff1f2 !important;
+    color: #be123c !important;
+}
+
+:is(body.dark-mode, html.dark) .status-rejected {
+    background-color: rgba(136, 19, 55, 0.45) !important;
+    color: #fda4af !important;
+}
+
+/* Status Modal Badges */
+.badge.bg-success {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-warning {
+    background-color: #f59e0b !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-danger {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+/* =========================================
+   KPI CARDS INTERACTIVITY
+   ========================================= */
+.kpi-card {
+    transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+}
+
+.kpi-card.active {
+    border-color: #6366f1 !important;
+    box-shadow: 0 4px 14px -2px rgba(99, 102, 241, 0.18) !important;
+}
+
+:is(body.dark-mode, html.dark) .kpi-card.active {
+    border-color: #818cf8 !important;
+    box-shadow: 0 4px 16px -2px rgba(99, 102, 241, 0.35) !important;
+}
+
+/* =========================================
+   MONTH QUICK NAVIGATION BAR
+   ========================================= */
+.month-nav-pill {
+    padding: 0.35rem 0.65rem;
+    border-radius: 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.month-nav-pill:hover {
+    color: #4f46e5;
+    background-color: #eef2ff;
+    border-color: #c7d2fe;
+}
+
+:is(body.dark-mode, html.dark) .month-nav-pill {
+    color: #94a3b8;
+    background-color: #1e293b;
+    border-color: #334155;
+}
+
+:is(body.dark-mode, html.dark) .month-nav-pill:hover {
+    color: #a5b4fc;
+    background-color: #312e81;
+    border-color: #4f46e5;
+}
+
+/* =========================================
+   RESPONSIVE OVERRIDES
+   ========================================= */
+@media (max-width: 768px) {
+    .table-pm .sticky-col {
+        position: static !important;
+        box-shadow: none !important;
+        left: auto !important;
+    }
+    
+    .table-pm thead th.sticky-col {
+        position: sticky !important;
+        top: 0 !important;
+        left: auto !important;
+        box-shadow: none !important;
+    }
+
+    .table-pm thead th.sticky-col-last {
+        box-shadow: none !important;
+        border-right: 1px solid #e2e8f0 !important;
+    }
+
+    .table-responsive-pm {
+        max-height: calc(100vh - 240px);
+        min-height: 350px;
+    }
+}
+
+/* =========================================
+   PRINT STYLES (Preserve A4 Landscape)
    ========================================= */
 @media print {
     @page {
@@ -63,17 +451,15 @@ td.edit-trigger:hover {
         margin: 0 !important;
         padding: 0 !important;
         width: 100% !important;
-        zoom: 58% !important; /* Ukuran paling pas untuk A4 Landscape */
+        zoom: 58% !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
 
-    /* Sembunyikan semua elemen UI Web */
-    .d-print-none, .btn, .sidebar, .navbar, .main-footer, form, .navbar, .card-header, .input-group, .h3 {
+    .d-print-none, .btn, .sidebar, .navbar, .main-footer, form, .card-header, .input-group {
         display: none !important;
     }
 
-    /* Paksa kolom sticky menjadi statis agar warna muncul */
     .sticky-col {
         position: static !important;
         background-color: #fff !important;
@@ -93,21 +479,18 @@ td.edit-trigger:hover {
         padding: 1px !important;
     }
 
-    /* Header Tabel Putih-Hitam di Print */
     .table-pm thead th {
         background-color: #f2f2f2 !important;
         color: #000 !important;
     }
 
-    /* Kuning Stabilo untuk baris ACTUAL di Print */
     .row-actual {
         background-color: #ffff00 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
 
-    /* Kotak Plan Hijau Tua di Print */
-    .cell-text-plan div, .box-plan {
+    .box-plan {
         background-color: #006400 !important;
         color: #fff !important;
         border: 0.5px solid #000 !important;
@@ -115,3 +498,43 @@ td.edit-trigger:hover {
         print-color-adjust: exact !important;
     }
 }
+
+/* =========================================
+   YEAR FILTER SELECT BUTTON
+   ========================================= */
+.year-filter-select {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    padding-left: 14px !important;
+    padding-right: 34px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    border-radius: 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    background-color: #ffffff !important;
+    color: #334155 !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    cursor: pointer !important;
+    outline: none !important;
+    transition: all 0.2s ease !important;
+}
+
+:is(body.dark-mode, html.dark) .year-filter-select {
+    border-color: #334155 !important;
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+.year-filter-select:hover {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+}
+
+:is(body.dark-mode, html.dark) .year-filter-select:hover {
+    background-color: #334155 !important;
+    border-color: #475569 !important;
+}
+

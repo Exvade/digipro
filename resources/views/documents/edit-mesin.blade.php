@@ -6,52 +6,77 @@
     $isLeader = in_array($role, ['leader', 'foreman']);
     @endphp
 
-    <div class="form-group">
-        <label for="nama_mesin">Nama Mesin <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="nama_mesin" name="nama_mesin" value="{{ $mesin->nama_mesin }}"
-            required {{ $isLeader ? 'readonly' : '' }}>
+    <div class="space-y-4">
+        <div>
+            <label for="nama_mesin" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                Nama Mesin <span class="text-rose-500">*</span>
+            </label>
+            <input type="text" 
+                class="form-control w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none" 
+                id="nama_mesin" name="nama_mesin" value="{{ $mesin->nama_mesin }}"
+                required {{ $isLeader ? 'readonly' : '' }}>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label for="brand_mesin" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                    Brand Mesin <span class="text-rose-500">*</span>
+                </label>
+                <input type="text" 
+                    class="form-control w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none" 
+                    id="brand_mesin" name="brand_mesin" value="{{ $mesin->brand_mesin }}"
+                    required {{ $isLeader ? 'readonly' : '' }}>
+            </div>
+
+            <div>
+                <label for="tonase_mesin" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                    Tonase Mesin (Ton) <span class="text-rose-500">*</span>
+                </label>
+                <input type="number" 
+                    class="form-control w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm font-mono focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none" 
+                    id="tonase_mesin" name="tonase_mesin"
+                    value="{{ $mesin->tonase_mesin }}" step="0.01" min="0" required {{ $isLeader ? 'readonly' : '' }}>
+            </div>
+        </div>
+
+        <div>
+            <label for="status" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                Status Mesin <span class="text-rose-500">*</span>
+            </label>
+            <select class="form-control w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none" 
+                id="status" name="status" required>
+                <option value="running" {{ $mesin->status == 'running' ? 'selected' : '' }}>Running</option>
+                <option value="stop" {{ $mesin->status == 'stop' ? 'selected' : '' }}>Stand By</option>
+                <option value="maintenance" {{ $mesin->status == 'maintenance' ? 'selected' : '' }}>Breakdown</option>
+                <option value="offline" {{ $mesin->status == 'offline' ? 'selected' : '' }}>Off</option>
+            </select>
+        </div>
+
+        <div class="{{ in_array($mesin->status, ['stop', 'maintenance', 'offline']) ? '' : 'd-none' }}" id="stop_reason_wrapper">
+            <label for="stop_reason" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                Pesan Status / Alasan <span class="text-rose-500">*</span>
+            </label>
+            <select class="form-control w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none" 
+                id="stop_reason" name="stop_reason" {{ in_array($mesin->status, ['stop', 'maintenance', 'offline']) ? 'required' : '' }}>
+                <option value="">Pilih alasan</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="keterangan" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                Keterangan Tambahan
+            </label>
+            <textarea class="form-control w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none" 
+                id="keterangan" name="keterangan" rows="3" placeholder="Masukkan keterangan (opsional)">{{ $mesin->keterangan }}</textarea>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label for="brand_mesin">Brand Mesin <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="brand_mesin" name="brand_mesin" value="{{ $mesin->brand_mesin }}"
-            required {{ $isLeader ? 'readonly' : '' }}>
-    </div>
-
-    <div class="form-group">
-        <label for="tonase_mesin">Tonase Mesin (Ton) <span class="text-danger">*</span></label>
-        <input type="number" class="form-control" id="tonase_mesin" name="tonase_mesin"
-            value="{{ $mesin->tonase_mesin }}" step="0.01" min="0" required {{ $isLeader ? 'readonly' : '' }}>
-    </div>
-
-    <div class="form-group">
-        <label for="status">Status <span class="text-danger">*</span></label>
-        <select class="form-control" id="status" name="status" required>
-            <option value="running" {{ $mesin->status == 'running' ? 'selected' : '' }}>Running</option>
-            <option value="stop" {{ $mesin->status == 'stop' ? 'selected' : '' }}>Stand By</option>
-            <option value="maintenance" {{ $mesin->status == 'maintenance' ? 'selected' : '' }}>Breakdown</option>
-            <option value="offline" {{ $mesin->status == 'offline' ? 'selected' : '' }}>Off</option>
-        </select>
-    </div>
-
-    <div class="form-group {{ in_array($mesin->status, ['stop', 'maintenance', 'offline']) ? '' : 'd-none' }}" id="stop_reason_wrapper">
-        <label for="stop_reason">Pesan Status <span class="text-danger">*</span></label>
-        <select class="form-control" id="stop_reason" name="stop_reason" {{ in_array($mesin->status, ['stop', 'maintenance', 'offline']) ? 'required' : '' }}>
-            <option value="">Pilih alasan</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label for="keterangan">Keterangan</label>
-        <textarea class="form-control" id="keterangan" name="keterangan" rows="3" placeholder="Masukkan keterangan (opsional)">{{ $mesin->keterangan }}</textarea>
-    </div>
-
-    <div class="modal-footer px-0 pb-0">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+    <div class="modal-footer px-0 pb-0 pt-4 mt-4 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-end gap-2.5">
+        <button type="button" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer" data-dismiss="modal">
             <i class="fas fa-times mr-1"></i>Batal
         </button>
-        <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save mr-1"></i>Simpan Perubahan
+        <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white shadow-md shadow-indigo-600/25 transition-all cursor-pointer">
+            <i class="fas fa-save text-xs"></i>Simpan Perubahan
         </button>
     </div>
 </form>
@@ -231,14 +256,12 @@
                 method: 'POST',
                 data: form.serialize(),
                 beforeSend: function() {
-                    submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...');
+                    submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1.5"></i>Menyimpan...');
                 },
                 success: function(response) {
                     if (response.success) {
-                        // Close modal
                         $('#editMesinModal').modal('hide');
 
-                        // Show success message
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil!',
@@ -246,7 +269,6 @@
                             showConfirmButton: false,
                             timer: 1500
                         }).then(() => {
-                            // Reload page to update machine cards
                             location.reload();
                         });
                     }

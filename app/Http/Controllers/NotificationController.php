@@ -8,6 +8,8 @@ use App\Models\Checksheet;
 use App\Models\DowntimeEvent;
 use Carbon\Carbon;
 
+use Illuminate\Support\Facades\Cache;
+
 class NotificationController extends Controller
 {
     public function getNotifications()
@@ -17,6 +19,10 @@ class NotificationController extends Controller
         if (!in_array($user->role, ['leader', 'foreman', 'kabag', 'super_admin'])) {
             return response()->json(['notifications' => []]);
         }
+
+        $cacheKey = "user_notifs_{$user->id}_{$user->role}_" . ($user->bagian ?? 'all') . "_" . ($user->grup_id ?? 0);
+
+        $notifications = Cache::remember($cacheKey, 15, function () use ($user) {
 
         // 1. Get Checksheet Notifications (Approved by Kabag)
         $checksheetQuery = \App\Models\Checksheet::with(['user', 'part', 'meja', 'mesin', 'approver'])
@@ -114,9 +120,10 @@ class NotificationController extends Controller
         });
 
         // Merge and sort by time
-        $notifications = $checksheetNotifications->concat($callNotifications)
+        return $checksheetNotifications->concat($callNotifications)
             ->sortByDesc('time')
             ->values();
+        });
 
         return response()->json([
             'notifications' => $notifications

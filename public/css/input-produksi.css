@@ -17,24 +17,8 @@
     --radius: 10px;
 }
 
-/* ==================== BASE ==================== */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/* Scoped layout styles for input produksi */
 
-/* ==================== FULL SCREEN LAYOUT ==================== */
-body {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: var(--light-bg);
-    min-height: 100vh;
-    color: var(--dark);
-    line-height: 1.6;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden !important; /* Hapus scrollbar horizontal */
-}
 
 .container-fluid {
     background: transparent;
@@ -391,34 +375,31 @@ html {
     color: var(--dark);
 }
 
-/* ==================== CUSTOM SCROLLBAR ==================== */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+/* ==================== CUSTOM SCROLLBAR (Scoped to input-produksi-wrapper only) ==================== */
+.input-produksi-wrapper ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
 
-::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
+.input-produksi-wrapper ::-webkit-scrollbar-track {
+    background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 4px;
+.input-produksi-wrapper ::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.4);
+    border-radius: 9999px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: #4c51bf;
+.input-produksi-wrapper ::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.6);
 }
 
 /* ====== DARK MODE STYLES ====== */
 body.dark-mode {
-    background-color: #121220 !important;
     color: #e0e0e0;
     --dark: #e0e0e0;
     --gray: #b0b0b0;
-    --light-bg: #121220;
-    --white: #1a1a2e;
+    --white: #1e293b;
     --border: rgba(102, 126, 234, 0.2);
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
@@ -490,35 +471,6 @@ body.dark-mode .text-muted {
 
 body.dark-mode .text-dark {
     color: #e0e0e0 !important;
-}
-
-/* Scrollbar Dark Mode */
-body.dark-mode ::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-body.dark-mode ::-webkit-scrollbar-thumb {
-    background: rgba(102, 126, 234, 0.5);
-}
-
-body.dark-mode ::-webkit-scrollbar-thumb:hover {
-    background: rgba(102, 126, 234, 0.7);
-}
-
-/* Navbar Dark Mode Override */
-body.dark-mode .navbar {
-    background-color: #1a1a2e !important;
-    border-bottom: 1px solid rgba(102, 126, 234, 0.2);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
-}
-
-body.dark-mode .navbar-dark .navbar-nav .nav-link {
-    color: #e0e0e0;
-}
-
-body.dark-mode .navbar-dark .navbar-nav .nav-link:hover,
-body.dark-mode .navbar-dark .navbar-nav .nav-link:focus {
-    color: #ffffff;
 }
 
 /* ==================== MODERN ANIMATIONS ==================== */

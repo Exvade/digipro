@@ -28,6 +28,13 @@ class JadwalKerjaService
         if (in_array($user->role, ['leader', 'foreman'])) {
             $query->where('user_id', $user->id);
         } else {
+            if ($request->filled('search')) {
+                $search = trim($request->search);
+                $query->whereHas('user', function ($q) use ($search) {
+                    $q->where('nama', 'like', "%{$search}%")
+                      ->orWhere('nik', 'like', "%{$search}%");
+                });
+            }
             if ($request->filled('tanggal')) $query->byDate($request->tanggal);
             if ($request->filled('shift')) $query->byShift($request->shift);
             if ($request->filled('bagian')) {

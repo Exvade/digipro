@@ -359,21 +359,4 @@
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap4.min.js"></script>
 <!-- Custom Approval JS -->
 <script src="{{ asset('js/approval.js') }}"></script>
-
-{{-- Set Active Tab Based on Filter --}}
-<script>
-    $(document).ready(function() {
-        // Set active tab based on current filter
-        const currentFilter = '{{ $filter }}';
-        $('#bagianTabsApprovalChecksheet .nav-link').removeClass('active');
-
-        if (currentFilter === 'inject') {
-            $('#inject-tab-approval-cs').addClass('active');
-        } else if (currentFilter === 'assy') {
-            $('#assy-tab-approval-cs').addClass('active');
-        } else {
-            $('#all-tab-approval-cs').addClass('active');
-        }
-    });
-</script>
 @endpush

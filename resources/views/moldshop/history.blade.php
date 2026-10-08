@@ -7,25 +7,28 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap4.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css">
 <!-- Custom Moldshop CSS -->
-<link rel="stylesheet" href="{{ asset('css/moldshop.css') }}">
+<link rel="stylesheet" href="{{ asset('css/moldshop.css') }}?v={{ filemtime(public_path('css/moldshop.css')) }}">
 @endpush
 
 @section('content-header')
-<div class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1 class="m-0">
-                    Riwayat Penggunaan Mold
-                </h1>
-            </div>
-            <div class="col-sm-6 text-right">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="{{ route('moldshop.index') }}">Data Mold</a></li>
-                    <li class="breadcrumb-item active">Riwayat</li>
-                </ol>
-            </div>
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800/60 flex items-center justify-center text-sky-600 dark:text-sky-400 shadow-sm flex-shrink-0">
+            <i class="fas fa-history text-lg"></i>
         </div>
+        <div>
+            <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                Riwayat Penggunaan Mold
+            </h1>
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+                Statistik akumulasi produksi, total shoot, OK & NG setiap mold
+            </p>
+        </div>
+    </div>
+    <div class="flex items-center gap-2">
+        <a href="{{ route('moldshop.index') }}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center">
+            <i class="fas fa-arrow-left mr-1.5"></i> Kembali ke Data Mold
+        </a>
     </div>
 </div>
 @endsection
@@ -34,14 +37,14 @@
 <div class="row">
     <div class="col-12">
         <div class="card card-outline card-info">
-            <div class="card-header">
+            <div class="card-header d-flex align-items-center justify-content-between">
                 <h3 class="card-title">
-                    <i class="fas fa-history mr-1"></i> Data Akumulasi Produksi Mold
+                    <i class="fas fa-chart-line text-sky-500 mr-2"></i>
+                    Data Akumulasi Produksi Mold
                 </h3>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table id="historyTable" class="table table-striped table-bordered table-hover align-middle">
+                <table id="historyTable" class="table table-striped table-bordered table-hover align-middle">
                         <thead class="text-center">
                             <tr>
                                 <th style="width:50px;">No</th>
@@ -91,7 +94,6 @@
                             @endforeach
                         </tbody>
                     </table>
-                </div>
             </div>
         </div>
     </div>

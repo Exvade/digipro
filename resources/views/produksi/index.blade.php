@@ -1,320 +1,148 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Scan QR Code - Digital Production System</title>
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Bootstrap 4 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- AdminLTE CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
-    <!-- Custom CSS -->
-    <link href="{{ asset('css/produksi.css') }}" rel="stylesheet">
-</head>
-<body class="hold-transition sidebar-mini">
-    <div class="wrapper">
-        <!-- Navbar -->
-        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-            <!-- Left navbar links -->
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="{{ route('produksi.index') }}" class="nav-link">Scan QR Code Product</a>
-                </li>
-            </ul>
+@extends('layouts.app')
 
-            <!-- Right navbar links -->
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-                        <i class="fas fa-expand-arrows-alt"></i>
-                    </a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link" data-toggle="dropdown" href="#">
-                        <i class="fas fa-user-circle"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <span class="dropdown-item dropdown-header">User Menu</span>
-                        <div class="dropdown-divider"></div>
-                        <a href="{{ route('menu') }}" class="dropdown-item">
-                            <i class="fas fa-home mr-2"></i> Menu Utama
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="{{ route('qrcode.index') }}" class="dropdown-item">
-                            <i class="fas fa-qrcode mr-2"></i> Generate QR Code
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="{{ route('login') }}" class="dropdown-item">
-                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
-                        </a>
-                    </div>
-                </li>
-            </ul>
-        </nav>
+@section('title', 'Scan QR Code - Digital Production System')
 
-        <!-- Main Sidebar Container -->
-        <aside class="main-sidebar sidebar-dark-primary elevation-4">
-            <!-- Brand Logo -->
-            <a href="{{ route('produksi.index') }}" class="brand-link">
-                <img src="{{ asset('images/logo2.png') }}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-                <span class="brand-text font-weight-light">DIGIPRO</span>
-            </a>
+@push('styles')
+<link href="{{ asset('css/produksi.css') }}" rel="stylesheet">
+@endpush
 
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <!-- Sidebar user panel (optional) -->
-                <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-                    <div class="image">
-                        <img src="https://adminlte.io/themes/v3/dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
-                    </div>
-                    <div class="info">
-                        <a href="#" class="d-block">{{ auth()->user()->nama ?? 'Operator' }}</a>
-                    </div>
-                </div>
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script src="{{ asset('js/qrcode-lib.js') }}"></script>
+<script src="{{ asset('js/produksi.js') }}"></script>
+@endpush
 
-                <!-- Sidebar Menu -->
-                <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                        <li class="nav-item">
-                            <a href="{{ route('produksi.index') }}" class="nav-link active">
-                                <i class="nav-icon fas fa-camera"></i>
-                                <p>Scan QR Code Product</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('qrcode.index') }}" class="nav-link">
-                                <i class="nav-icon fas fa-qrcode"></i>
-                                <p>Generate QR Code</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('input-produksi.index') }}" class="nav-link">
-                                <i class="nav-icon fas fa-plus"></i>
-                                <p>Input Produksi</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('menu') }}" class="nav-link">
-                                <i class="nav-icon fas fa-home"></i>
-                                <p>Menu Utama</p>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        </aside>
-
-        <!-- Content Wrapper -->
-        <div class="content-wrapper">
-            <!-- Content Header -->
-            <section class="content-header">
-                <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1>Scan QR Code</h1>
-                        </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="{{ route('menu') }}">Menu Utama</a></li>
-                                <li class="breadcrumb-item active">Scan QR Code</li>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Main content -->
-            <section class="content">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <i class="fas fa-camera mr-2"></i>
-                                        Scan QR Code Produk
-                                    </h3>
-                                </div>
-                                <div class="card-body">
-                                    <!-- Scan Section -->
-                                    <div class="scan-section">
-                                        <div class="row justify-content-center">
-                                            <div class="col-md-8">
-                                                <div class="alert alert-info text-center">
-                                                    <i class="fas fa-info-circle mr-2"></i>
-                                                    <strong>Petunjuk:</strong> Scan QR code yang telah di-generate dari sistem untuk memproses produk
-                                                </div>
-                                                
-                                                <div class="scan-area text-center" id="scanArea">
-                                                    <div class="scan-icon mb-3">
-                                                        <i class="fas fa-qrcode fa-4x text-primary"></i>
-                                                    </div>
-                                                    <h4 class="scan-title mb-3">
-                                                        <i class="fas fa-camera mr-2"></i>
-                                                        Scan QR Code
-                                                    </h4>
-                                                    <div class="scan-text mb-2">Klik untuk mulai scan QR code</div>
-                                                    <div class="scan-subtext text-muted">Pastikan QR code terlihat jelas di kamera</div>
-                                                    <button class="btn btn-primary btn-lg mt-3" id="startScanBtn">
-                                                        <i class="fas fa-camera mr-2"></i>
-                                                        Mulai Scan
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Loading State -->
-                                    <div class="loading" id="loading">
-                                        <div class="spinner"></div>
-                                        <p>Memproses scan...</p>
-                                    </div>
-
-                                    <!-- Product Information -->
-                                    <div class="product-info" id="productInfo">
-                                        <!-- Product info will be populated by JavaScript -->
-                                    </div>
-
-                                    <!-- Quality Check -->
-                                    <div class="quality-check" id="qualityCheck">
-                                        <h4 class="quality-title">
-                                            <i class="fas fa-check-circle mr-2"></i>
-                                            Quality Check
-                                        </h4>
-                                        
-                                        <div class="quality-buttons">
-                                            <button class="quality-btn good" data-quality="good">
-                                                <i class="fas fa-thumbs-up"></i>
-                                                GOOD
-                                            </button>
-                                            <button class="quality-btn ng" data-quality="ng">
-                                                <i class="fas fa-times-circle"></i>
-                                                NG
-                                            </button>
-                                            <button class="quality-btn retry" data-quality="retry">
-                                                <i class="fas fa-redo"></i>
-                                                RETRY
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <!-- Scan History -->
-                                    <div class="scan-history-section mt-4">
-                                        <div class="card">
-                                            <div class="card-header">
-                                                <h5 class="mb-0">
-                                                    <i class="fas fa-history mr-2"></i>
-                                                    Riwayat Scan Terakhir
-                                                </h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="scan-history" id="scanHistory">
-                                                    <div class="text-center text-muted py-4">
-                                                        <i class="fas fa-history fa-2x mb-2"></i>
-                                                        <p>Belum ada riwayat scan</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- Footer -->
-        <footer class="main-footer">
-            <!-- To the right -->
-            <div class="container text-center">
-                <span class="text-muted">© {{ date('Y') }} All rights reserved | IT Department PT Mada Wikri Tunggal</span>
-            </div>
-        </footer> 
+@section('content-header')
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+        <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Scan QR Code</h1>
+        <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">Pemindaian QR Code Produk untuk Quality Control & Monitoring</p>
     </div>
+    <nav class="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+        <a href="{{ route('menu') }}" class="hover:text-indigo-600 dark:hover:text-indigo-400">Menu Utama</a>
+        <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>
+        <span class="text-slate-900 dark:text-white font-bold">Scan QR Code</span>
+    </nav>
+</div>
+@endsection
 
-    <!-- Modal for QR Scanner -->
-    <div class="modal fade" id="scannerModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">
-                        <i class="fas fa-qrcode mr-2"></i>
-                        Scan QR Code Product
-                    </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
+@section('content')
+<div class="space-y-6">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+        <div class="scan-section">
+            <div class="max-w-2xl mx-auto space-y-6">
+                <div class="p-4 bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 rounded-xl text-center">
+                    <i class="fas fa-info-circle text-indigo-600 dark:text-indigo-400 text-lg mb-1"></i>
+                    <p class="text-xs text-indigo-900 dark:text-indigo-200 font-medium">
+                        <strong>Petunjuk:</strong> Scan QR code yang telah di-generate dari sistem untuk memproses produk.
+                    </p>
                 </div>
-                <div class="modal-body">
-                    <div class="text-center">
-                        <div class="alert alert-warning mb-3">
-                            <i class="fas fa-exclamation-triangle mr-2"></i>
-                            <strong>Penting:</strong> Hanya QR code yang di-generate dari sistem yang dapat di-scan
-                        </div>
-                        <div id="cameraContainer" class="mb-3">
-                            <div id="cameraLoading" class="text-center py-4" style="display: none;">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="sr-only">Loading...</span>
-                                </div>
-                                <p class="mt-2 text-muted">Menginisialisasi kamera...</p>
-                            </div>
-                            
-                            <!-- Camera Status Indicator -->
-                            <div id="cameraStatus" class="alert alert-info mb-2" style="display: none;">
-                                <i class="fas fa-camera mr-2"></i>
-                                <span id="cameraStatusText">Menggunakan kamera belakang</span>
-                            </div>
-                            
-                            <div id="interactive" class="viewport border rounded"></div>
-                        </div>
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle mr-2"></i>
-                            Arahkan kamera ke QR code untuk scan otomatis
-                        </div>
-                        <div class="mt-3">
-                            <small class="text-muted">
-                                <i class="fas fa-lightbulb mr-1"></i>
-                                Tips: Pastikan QR code berada dalam frame dan pencahayaan cukup
-                            </small>
-                        </div>
+
+                <div class="p-8 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 text-center" id="scanArea">
+                    <div class="w-20 h-20 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-qrcode text-3xl"></i>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        <i class="fas fa-times mr-2"></i>
-                        Tutup
-                    </button>
-                    <button type="button" class="btn btn-primary" id="switchCameraBtn" style="display: none;">
-                        <i class="fas fa-sync-alt mr-2"></i>
-                        <span id="cameraButtonText">Ganti Kamera</span>
+                    <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-1">
+                        Scan QR Code
+                    </h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Klik tombol di bawah untuk membuka kamera scanner</p>
+                    <p class="text-[11px] text-slate-400 dark:text-slate-500 mb-6">Pastikan QR code terlihat jelas di dalam frame</p>
+                    <button class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold rounded-xl shadow-lg shadow-indigo-500/25 inline-flex items-center gap-2 transition" id="startScanBtn">
+                        <i class="fas fa-camera text-sm"></i>
+                        <span>Mulai Scan Kamera</span>
                     </button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- jQuery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <!-- Bootstrap 4 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
-    <!-- AdminLTE App -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
-    <!-- QR Code Scanner Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-    <!-- QR Code Library (Local) -->
-    <script src="{{ asset('js/qrcode-lib.js') }}"></script>
-    <!-- Custom JavaScript -->
-    <script src="{{ asset('js/produksi.js') }}"></script>
-</body>
-</html>
+        <!-- Loading State -->
+        <div class="loading hidden py-8 text-center" id="loading">
+            <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+            <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">Memproses scan...</p>
+        </div>
+
+        <!-- Product Information -->
+        <div class="product-info" id="productInfo"></div>
+
+        <!-- Quality Check -->
+        <div class="quality-check hidden mt-6 pt-6 border-t border-slate-100 dark:border-slate-800" id="qualityCheck">
+            <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                <i class="fas fa-check-circle text-emerald-500"></i>
+                Quality Check
+            </h4>
+            
+            <div class="grid grid-cols-3 gap-4">
+                <button class="quality-btn good p-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-black text-xs shadow-md shadow-emerald-500/20 flex flex-col items-center justify-center gap-2 transition" data-quality="good">
+                    <i class="fas fa-thumbs-up text-lg"></i>
+                    <span>GOOD</span>
+                </button>
+                <button class="quality-btn ng p-4 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-black text-xs shadow-md shadow-rose-500/20 flex flex-col items-center justify-center gap-2 transition" data-quality="ng">
+                    <i class="fas fa-times-circle text-lg"></i>
+                    <span>NG</span>
+                </button>
+                <button class="quality-btn retry p-4 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-black text-xs shadow-md shadow-amber-500/20 flex flex-col items-center justify-center gap-2 transition" data-quality="retry">
+                    <i class="fas fa-redo text-lg"></i>
+                    <span>RETRY</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Scan History -->
+        <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
+            <h5 class="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                <i class="fas fa-history text-indigo-600 dark:text-indigo-400"></i>
+                Riwayat Scan Terakhir
+            </h5>
+            <div id="scanHistory">
+                <div class="text-center text-slate-400 dark:text-slate-500 py-8 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                    <i class="fas fa-history text-2xl mb-2"></i>
+                    <p class="text-xs">Belum ada riwayat scan</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Scanner -->
+<div class="modal fade" id="scannerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content dark:bg-slate-900 dark:text-white border-0 shadow-2xl rounded-2xl overflow-hidden">
+            <div class="modal-header bg-indigo-600 text-white px-6 py-4">
+                <h5 class="modal-title text-sm font-bold flex items-center gap-2">
+                    <i class="fas fa-qrcode"></i>
+                    Scan QR Code Product
+                </h5>
+                <button type="button" class="close text-white opacity-80 hover:opacity-100" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-6">
+                <div class="text-center space-y-4">
+                    <div class="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 rounded-xl text-xs text-amber-900 dark:text-amber-200">
+                        <i class="fas fa-exclamation-triangle text-amber-500 mr-1"></i>
+                        <strong>Penting:</strong> Hanya QR code yang di-generate dari sistem yang dapat di-scan
+                    </div>
+                    
+                    <div id="cameraContainer" class="relative rounded-xl overflow-hidden bg-black">
+                        <div id="cameraLoading" class="text-center py-8 text-white" style="display: none;">
+                            <div class="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                            <p class="text-xs">Menginisialisasi kamera...</p>
+                        </div>
+                        <div id="interactive" class="viewport min-h-[300px]"></div>
+                    </div>
+                    
+                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                        <i class="fas fa-lightbulb text-amber-400 mr-1"></i>
+                        Arahkan kamera ke QR code untuk scan otomatis
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
+                <button type="button" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-xs" data-dismiss="modal">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

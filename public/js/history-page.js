@@ -15,27 +15,94 @@
 })();
 
 $(document).ready(function () {
+    if ($.fn.dataTable.isDataTable('#historyTable')) {
+        $('#historyTable').DataTable().destroy();
+    }
+
     var historyTable = $("#historyTable").DataTable({
+        responsive: false,
+        autoWidth: false,
         ordering: true,
         order: [[4, 'desc']], // Default sort by Waktu Mulai descending
-        // Sorting enabled for all columns as requested
-        columnDefs: [],
+        columnDefs: [
+            {
+                targets: [0, 2, 4, 5, 6, 8],
+                className: 'text-center'
+            }
+        ],
         language: {
+            emptyTable: "Tidak ada data riwayat yang tersedia",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ log",
+            infoEmpty: "Menampilkan 0 log",
+            infoFiltered: "(disaring dari _MAX_ total log)",
+            lengthMenu: "Tampilkan _MENU_ log",
+            loadingRecords: "Memuat data...",
+            processing: "Sedang memproses...",
             search: "Cari:",
-            lengthMenu: "Tampilkan _MENU_ data per halaman",
-            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-            infoFiltered: "(difilter dari _MAX_ total data)",
+            searchPlaceholder: "Cari mesin, status, PIC...",
+            zeroRecords: "Tidak ditemukan data yang sesuai",
             paginate: {
-                first: "Pertama",
-                last: "Terakhir",
-                next: "Selanjutnya",
-                previous: "Sebelumnya",
+                first: '<i class="fas fa-angle-double-left text-xs"></i>',
+                last: '<i class="fas fa-angle-double-right text-xs"></i>',
+                next: '<i class="fas fa-angle-right text-xs"></i>',
+                previous: '<i class="fas fa-angle-left text-xs"></i>',
             },
-            zeroRecords: "Tidak ada data yang ditemukan",
-            emptyTable: "Tidak ada data tersedia",
         },
+        dom: "<'flex flex-col sm:flex-row items-center justify-between gap-3 mb-4'<'w-full sm:w-auto'l><'w-full sm:w-auto'f>>" +
+             "<'overflow-x-auto custom-scrollbar'tr>" +
+             "<'flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-3 border-t border-slate-100 dark:border-slate-800'<'text-xs font-medium text-slate-500 dark:text-slate-400'i><'flex items-center gap-1'p>>",
     });
+
+    // ==========================================================================
+    // History Summary KPI Cards: Interactive Filter on Detailed Log Table
+    // ==========================================================================
+    initHistoryKpiFilters(historyTable);
+
+    function initHistoryKpiFilters(table) {
+        $('[data-history-filter]').on('click', function () {
+            var $card = $(this);
+            var filter = $card.data('history-filter');
+            var isAlreadyActive = $card.hasClass('active');
+
+            // Reset active states
+            $('[data-history-filter]').removeClass('active ring-2 ring-indigo-500/30 ring-emerald-500/30 ring-rose-500/30 ring-amber-500/30 ring-slate-500/30');
+            $('[data-history-filter] .kpi-active-indicator').addClass('hidden');
+
+            if (isAlreadyActive) {
+                // Deselect: show all
+                table.column(2).search('').draw();
+                return;
+            }
+
+            var ringClass = 'ring-2 ring-indigo-500/30';
+            if (filter === 'aktif') ringClass = 'ring-2 ring-emerald-500/30';
+            else if (filter === 'maintenance') ringClass = 'ring-2 ring-rose-500/30';
+            else if (filter === 'standby') ringClass = 'ring-2 ring-amber-500/30';
+            else if (filter === 'offline') ringClass = 'ring-2 ring-slate-500/30';
+
+            $card.addClass('active ' + ringClass);
+            $card.find('.kpi-active-indicator').removeClass('hidden');
+
+            // Column 2 is Status
+            if (filter === 'aktif') {
+                table.column(2).search('Running').draw();
+            } else if (filter === 'maintenance') {
+                table.column(2).search('Breakdown|SOS', true, false).draw();
+            } else if (filter === 'standby') {
+                table.column(2).search('Stand By').draw();
+            } else if (filter === 'offline') {
+                table.column(2).search('Off').draw();
+            } else {
+                table.column(2).search('').draw();
+            }
+
+            // Smooth scroll to history table
+            var targetEl = document.getElementById('historyTableCard');
+            if (targetEl) {
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
 
     // Function to get category from raw downtime type
     function getCategory(type) {
