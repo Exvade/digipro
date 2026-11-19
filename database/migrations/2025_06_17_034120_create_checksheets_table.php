@@ -16,13 +16,10 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('grup', 1)->nullable();
             $table->unsignedBigInteger('meja_id')->nullable(); // Tambahkan kolom meja_id
-            $table->string('shift');
             $table->enum('approval_status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->unsignedBigInteger('approved_by')->nullable();
             $table->timestamp('approved_at')->nullable();
             $table->text('rejection_reason')->nullable();
-            // Standar AMTPM fields
-            $table->enum('amptm_standar', ['ya', 'tidak'])->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

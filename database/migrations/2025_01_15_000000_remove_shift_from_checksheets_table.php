@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('checksheets', function (Blueprint $table) {
-            $table->dropColumn('shift');
-        });
+        // Migration ini lebih lama daripada migration pembuat tabel checksheets.
+        // Pada instalasi baru tabel belum ada, sehingga penghapusan harus dilewati.
+        if (Schema::hasTable('checksheets') && Schema::hasColumn('checksheets', 'shift')) {
+            Schema::table('checksheets', function (Blueprint $table) {
+                $table->dropColumn('shift');
+            });
+        }
     }
 
     /**
@@ -21,9 +25,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('checksheets', function (Blueprint $table) {
-            $table->string('shift')->nullable()->after('grup_id');
-        });
+        if (Schema::hasTable('checksheets') && !Schema::hasColumn('checksheets', 'shift')) {
+            Schema::table('checksheets', function (Blueprint $table) {
+                $table->string('shift')->nullable()->after('grup_id');
+            });
+        }
     }
 };
 
